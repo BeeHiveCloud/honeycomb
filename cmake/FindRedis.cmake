@@ -1,0 +1,20 @@
+#  LIBREDIS_INCLUDE_DIR - where to find hiredis.h, etc.
+#  LIBREDIS_LIBRARY     - List of libraries when using hiredis.lib.
+#  LIBREDIS_FOUND       - True if redis found.
+
+#  Read environment variables to find mysql include/lib directories
+SET(LIBREDIS_INCLUDE_DIR $ENV{LIBREDIS_INCLUDE_DIR})
+MESSAGE( STATUS "LIBREDIS_INCLUDE_DIR:         " ${LIBREDIS_INCLUDE_DIR} )
+SET(LIBREDIS_LIBRARY $ENV{LIBREDIS_LIBRARY})
+MESSAGE( STATUS "LIBREDIS_LIBRARY:         " ${LIBREDIS_LIBRARY} )
+
+FIND_PATH(LIBREDIS_INCLUDE_DIR hiredis.h)
+
+FIND_LIBRARY(LIBREDIS_LIBRARY hiredis)
+
+# handle the QUIETLY and REQUIRED arguments and set Libmysql_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBREDIS DEFAULT_MSG LIBMYSQL_INCLUDE_DIR LIBREDIS_LIBRARY)
+
+MARK_AS_ADVANCED(LIBREDIS_INCLUDE_DIR LIBREDIS_LIBRARY)

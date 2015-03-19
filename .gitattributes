@@ -1,0 +1,3 @@
+*.c eol=lf
+*.cc eol=lf
+*.h eol=lf

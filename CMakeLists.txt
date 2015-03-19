@@ -1,0 +1,67 @@
+# CMake build script for honeycomb
+
+PROJECT(honeycomb)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+# Set build type
+SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+
+# Set build directory
+SET(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+
+# Override libgit2 build options
+SET(BUILD_CLAR	OFF CACHE BOOL "Do not build clar test")
+
+# Add libgit2 project
+ADD_SUBDIRECTORY(vendor/libgit2)
+
+# Load cmake modules
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+INCLUDE(FindMysql)
+INCLUDE(FindRedis)
+INCLUDE(FindNode)
+
+# Add libgit2 include
+INCLUDE_DIRECTORIES("vendor/libgit2/include")
+
+# mysql
+FILE(GLOB SRC_MYSQL native/mysql/*.c native/mysql/*.h)
+INCLUDE_DIRECTORIES(${LIBMYSQL_INCLUDE_DIR})
+
+ADD_LIBRARY(mysql ${SRC_MYSQL})
+ADD_DEPENDENCIES(mysql git2)
+TARGET_LINK_LIBRARIES(mysql ${LIBMYSQL_LIBRARY}/libmysql)
+TARGET_LINK_LIBRARIES(mysql git2)
+TARGET_OS_LIBRARIES(mysql)
+
+# redis
+FILE(GLOB SRC_REDIS native/redis/*.c native/redis/*.h)
+INCLUDE_DIRECTORIES(${LIBREDIS_INCLUDE_DIR})
+
+ADD_LIBRARY(redis ${SRC_REDIS})
+ADD_DEPENDENCIES(redis git2)
+TARGET_LINK_LIBRARIES(redis git2)
+TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/hiredis)
+IF (MSVC_IDE)
+    TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/Win32_Interop)
+ENDIF ()
+TARGET_OS_LIBRARIES(redis)
+
+# node native addon
+
+#INCLUDE_DIRECTORIES(${LIBNODE_INCLUDE_DIR})
+#INCLUDE_DIRECTORIES(${LIBUV_INCLUDE_DIR})
+#INCLUDE_DIRECTORIES(${LIBV8_INCLUDE_DIR})
+#INCLUDE_DIRECTORIES(node_modules/nan)
+#FILE(GLOB SRC_NODE native/addon/*.h native/addon/*.cc)
+
+#ADD_LIBRARY(rawApi ${SRC_NODE})
+#ADD_DEPENDENCIES(rawApi mysql)
+#TARGET_LINK_LIBRARIES(rawApi mysql)
+#TARGET_LINK_LIBRARIES(rawApi ${LIBNODE_LIBRARY}/node)
+#TARGET_OS_LIBRARIES(rawApi)
+
+#SET_TARGET_PROPERTIES(rawApi PROPERTIES SUFFIX ".node")

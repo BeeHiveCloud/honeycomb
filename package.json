@@ -1,0 +1,36 @@
+{
+  "name": "honeycomb.js",
+  "version": "0.1.0",
+  "description": "Honeycomb data orchestration layer",
+  "keywords": ["honeycomb","node.js","libgit2","mysql","redis","mongodb"],
+  "main": "./lib/index.js",
+  "dependencies": {
+    "bluebird": "2.9.7",
+    "nan": "^1.6.2"
+  },
+  "scripts": {
+    "test": "mocha -b",
+    "prepublish": "npm prune"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/BeeHiveCloud/honeycomb.git"
+  },
+  "devDependencies": {
+    "should": "3.3.1",
+    "mocha": "2.1.0"
+  },
+  "engines": {
+      "node": ">= 0.10.0",
+      "npm": ">= 1.4.0"
+  },
+  "bugs": {
+        "url": "http://github.com/BeeHiveCloud/honeycomb/issues"
+  },
+  "author": "Jerry Yang Jin",
+  "license": "MIT"
+}
