@@ -1,0 +1,20 @@
+#  LIBMONGO_INCLUDE_DIR - where to find mongoc.h, etc.
+#  LIBMONGO_LIBRARY     - List of libraries when using mongoc.
+#  LIBMONGO_FOUND       - True if mongoc found.
+
+#  Read environment variables to find mongo include/lib directories
+SET(LIBMONGO_INCLUDE_DIR $ENV{LIBMONGO_INCLUDE_DIR})
+MESSAGE( STATUS "LIBMONGO_INCLUDE_DIR:         " ${LIBMONGO_INCLUDE_DIR} )
+SET(LIBMONGO_LIBRARY $ENV{LIBMONGO_LIBRARY})
+MESSAGE( STATUS "LIBMONGO_LIBRARY:         " ${LIBMONGO_LIBRARY} )
+
+FIND_PATH(LIBMONGO_INCLUDE_DIR mongoc.h)
+
+FIND_LIBRARY(LIBMONGO_LIBRARY mongoc-1.0.lib)
+
+# handle the QUIETLY and REQUIRED arguments and set Libmongo_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBMONGO DEFAULT_MSG LIBMONGO_LIBRARY LIBMONGO_INCLUDE_DIR)
+
+MARK_AS_ADVANCED(LIBMONGO_LIBRARY LIBMONGO_INCLUDE_DIR)
