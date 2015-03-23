@@ -17,9 +17,6 @@ typedef struct {
   MYSQL_STMT *odb_read;
   MYSQL_STMT *odb_write;
   MYSQL_STMT *odb_read_header;
-  MYSQL_STMT *refdb_read;
-  MYSQL_STMT *refdb_write;
-  MYSQL_STMT *refdb_read_header;
 } git_mysql;
 
 GIT_BEGIN_DECL
@@ -30,7 +27,7 @@ GIT_EXTERN(int) git_mysql_init(git_mysql **out,
           					   const char *mysql_passwd,
           					   const char *mysql_db,
           					   unsigned int mysql_port,
-							   const char *mysql_unix_socket, 
+							   const char *mysql_unix_socket,
 							   unsigned long mysql_client_flag);
 
 GIT_EXTERN(int) git_mysql_free(git_mysql *mysql);

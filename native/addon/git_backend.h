@@ -1,17 +1,20 @@
-#ifndef GIT_ADDON_MYSQL_H
-#define GIT_ADDON_MYSQL_H
+#ifndef NODE_ADDON_GIT_BACKEND_H
+#define NODE_ADDON_GIT_BACKEND_H
 
 #include <nan.h>
 #include <string>
 
 extern "C" {
 #include "../mysql/mysql_backend.h"
+#include "../mysql/mysql_odb.h"
 }
+
+#include "git_mysql.h"
 
 using namespace node;
 using namespace v8;
 
-class GitMysql : public ObjectWrap {
+class GitBackend : public ObjectWrap {
   public:
 
     static Persistent<Function> constructor_template;
@@ -25,7 +28,9 @@ class GitMysql : public ObjectWrap {
 
     static NAN_METHOD(GitMysqlInit);
 
-	//static NAN_METHOD(GitMysqlFree);
+	static NAN_METHOD(GitMysqlFree);
+
+	static NAN_METHOD(GitMysqlOdbInit);
 };
 
 #endif
