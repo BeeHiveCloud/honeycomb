@@ -9,8 +9,6 @@ extern "C" {
 #include "../mysql/mysql_odb.h"
 }
 
-#include "git_mysql.h"
-
 using namespace node;
 using namespace v8;
 
@@ -20,17 +18,20 @@ class GitBackend : public ObjectWrap {
     static Persistent<Function> constructor_template;
     static void InitializeComponent (Handle<v8::Object> target);
 
-    bool selfFreeing;
+    //bool selfFreeing;
+
+	static git_mysql *mysql;
+	static git_repository *repo;
 
   private:
 
     static NAN_METHOD(JSNewFunction);
 
-    static NAN_METHOD(GitMysqlInit);
+    static NAN_METHOD(GitMysqlOpen);
 
-	static NAN_METHOD(GitMysqlFree);
+	static NAN_METHOD(GitMysqlClose);
 
-	static NAN_METHOD(GitMysqlOdbInit);
+	static NAN_METHOD(GitMysqlCreateBlob);
 };
 
 #endif

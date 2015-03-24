@@ -11,17 +11,17 @@ void GitBackend::InitializeComponent(Handle<v8::Object> target) {
 
     Local<Object> object = NanNew<Object>();
 
-	NODE_SET_METHOD(object, "gitMysqlInit", GitMysqlInit);
+	NODE_SET_METHOD(object, "gitMysqlOpen", GitMysqlOpen);
 
-	NODE_SET_METHOD(object, "gitMysqlFree", GitMysqlFree);
+	NODE_SET_METHOD(object, "gitMysqlClose", GitMysqlClose);
 
-	NODE_SET_METHOD(object, "gitMysqlOdbInit", GitMysqlOdbInit);
+	NODE_SET_METHOD(object, "gitMysqlCreateBlob", GitMysqlCreateBlob);
 
     target->Set(NanNew<String>("SQL"), object);
 }
 
 
-NAN_METHOD(GitBackend::GitMysqlInit) {
+NAN_METHOD(GitBackend::GitMysqlOpen) {
   NanEscapableScope();
 
   if (args.Length() == 0 || !args[0]->IsString()) {
@@ -65,8 +65,7 @@ NAN_METHOD(GitBackend::GitMysqlInit) {
   from_mysql_port = (unsigned int)args[4]->ToNumber()->Value();
 // end convert_from_v8 block
 
-  git_mysql *from_out;
-  int error = git_mysql_init(&from_out,
+  int error = git_mysql_init(&mysql,
 							  from_mysql_host,
 							  from_mysql_user,
 							  from_mysql_passwd,
@@ -79,61 +78,80 @@ NAN_METHOD(GitBackend::GitMysqlInit) {
 	  ThrowException(Exception::TypeError(String::New("git_mysql_init error")));
 	  return Undefined();
   }
-  //Handle<v8::External> mysql;
-  //mysql = NanNew<External>((void *)from_out);
 
-  //GitMysql* object = new GitMysql(from_out, true);
-  Handle<v8::Value> obj = GitMysql::New(from_out, true);
-  //Local<GitMysql> obj = GitMysql::New(from_out, true);
+  git_odb_backend   *odb_backend;
+  error = git_mysql_odb_init(&odb_backend, mysql);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_mysql_odb_init error")));
+	  return Undefined();
+  }
 
-  NanReturnValue(obj);
+  error = git_odb_new(&odb_backend->odb);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_odb_new error")));
+	  return Undefined();
+  }
+
+  error = git_repository_wrap_odb(&repo, odb_backend->odb);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_odb_new error")));
+	  return Undefined();
+  }
+
+  error = git_odb_add_backend(odb_backend->odb, odb_backend, 1);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_odb_add_backend error")));
+	  return Undefined();
+  }
+
+  //Handle<v8::Value> obj = GitMysql::New(from_out, false);
+  //NanReturnValue(obj);
+  if (error == 0)
+	  NanReturnValue(NanTrue());
+  else
+	  NanReturnValue(NanFalse());
+
 }
 
-NAN_METHOD(GitBackend::GitMysqlFree) {
+NAN_METHOD(GitBackend::GitMysqlClose) {
 	NanEscapableScope();
 
-	if (args.Length() == 0 || !args[0]->IsObject()) {
-		return NanThrowError("mysql is required.");
+	int error = git_mysql_free(mysql);
+
+	if (error == 0)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(GitBackend::GitMysqlCreateBlob) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsString()) {
+		return NanThrowError("string is required.");
 	}
 
 	// start convert_from_v8 block
-	GitMysql* from_mysql;
-	from_mysql = ObjectWrap::Unwrap<GitMysql>(args[0]->ToObject());
-
+	const char *from_blob;
+	String::Utf8Value blob(args[0]->ToString());
+	from_blob = (const char *)strdup(*blob);
 	// end convert_from_v8 block
 
-	int result = git_mysql_free(from_mysql->GetValue());
+	int				  error;
+	git_oid			  oid;
 
-	Handle<v8::Value> to;
-
-	to = NanNew<Number>(result);
-
-	NanReturnValue(to);
-}
-
-NAN_METHOD(GitBackend::GitMysqlOdbInit) {
-	NanEscapableScope();
-
-	if (args.Length() == 0 || !args[0]->IsExternal()) {
-		return NanThrowError("mysql is required.");
+	error = git_blob_create_frombuffer(&oid, repo, from_blob, strlen(from_blob));
+	if (error < 0){
+		ThrowException(Exception::TypeError(String::New("git_blob_create_frombuffer error")));
+		return Undefined();
 	}
 
-	// start convert_from_v8 block
-
-	git_odb_backend *from_out;
-
-	git_mysql *from_mysql;
-	from_mysql = ObjectWrap::Unwrap<git_mysql>(args[1]->ToObject());
-
-	// end convert_from_v8 block
-
-	int result = git_mysql_odb_init(&from_out,from_mysql);
-
-	Handle<v8::Value> to;
-
-	to = NanNew<Number>(result);
-
-	NanReturnValue(to);
+	if (error == 0)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
 }
 
 Persistent<Function> GitBackend::constructor_template;
+git_mysql * GitBackend::mysql;
+git_repository *GitBackend::repo;
