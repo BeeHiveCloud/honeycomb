@@ -7,6 +7,7 @@
 extern "C" {
 #include "../mysql/mysql_backend.h"
 #include "../mysql/mysql_odb.h"
+#include "../mysql/mysql_index.h"
 }
 
 using namespace node;

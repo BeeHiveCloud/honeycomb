@@ -5,14 +5,19 @@ int init_statements(git_mysql *mysql)
   my_bool truth = 1;
 
   static const char *sql_odb_read =
-    "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT2_ODB WHERE `oid` = ?;";
+    "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `oid` = ?;";
 
   static const char *sql_odb_read_header =
-    "SELECT `type`, `size` FROM GIT2_ODB WHERE `oid` = ?;";
+    "SELECT `type`, `size` FROM GIT_ODB WHERE `oid` = ?;";
 
   static const char *sql_odb_write =
-    "INSERT IGNORE INTO GIT2_ODB VALUES (?, ?, ?, COMPRESS(?));";
+    "INSERT IGNORE INTO GIT_ODB VALUES (?, ?, ?, COMPRESS(?));";
 
+  static const char *sql_index_read =
+	  "SELECT `oid` FROM GIT_INDEX WHERE `path` = ?;";
+
+  static const char *sql_index_write =
+	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
 
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
@@ -46,6 +51,26 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->odb_write, sql_odb_write, strlen(sql_odb_write)) != 0)
     return GIT_ERROR;
 
+
+  mysql->index_read = mysql_stmt_init(mysql->db);
+  if (mysql->index_read == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->index_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->index_read, sql_index_read, strlen(sql_index_read)) != 0)
+	  return GIT_ERROR;
+
+  mysql->index_write = mysql_stmt_init(mysql->db);
+  if (mysql->index_write == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->index_write, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->index_write, sql_index_write, strlen(sql_index_write)) != 0)
+	  return GIT_ERROR;
 
   return GIT_OK;
 }

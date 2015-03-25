@@ -128,28 +128,45 @@ NAN_METHOD(GitBackend::GitMysqlCreateBlob) {
 	NanEscapableScope();
 
 	if (args.Length() == 0 || !args[0]->IsString()) {
-		return NanThrowError("string is required.");
+		return NanThrowError("path is required.");
+	}
+
+	if (args.Length() == 1 || !args[1]->IsString()) {
+		return NanThrowError("buffer is required.");
 	}
 
 	// start convert_from_v8 block
-	const char *from_blob;
-	String::Utf8Value blob(args[0]->ToString());
-	from_blob = (const char *)strdup(*blob);
+	const char *from_path;
+	String::Utf8Value path_buf(args[0]->ToString());
+	from_path = (const char *)strdup(*path_buf);
+
+	const char *from_buf;
+	String::Utf8Value blob_buf(args[1]->ToString());
+	from_buf = (const char *)strdup(*blob_buf);
 	// end convert_from_v8 block
 
 	int				  error;
 	git_oid			  oid;
 
-	error = git_blob_create_frombuffer(&oid, repo, from_blob, strlen(from_blob));
+	error = git_blob_create_frombuffer(&oid, repo, from_buf, strlen(from_buf));
 	if (error < 0){
 		ThrowException(Exception::TypeError(String::New("git_blob_create_frombuffer error")));
 		return Undefined();
 	}
 
-	if (error == 0)
-		NanReturnValue(NanTrue());
-	else
-		NanReturnValue(NanFalse());
+	error = git_mysql_index_write(mysql, &oid, from_path);
+	if (error < 0){
+		ThrowException(Exception::TypeError(String::New("git_mysql_index_write error")));
+		return Undefined();
+	}
+
+	char sha1[GIT_OID_HEXSZ+2] = { 0 };
+	git_oid_tostr(sha1, GIT_OID_HEXSZ+1, &oid);
+
+	Handle<v8::Value> to;
+	to = NanNew<String>(sha1);
+
+	NanReturnValue(to);
 }
 
 Persistent<Function> GitBackend::constructor_template;
