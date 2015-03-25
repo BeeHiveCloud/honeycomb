@@ -1,11 +1,16 @@
 #include "mysql_repo.h"
 
-int git_repo_set_dummy_path(git_repository *repo){
+#include "../../libgit2/src/common.h"
+#include "../../libgit2/src/thread-utils.h"
+#include "../../libgit2/src/repository.h"
 
-	int error;
-	
-	//repo->path_repository = "/.git";
-	error = git_repository_set_workdir(repo, "/", 0);
+#include <string.h>
 
-	return error;
+int git_repository_set_path(git_repository *repo, char *path){
+
+	assert(repo && path);
+
+	repo->path_repository = path;
+
+	return 0;
 }

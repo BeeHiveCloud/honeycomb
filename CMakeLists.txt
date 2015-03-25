@@ -27,6 +27,7 @@ INCLUDE(FindNode)
 
 # Add libgit2 include
 INCLUDE_DIRECTORIES("vendor/libgit2/include")
+INCLUDE_DIRECTORIES("vendor/libgit2/deps/regex")
 
 # mysql
 FILE(GLOB SRC_MYSQL native/mysql/*.c native/mysql/*.h)

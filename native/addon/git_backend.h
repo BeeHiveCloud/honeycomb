@@ -5,9 +5,11 @@
 #include <string>
 
 extern "C" {
+#include "git2.h"
 #include "../mysql/mysql_backend.h"
 #include "../mysql/mysql_odb.h"
 #include "../mysql/mysql_index.h"
+#include "../mysql/mysql_repo.h"
 }
 
 using namespace node;
@@ -23,6 +25,7 @@ class GitBackend : public ObjectWrap {
 
 	static git_mysql *mysql;
 	static git_repository *repo;
+	//static const char *path_buf;
 
   private:
 
@@ -33,6 +36,8 @@ class GitBackend : public ObjectWrap {
 	static NAN_METHOD(GitMysqlClose);
 
 	static NAN_METHOD(GitMysqlCreateBlob);
+
+	static NAN_METHOD(GitMysqlCreateTree);
 };
 
 #endif

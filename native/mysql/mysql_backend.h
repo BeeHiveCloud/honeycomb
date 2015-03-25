@@ -34,6 +34,10 @@ GIT_EXTERN(int) git_mysql_init(git_mysql **out,
 
 GIT_EXTERN(int) git_mysql_free(git_mysql *mysql);
 
+GIT_EXTERN(void) git_mysql_transaction(git_mysql *mysql);
+GIT_EXTERN(void) git_mysql_commit(git_mysql *mysql);
+GIT_EXTERN(void) git_mysql_rollback(git_mysql *mysql);
+
 GIT_END_DECL
 
 #endif

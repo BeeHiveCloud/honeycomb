@@ -5,7 +5,6 @@
 
 #include "git_backend.h"
 
-
 void GitBackend::InitializeComponent(Handle<v8::Object> target) {
     NanScope();
 
@@ -17,11 +16,13 @@ void GitBackend::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "gitMysqlCreateBlob", GitMysqlCreateBlob);
 
+	NODE_SET_METHOD(object, "gitMysqlCreateTree", GitMysqlCreateTree);
+
     target->Set(NanNew<String>("SQL"), object);
 }
 
 
-NAN_METHOD(GitBackend::GitMysqlOpen) {
+extern "C" NAN_METHOD(GitBackend::GitMysqlOpen) {
   NanEscapableScope();
 
   if (args.Length() == 0 || !args[0]->IsString()) {
@@ -92,17 +93,33 @@ NAN_METHOD(GitBackend::GitMysqlOpen) {
 	  return Undefined();
   }
 
-  error = git_repository_wrap_odb(&repo, odb_backend->odb);
-  if (error < 0){
-	  ThrowException(Exception::TypeError(String::New("git_odb_new error")));
-	  return Undefined();
-  }
-
   error = git_odb_add_backend(odb_backend->odb, odb_backend, 1);
   if (error < 0){
 	  ThrowException(Exception::TypeError(String::New("git_odb_add_backend error")));
 	  return Undefined();
   }
+
+  error = git_repository_wrap_odb(&repo, odb_backend->odb);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_repository_wrap_odb error")));
+	  return Undefined();
+  }
+  
+  error = git_repository_set_workdir(repo, "/", 0);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_repository_set_workdir error")));
+	  return Undefined();
+  }
+  printf("workdir:%s", git_repository_workdir(repo));
+
+  error = git_repository_set_path(repo, "/.git");
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_repository_set_path error")));
+	  return Undefined();
+  } 
+  printf("path:%s", git_repository_path(repo));
+
+
 
   //Handle<v8::Value> obj = GitMysql::New(from_out, false);
   //NanReturnValue(obj);
@@ -148,17 +165,24 @@ NAN_METHOD(GitBackend::GitMysqlCreateBlob) {
 	int				  error;
 	git_oid			  oid;
 
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
 	error = git_blob_create_frombuffer(&oid, repo, from_buf, strlen(from_buf));
 	if (error < 0){
+		git_mysql_rollback(mysql);
 		ThrowException(Exception::TypeError(String::New("git_blob_create_frombuffer error")));
 		return Undefined();
 	}
 
 	error = git_mysql_index_write(mysql, &oid, from_path);
 	if (error < 0){
+		git_mysql_rollback(mysql);
 		ThrowException(Exception::TypeError(String::New("git_mysql_index_write error")));
 		return Undefined();
 	}
+
+	git_mysql_commit(mysql);
 
 	char sha1[GIT_OID_HEXSZ+2] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ+1, &oid);
@@ -169,6 +193,51 @@ NAN_METHOD(GitBackend::GitMysqlCreateBlob) {
 	NanReturnValue(to);
 }
 
+NAN_METHOD(GitBackend::GitMysqlCreateTree) {
+	NanEscapableScope();
+
+	int				  error;
+	git_oid			  oid,tree;
+	git_treebuilder   *bld = NULL;
+
+	git_oid_fromstr(&oid, "41842f42ac3734774a6192c9d7f03ad972c684fc");
+
+	error = git_treebuilder_new(&bld, repo, NULL);
+	if (error < 0){
+		ThrowException(Exception::TypeError(String::New("git_treebuilder_new error")));
+		return Undefined();
+	}
+
+	error = git_treebuilder_insert(NULL, bld, "README.md", &oid, GIT_FILEMODE_BLOB);
+	if (error < 0){
+		ThrowException(Exception::TypeError(String::New("git_treebuilder_insert error")));
+		return Undefined();
+	}
+
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
+	error = git_treebuilder_write(&tree, bld);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		ThrowException(Exception::TypeError(String::New("git_treebuilder_write error")));
+		return Undefined();
+	}
+
+	git_mysql_commit(mysql);
+
+	git_treebuilder_free(bld);
+
+	char sha1[GIT_OID_HEXSZ + 2] = { 0 };
+	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, &tree);
+
+	Handle<v8::Value> to;
+	to = NanNew<String>(sha1);
+
+	NanReturnValue(to);
+}
+
 Persistent<Function> GitBackend::constructor_template;
 git_mysql * GitBackend::mysql;
 git_repository *GitBackend::repo;
+//const char * GitBackend::path_buf = "/.git";

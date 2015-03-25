@@ -132,7 +132,22 @@ int git_mysql_init(git_mysql **out,
   if (error < 0)
 	  return GIT_ERROR;
 
+  // turn off auto commit
+  mysql_autocommit(mysql->db, 0);
+
   *out = mysql;
 
   return GIT_OK;
+}
+
+void git_mysql_transaction(git_mysql *mysql){
+	mysql_query(mysql->db, "START TRANSACTION");
+}
+
+void git_mysql_commit(git_mysql *mysql){
+	mysql_query(mysql->db, "COMMIT");
+}
+
+void git_mysql_rollback(git_mysql *mysql){
+	mysql_query(mysql->db, "ROLLBACK");
 }

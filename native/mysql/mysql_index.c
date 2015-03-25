@@ -30,8 +30,8 @@ int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
 
 	// now lets see if the insert worked
 	affected_rows = mysql_stmt_affected_rows(mysql->index_write);
-	//if (affected_rows != 1)
-	//	return GIT_ERROR;
+	if (affected_rows > 1)
+		return GIT_ERROR;
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->index_write) != 0)
