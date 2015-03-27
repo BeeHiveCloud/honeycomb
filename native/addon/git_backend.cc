@@ -22,7 +22,7 @@ void GitBackend::InitializeComponent(Handle<v8::Object> target) {
 }
 
 
-extern "C" NAN_METHOD(GitBackend::GitMysqlOpen) {
+NAN_METHOD(GitBackend::GitMysqlOpen) {
   NanEscapableScope();
 
   if (args.Length() == 0 || !args[0]->IsString()) {
@@ -105,25 +105,36 @@ extern "C" NAN_METHOD(GitBackend::GitMysqlOpen) {
 	  return Undefined();
   }
   
+  git_config *config;
+  error = git_config_open_default(&config);
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_config_open_default error")));
+	  return Undefined();
+  }
+
+  git_repository_set_config(repo,config);
+
+  
   error = git_repository_set_workdir(repo, "/", 0);
   if (error < 0){
 	  ThrowException(Exception::TypeError(String::New("git_repository_set_workdir error")));
 	  return Undefined();
   }
-  printf("workdir:%s", git_repository_workdir(repo));
-
-  error = git_repository_set_path(repo, "/.git");
+   //printf("workdir:%s", git_repository_workdir(repo));
+  
+  
+  
+  error = git_repository_set_path(repo, "/");
   if (error < 0){
 	  ThrowException(Exception::TypeError(String::New("git_repository_set_path error")));
 	  return Undefined();
   } 
-  printf("path:%s", git_repository_path(repo));
-
-
+  //printf("path:%s", git_repository_path(repo));
+  
 
   //Handle<v8::Value> obj = GitMysql::New(from_out, false);
   //NanReturnValue(obj);
-  if (error == 0)
+  if (!error)
 	  NanReturnValue(NanTrue());
   else
 	  NanReturnValue(NanFalse());
@@ -135,7 +146,7 @@ NAN_METHOD(GitBackend::GitMysqlClose) {
 
 	int error = git_mysql_free(mysql);
 
-	if (error == 0)
+	if (!error)
 		NanReturnValue(NanTrue());
 	else
 		NanReturnValue(NanFalse());
@@ -240,4 +251,3 @@ NAN_METHOD(GitBackend::GitMysqlCreateTree) {
 Persistent<Function> GitBackend::constructor_template;
 git_mysql * GitBackend::mysql;
 git_repository *GitBackend::repo;
-//const char * GitBackend::path_buf = "/.git";

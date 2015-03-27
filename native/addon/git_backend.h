@@ -9,7 +9,8 @@ extern "C" {
 #include "../mysql/mysql_backend.h"
 #include "../mysql/mysql_odb.h"
 #include "../mysql/mysql_index.h"
-#include "../mysql/mysql_repo.h"
+#include "../patch/repo_path.h"
+#include "git2/sys/repository.h"
 }
 
 using namespace node;
@@ -21,15 +22,10 @@ class GitBackend : public ObjectWrap {
     static Persistent<Function> constructor_template;
     static void InitializeComponent (Handle<v8::Object> target);
 
-    //bool selfFreeing;
-
 	static git_mysql *mysql;
 	static git_repository *repo;
-	//static const char *path_buf;
 
   private:
-
-    static NAN_METHOD(JSNewFunction);
 
     static NAN_METHOD(GitMysqlOpen);
 
