@@ -8,6 +8,7 @@ extern "C" {
 #include "git2.h"
 #include "../mysql/mysql_backend.h"
 #include "../mysql/mysql_odb.h"
+#include "../mysql/mysql_refdb.h"
 #include "../mysql/mysql_index.h"
 #include "../patch/repo_path.h"
 #include "git2/sys/repository.h"
@@ -33,7 +34,13 @@ class GitBackend : public ObjectWrap {
 
 	static NAN_METHOD(GitMysqlCreateBlob);
 
-	static NAN_METHOD(GitMysqlCreateTree);
+	static NAN_METHOD(GitMysqlWriteTree);
+
+	static NAN_METHOD(GitMysqlLookup);
+
+	static NAN_METHOD(GitMysqlCreateRef);
+
+	static NAN_METHOD(GitMysqlCommit);
 };
 
 #endif

@@ -19,6 +19,18 @@ int init_statements(git_mysql *mysql)
   static const char *sql_index_write =
 	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
 
+  static const char *sql_refdb_read =
+	  "SELECT `type`, `target`, `symbolic` FROM GIT_REFDB WHERE `name` = ?;";
+
+  static const char *sql_refdb_read_header =
+	  "SELECT `type` FROM GIT_REFDB WHERE `name` = ?;";
+
+  static const char *sql_refdb_write =
+	  "INSERT IGNORE INTO GIT_REFDB VALUES (?, ?, ?, NULL) ON DUPLICATE KEY UPDATE `target` = VALUES(`target`);";
+
+  static const char *sql_refdb_del =
+	  "DELETE FROM GIT_REFDB WHERE `name` = ?;";
+
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
     return GIT_ERROR;
@@ -72,6 +84,50 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->index_write, sql_index_write, strlen(sql_index_write)) != 0)
 	  return GIT_ERROR;
 
+
+  mysql->refdb_read = mysql_stmt_init(mysql->db);
+  if (mysql->refdb_read == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->refdb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->refdb_read, sql_refdb_read, strlen(sql_refdb_read)) != 0)
+	  return GIT_ERROR;
+
+
+  mysql->refdb_read_header = mysql_stmt_init(mysql->db);
+  if (mysql->refdb_read_header == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->refdb_read_header, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->refdb_read_header, sql_refdb_read_header, strlen(sql_refdb_read_header)) != 0)
+	  return GIT_ERROR;
+
+
+  mysql->refdb_write = mysql_stmt_init(mysql->db);
+  if (mysql->refdb_write == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->refdb_write, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->refdb_write, sql_refdb_write, strlen(sql_refdb_write)) != 0)
+	  return GIT_ERROR;
+
+
+  mysql->refdb_del = mysql_stmt_init(mysql->db);
+  if (mysql->refdb_del == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->refdb_del, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->refdb_del, sql_refdb_del, strlen(sql_refdb_del)) != 0)
+	  return GIT_ERROR;
+
   return GIT_OK;
 }
 
@@ -85,6 +141,16 @@ int git_mysql_free(git_mysql *mysql)
     mysql_stmt_close(mysql->odb_read_header);
   if (mysql->odb_write)
     mysql_stmt_close(mysql->odb_write);
+  if (mysql->index_read)
+	  mysql_stmt_close(mysql->index_read);
+  if (mysql->index_write)
+	  mysql_stmt_close(mysql->index_write);
+  if (mysql->refdb_read)
+	  mysql_stmt_close(mysql->refdb_read);
+  if (mysql->refdb_read_header)
+	  mysql_stmt_close(mysql->refdb_read_header);
+  if (mysql->refdb_write)
+	  mysql_stmt_close(mysql->refdb_write);
 
   mysql_close(mysql->db);
 

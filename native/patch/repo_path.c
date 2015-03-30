@@ -1,7 +1,5 @@
 #include "repo_path.h"
 
-
-#include "git2/sys/repository.h"
 #include "../../vendor/libgit2/src/repository.h"
 
 int git_repository_set_path(git_repository *repo, const char *path)

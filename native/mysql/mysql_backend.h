@@ -19,6 +19,11 @@ typedef struct {
   MYSQL_STMT *odb_read_header;
   MYSQL_STMT *index_read;
   MYSQL_STMT *index_write;
+  MYSQL_STMT *refdb_read;
+  MYSQL_STMT *refdb_write;
+  MYSQL_STMT *refdb_read_header;
+  MYSQL_STMT *refdb_del;
+  MYSQL_STMT *refdb_rename;
 } git_mysql;
 
 GIT_BEGIN_DECL
