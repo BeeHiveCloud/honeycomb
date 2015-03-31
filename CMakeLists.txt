@@ -3,8 +3,11 @@
 PROJECT(honeycomb)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-# Set build type
+# override CMAKE_BUILD_TYPE
 SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+
+# override STATIC_CRT
+SET(STATIC_CRT OFF CACHE BOOL "Link the dynamic CRT libraries" FORCE)
 
 # Set build directory
 SET(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)

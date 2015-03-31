@@ -86,6 +86,12 @@ NAN_METHOD(GitBackend::GitMysqlOpen) {
 	  return Undefined();
   }
 
+  error = git_libgit2_init();
+  if (error < 0){
+	  ThrowException(Exception::TypeError(String::New("git_libgit2_init error")));
+	  return Undefined();
+  }
+
   git_odb_backend   *odb_backend;
   error = git_mysql_odb_init(&odb_backend, mysql);
   if (error < 0){
@@ -159,12 +165,6 @@ NAN_METHOD(GitBackend::GitMysqlOpen) {
   } 
   //printf("path:%s", git_repository_path(repo));
   
-  error = git_libgit2_init();
-  if (error < 0){
-	  ThrowException(Exception::TypeError(String::New("git_libgit2_init error")));
-	  return Undefined();
-  }
-
   //Handle<v8::Value> obj = GitMysql::New(from_out, false);
   //NanReturnValue(obj);
   if (!error)
@@ -394,7 +394,7 @@ NAN_METHOD(GitBackend::GitMysqlCommit) {
 	git_oid oid;
 	git_signature *me;
 	git_oid commit;
-	git_object *	  obj;
+	git_tree *tree;
 
 	//error = git_revparse_single((git_object**)&tree, repo, "HEAD~^{tree}");
 	//if (error < 0){
@@ -404,20 +404,30 @@ NAN_METHOD(GitBackend::GitMysqlCommit) {
 	//}
 	git_oid_fromstr(&oid, "e1ca16979da4db87b96af5268ac2ba8facb1a4f4");
 	
-	error = git_object_lookup(&obj, repo, &oid, GIT_OBJ_ANY);
+
+	error = git_tree_lookup(&tree, repo, &oid);
 	if (error < 0){
-		git_mysql_rollback(mysql);
-		ThrowException(Exception::TypeError(String::New("git_object_lookup error")));
+		ThrowException(Exception::TypeError(String::New("git_tree_lookup error")));
 		return Undefined();
 	}
-	//error = git_tree_lookup(&tree, repo, &oid);
 
-	//error = git_commit_create(&commit, repo, from_ref, me, me, "UTF-8", from_msg, tree, 0, NULL);
+	error = git_signature_now(&me, "Me", "me@example.com");
+	if (error < 0){
+		ThrowException(Exception::TypeError(String::New("git_signature_now error")));
+		return Undefined();
+	}
+
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
+	error = git_commit_create(&commit, repo, from_ref, me, me, "UTF-8", from_msg, tree, 0, NULL);
 	if (error < 0){
 		git_mysql_rollback(mysql);
 		ThrowException(Exception::TypeError(String::New("git_commit_create error")));
 		return Undefined();
 	}
+
+	git_mysql_commit(mysql);
 
 	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, &commit);

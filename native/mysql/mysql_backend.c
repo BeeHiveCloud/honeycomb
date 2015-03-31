@@ -20,7 +20,7 @@ int init_statements(git_mysql *mysql)
 	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
 
   static const char *sql_refdb_read =
-	  "SELECT `type`, `target`, `symbolic` FROM GIT_REFDB WHERE `name` = ?;";
+	  "SELECT `type`, `target` FROM GIT_REFDB WHERE `name` = ?;";
 
   static const char *sql_refdb_read_header =
 	  "SELECT `type` FROM GIT_REFDB WHERE `name` = ?;";
