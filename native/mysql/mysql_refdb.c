@@ -62,9 +62,9 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 
 	git_ref_t type;
 	git_oid target;
-	//char *symbolic;
+	char *target_buf;
 	unsigned long type_len;
-	//unsigned long symbol_len;
+	unsigned long target_len;
 
 	assert(_backend && ref_name);
 
@@ -100,17 +100,17 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		result_buffers[0].length = &type_len;
 		memset(&type, 0, sizeof(type));
 
-		result_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
-		result_buffers[1].buffer = target.id;
-		result_buffers[1].buffer_length = 20;
-		result_buffers[1].is_null = 0;
-		memset(&target, 0, sizeof(target));
+		//result_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
+		//result_buffers[1].buffer = target.id;
+		//result_buffers[1].buffer_length = 20;
+		//result_buffers[1].is_null = 0;
+		//memset(&target, 0, sizeof(target));
 
-		//result_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
-		//result_buffers[2].buffer = 0;
-		//result_buffers[2].buffer_length = 0;
-		//result_buffers[2].is_null = 0;
-		//result_buffers[2].length = &symbol_len;
+		result_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		result_buffers[1].buffer = 0;
+		result_buffers[1].buffer_length = 0;
+		result_buffers[1].is_null = 0;
+		result_buffers[1].length = &target_len;
 
 		if (mysql_stmt_bind_result(backend->mysql->refdb_read, result_buffers) != 0)
 			return GIT_ERROR;
@@ -124,13 +124,22 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 				return GIT_ERROR;
 		}
 
+		if (target_len > 0){
+			target_buf = malloc(target_len);
+			result_buffers[1].buffer = target_buf;
+			result_buffers[1].buffer_length = target_len;
+
+			if (mysql_stmt_fetch_column(backend->mysql->refdb_read, &result_buffers[1], 1, 0) != 0)
+				return GIT_ERROR;
+		}
 
 		if (type == GIT_REF_OID){
+			git_oid_fromstr(&target, target_buf);
 			*out = git_reference__alloc(ref_name, &target, NULL);
 		}
-		//else if (type == GIT_REF_SYMBOLIC) {
-		//	*out = git_reference__alloc_symbolic(ref_name, symbolic);
-		//}
+		else if (type == GIT_REF_SYMBOLIC) {
+			*out = git_reference__alloc_symbolic(ref_name, target_buf);
+		}
 		else {
 			giterr_set_str(GITERR_REFERENCE, "unknown ref type returned");
 			error = GIT_ERROR;
@@ -180,18 +189,30 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 	
 	// bind the type
 	bind_buffers[1].buffer = &ref_type;
+	bind_buffers[1].buffer_length = sizeof(ref_type);
 	bind_buffers[1].buffer_type = MYSQL_TYPE_TINY;
 
-	// bind the oid
-	bind_buffers[2].buffer = &(target->id);
-	bind_buffers[2].buffer_length = 20;
-	bind_buffers[2].length = &bind_buffers[2].buffer_length;
-	bind_buffers[2].buffer_type = MYSQL_TYPE_BLOB;
+	// bind the target
+	bind_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
 
-	// bind the name
-	//bind_buffers[3].buffer = symbolic_target;
-	//bind_buffers[3].buffer_length = strlen(symbolic_target) + 1;
-	//bind_buffers[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+	if (ref_type == GIT_REF_OID){
+		char sha1[GIT_OID_HEXSZ + 1] = { 0 };
+		git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, target);
+
+		bind_buffers[2].buffer = sha1;
+		bind_buffers[2].buffer_length = GIT_OID_HEXSZ + 1;
+		bind_buffers[2].length = &bind_buffers[2].buffer_length;
+	}
+	else if (ref_type == GIT_REF_SYMBOLIC) {
+		bind_buffers[2].buffer = symbolic_target;
+		bind_buffers[2].buffer_length = strlen(symbolic_target) + 1;
+		bind_buffers[2].length = &bind_buffers[2].buffer_length;
+	}
+	else {
+		giterr_set_str(GITERR_REFERENCE, "unknown ref type returned");
+		return GIT_ERROR;
+	}
+
 
 	if (mysql_stmt_bind_param(backend->mysql->refdb_write, bind_buffers) != 0)
 		return GIT_ERROR;

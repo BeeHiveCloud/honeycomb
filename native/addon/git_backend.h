@@ -41,6 +41,8 @@ class GitBackend : public ObjectWrap {
 	static NAN_METHOD(GitMysqlCreateRef);
 
 	static NAN_METHOD(GitMysqlCommit);
+
+	static NAN_METHOD(GitMysqlCreateBranch);
 };
 
 #endif

@@ -24,6 +24,8 @@ void GitBackend::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "gitMysqlCommit", GitMysqlCommit);
 
+	NODE_SET_METHOD(object, "gitMysqlCreateBranch", GitMysqlCreateBranch);
+
     target->Set(NanNew<String>("SQL"), object);
 }
 
@@ -346,18 +348,18 @@ NAN_METHOD(GitBackend::GitMysqlCreateRef) {
 	// end convert_from_v8 block
 
 	int				  error;
-	git_oid			  oid;
+	//git_oid			  oid;
 	git_reference *ref = NULL;
 
-	git_oid_fromstr(&oid, from_target);
+	//git_oid_fromstr(&oid, from_target);
 
 	// Transaction Start
 	git_mysql_transaction(mysql);
 
-	error = git_reference_create(&ref, repo, from_name, &oid, true, NULL, NULL);
+	error = git_reference_symbolic_create(&ref, repo, from_name, from_target, 0, NULL, NULL);
 	if (error < 0){
 		git_mysql_rollback(mysql);
-		ThrowException(Exception::TypeError(String::New("git_reference_create error")));
+		ThrowException(Exception::TypeError(String::New("git_reference_symbolic_create error")));
 		return Undefined();
 	}
 
@@ -437,6 +439,52 @@ NAN_METHOD(GitBackend::GitMysqlCommit) {
 
 	NanReturnValue(to);
 }
+
+
+NAN_METHOD(GitBackend::GitMysqlCreateBranch) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsString()) {
+		return NanThrowError("name is required.");
+	}
+
+	// start convert_from_v8 block
+	const char *from_name;
+	String::Utf8Value name_buf(args[0]->ToString());
+	from_name = (const char *)strdup(*name_buf);
+	// end convert_from_v8 block
+
+	int				  error;
+	git_oid				oid;
+	git_reference	   *ref;
+	git_commit	    *commit;
+
+	git_oid_fromstr(&oid, "5cc5cd4d23456140a810130f5d7b154cc59f6c46");
+
+	error = git_commit_lookup(&commit, repo, &oid);
+	if (error < 0){
+		ThrowException(Exception::TypeError(String::New("git_commit_lookup error")));
+		return Undefined();
+	}
+
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
+	error = git_branch_create(&ref, repo, from_name,commit,0,NULL,NULL);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		ThrowException(Exception::TypeError(String::New("git_branch_create error")));
+		return Undefined();
+	}
+	
+	git_mysql_commit(mysql);
+	
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
+}
+
 
 Persistent<Function> GitBackend::constructor_template;
 git_mysql * GitBackend::mysql;

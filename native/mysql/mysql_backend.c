@@ -26,7 +26,7 @@ int init_statements(git_mysql *mysql)
 	  "SELECT `type` FROM GIT_REFDB WHERE `name` = ?;";
 
   static const char *sql_refdb_write =
-	  "INSERT IGNORE INTO GIT_REFDB VALUES (?, ?, ?, NULL) ON DUPLICATE KEY UPDATE `target` = VALUES(`target`);";
+	  "INSERT IGNORE INTO GIT_REFDB VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `target` = VALUES(`target`);";
 
   static const char *sql_refdb_del =
 	  "DELETE FROM GIT_REFDB WHERE `name` = ?;";

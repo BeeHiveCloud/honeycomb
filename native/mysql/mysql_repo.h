@@ -2,8 +2,11 @@
 #define INCLUDE_git_mysql_repo_h__
 
 #include "git2.h"
-#include "git2/buffer.h"
 
+GIT_BEGIN_DECL
 
+GIT_EXTERN(long) git_repo_create(const long owner, const char *name, const char *description);
+
+GIT_END_DECL
 
 #endif
