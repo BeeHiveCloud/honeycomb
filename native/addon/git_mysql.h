@@ -1,5 +1,5 @@
-#ifndef NODE_ADDON_GIT_BACKEND_H
-#define NODE_ADDON_GIT_BACKEND_H
+#ifndef NODE_ADDON_GIT_MYSQL_H
+#define NODE_ADDON_GIT_MYSQL_H
 
 #include <nan.h>
 #include <string>
@@ -17,7 +17,7 @@ extern "C" {
 using namespace node;
 using namespace v8;
 
-class GitBackend : public ObjectWrap {
+class GitMysql : public ObjectWrap {
   public:
 
     static Persistent<Function> constructor_template;
@@ -28,21 +28,21 @@ class GitBackend : public ObjectWrap {
 
   private:
 
-    static NAN_METHOD(GitMysqlOpen);
+	  static NAN_METHOD(Open);
 
-	static NAN_METHOD(GitMysqlClose);
+	  static NAN_METHOD(Close);
 
-	static NAN_METHOD(GitMysqlCreateBlob);
+	  static NAN_METHOD(CreateBlob);
 
-	static NAN_METHOD(GitMysqlWriteTree);
+	  static NAN_METHOD(WriteTree);
 
-	static NAN_METHOD(GitMysqlLookup);
+	  static NAN_METHOD(Lookup);
 
-	static NAN_METHOD(GitMysqlCreateRef);
+	  static NAN_METHOD(CreateRef);
 
-	static NAN_METHOD(GitMysqlCommit);
+	  static NAN_METHOD(Commit);
 
-	static NAN_METHOD(GitMysqlCreateBranch);
+	  static NAN_METHOD(CreateBranch);
 };
 
 #endif
