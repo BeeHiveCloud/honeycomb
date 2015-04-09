@@ -6,7 +6,7 @@
   "main": "./lib/index.js",
   "dependencies": {
     "bluebird": "2.9.7",
-    "nan": "^1.6.2"
+    "nan": "^1.7.0"
   },
   "scripts": {
     "test": "mocha -b",

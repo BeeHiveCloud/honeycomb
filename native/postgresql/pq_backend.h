@@ -8,6 +8,8 @@ GIT_BEGIN_DECL
 
 GIT_EXTERN(int)git_pq_init(PGconn **out, const char *conninfo);
 
+GIT_EXTERN(int)git_pq_free(PGconn *conn);
+
 GIT_END_DECL
 
 #endif

@@ -1,0 +1,14 @@
+#ifndef INCLUDE_git_mysql_config_h__
+#define INCLUDE_git_mysql_config_h__
+
+#include "git2.h"
+#include "git2/sys/config.h"
+#include "mysql_backend.h"
+
+GIT_BEGIN_DECL
+
+GIT_EXTERN(int) git_mysql_config_init(git_config_backend **out, git_mysql *mysql);
+
+GIT_END_DECL
+
+#endif

@@ -3,7 +3,7 @@
 PROJECT(honeycomb)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-# override CMAKE_BUILD_TYPE
+# set CMAKE_BUILD_TYPE
 SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 
 # override STATIC_CRT
@@ -24,23 +24,23 @@ ADD_SUBDIRECTORY(vendor/libgit2)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 INCLUDE(FindMysql)
-INCLUDE(FindPostgres)
+#INCLUDE(FindPostgres)
 #INCLUDE(FindMongo)
-INCLUDE(FindRedis)
+#INCLUDE(FindRedis)
 INCLUDE(FindNode)
 
 # Add libgit2 include
 INCLUDE_DIRECTORIES("vendor/libgit2/include")
 
 # postgresql
-FILE(GLOB SRC_PQ native/postgresql/*.c native/postgresql/*.h)
-INCLUDE_DIRECTORIES(${LIBPQ_INCLUDE_DIR})
+#FILE(GLOB SRC_PQ native/postgresql/*.c native/postgresql/*.h)
+#INCLUDE_DIRECTORIES(${LIBPQ_INCLUDE_DIR})
 
-ADD_LIBRARY(git2pq ${SRC_PQ})
-ADD_DEPENDENCIES(git2pq git2)
-TARGET_LINK_LIBRARIES(git2pq ${LIBPQ_LIBRARY}/libpq)
-TARGET_LINK_LIBRARIES(git2pq git2)
-TARGET_OS_LIBRARIES(git2pq)
+#ADD_LIBRARY(git2pq ${SRC_PQ})
+#ADD_DEPENDENCIES(git2pq git2)
+#TARGET_LINK_LIBRARIES(git2pq ${LIBPQ_LIBRARY}/libpq)
+#TARGET_LINK_LIBRARIES(git2pq git2)
+#TARGET_OS_LIBRARIES(git2pq)
 
 # mysql
 FILE(GLOB SRC_MYSQL native/mysql/*.c native/mysql/*.h)
@@ -62,17 +62,17 @@ TARGET_OS_LIBRARIES(git2mysql)
 #TARGET_OS_LIBRARIES(git2mongodb)
 
 # redis
-FILE(GLOB SRC_REDIS native/redis/*.c native/redis/*.h)
-INCLUDE_DIRECTORIES(${LIBREDIS_INCLUDE_DIR})
+#FILE(GLOB SRC_REDIS native/redis/*.c native/redis/*.h)
+#INCLUDE_DIRECTORIES(${LIBREDIS_INCLUDE_DIR})
 
-ADD_LIBRARY(git2redis ${SRC_REDIS})
-ADD_DEPENDENCIES(git2redis git2)
-TARGET_LINK_LIBRARIES(git2redis git2)
-TARGET_LINK_LIBRARIES(git2redis ${LIBREDIS_LIBRARY}/hiredis)
-IF (MSVC_IDE)
-    TARGET_LINK_LIBRARIES(git2redis ${LIBREDIS_LIBRARY}/Win32_Interop)
-ENDIF ()
-TARGET_OS_LIBRARIES(git2redis)
+#ADD_LIBRARY(git2redis ${SRC_REDIS})
+#ADD_DEPENDENCIES(git2redis git2)
+#TARGET_LINK_LIBRARIES(git2redis git2)
+#TARGET_LINK_LIBRARIES(git2redis ${LIBREDIS_LIBRARY}/hiredis)
+#IF (MSVC_IDE)
+#    TARGET_LINK_LIBRARIES(git2redis ${LIBREDIS_LIBRARY}/Win32_Interop)
+#ENDIF ()
+#TARGET_OS_LIBRARIES(git2redis)
 
 # node native addon
 

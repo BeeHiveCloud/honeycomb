@@ -26,7 +26,7 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "CreateBranch", CreateBranch);
 
-    target->Set(NanNew<String>("MYSQL"), object);
+    target->Set(NanNew<String>("MySQL"), object);
 }
 
 
