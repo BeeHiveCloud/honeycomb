@@ -14,6 +14,7 @@
 
 typedef struct {
   MYSQL *db;
+  long long int repo;
   MYSQL_STMT *odb_read;
   MYSQL_STMT *odb_write;
   MYSQL_STMT *odb_read_header;
@@ -24,6 +25,7 @@ typedef struct {
   MYSQL_STMT *refdb_read_header;
   MYSQL_STMT *refdb_del;
   MYSQL_STMT *refdb_rename;
+  MYSQL_STMT *repo_create;
 } git_mysql;
 
 GIT_BEGIN_DECL
@@ -42,6 +44,7 @@ GIT_EXTERN(int) git_mysql_free(git_mysql *mysql);
 GIT_EXTERN(void) git_mysql_transaction(git_mysql *mysql);
 GIT_EXTERN(void) git_mysql_commit(git_mysql *mysql);
 GIT_EXTERN(void) git_mysql_rollback(git_mysql *mysql);
+GIT_EXTERN(int) git_mysql_adhoc(git_mysql *mysql, const char *cmd);
 
 GIT_END_DECL
 

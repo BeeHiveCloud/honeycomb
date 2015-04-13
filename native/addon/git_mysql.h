@@ -10,6 +10,7 @@ extern "C" {
 #include "../mysql/mysql_odb.h"
 #include "../mysql/mysql_refdb.h"
 #include "../mysql/mysql_index.h"
+#include "../mysql/mysql_repo.h"
 #include "../patch/repo_path.h"
 #include "git2/sys/repository.h"
 }
@@ -43,6 +44,14 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(Commit);
 
 	  static NAN_METHOD(CreateBranch);
+
+	  static NAN_METHOD(AdHoc);
+
+	  static NAN_METHOD(CreateRepo);
+
+	  static NAN_METHOD(GetRepo);
+
+	  static NAN_METHOD(SetRepo);
 };
 
 #endif

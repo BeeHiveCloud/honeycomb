@@ -14,9 +14,9 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "Close", Close);
 
-	NODE_SET_METHOD(object, "Blob", CreateBlob);
+	NODE_SET_METHOD(object, "CreateBlob", CreateBlob);
 
-	NODE_SET_METHOD(object, "Tree", WriteTree);
+	NODE_SET_METHOD(object, "WriteTree", WriteTree);
 
 	NODE_SET_METHOD(object, "Lookup", Lookup);
 
@@ -25,6 +25,14 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 	NODE_SET_METHOD(object, "Commit", Commit);
 
 	NODE_SET_METHOD(object, "CreateBranch", CreateBranch);
+
+	NODE_SET_METHOD(object, "AdHoc", AdHoc);
+
+	NODE_SET_METHOD(object, "CreateRepo", CreateRepo);
+
+	NODE_SET_METHOD(object, "GetRepo", GetRepo);
+
+	NODE_SET_METHOD(object, "SetRepo", SetRepo);
 
     target->Set(NanNew<String>("MySQL"), object);
 }
@@ -182,6 +190,10 @@ NAN_METHOD(GitMysql::Close) {
 NAN_METHOD(GitMysql::CreateBlob) {
 	NanEscapableScope();
 
+	//if (args.Length() == 0 || !args[0]->IsNumber()) {
+	//	return NanThrowError("repo is required.");
+	//}
+
 	if (args.Length() == 0 || !args[0]->IsString()) {
 		return NanThrowError("path is required.");
 	}
@@ -191,6 +203,9 @@ NAN_METHOD(GitMysql::CreateBlob) {
 	}
 
 	// start convert_from_v8 block
+	//long long int from_repo;
+	//from_repo = (long long int)args[0]->ToNumber()->Value();
+
 	const char *from_path;
 	String::Utf8Value path_buf(args[0]->ToString());
 	from_path = (const char *)strdup(*path_buf);
@@ -434,7 +449,7 @@ NAN_METHOD(GitMysql::CreateBranch) {
 	git_reference	   *ref;
 	git_commit	    *commit;
 
-	git_oid_fromstr(&oid, "5cc5cd4d23456140a810130f5d7b154cc59f6c46");
+	git_oid_fromstr(&oid, "900773840d4604fd48d328d1b5f489f3cb36f533");
 
 	error = git_commit_lookup(&commit, repo, &oid);
 	if (error < 0){
@@ -456,6 +471,99 @@ NAN_METHOD(GitMysql::CreateBranch) {
 		NanReturnValue(NanTrue());
 	else
 		NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(GitMysql::AdHoc) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsString()) {
+		return NanThrowError("cmd is required.");
+	}
+
+	// start convert_from_v8 block
+	const char *from_cmd;
+	String::Utf8Value cmd_buf(args[0]->ToString());
+	from_cmd = (const char *)strdup(*cmd_buf);
+	// end convert_from_v8 block
+
+	int error = git_mysql_adhoc(mysql,from_cmd);
+
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(GitMysql::CreateRepo) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsNumber()) {
+		return NanThrowError("owner is required.");
+	}
+
+	if (args.Length() == 1 || !args[1]->IsString()) {
+		return NanThrowError("name is required.");
+	}
+
+	if (args.Length() == 2 || !args[2]->IsString()) {
+		return NanThrowError("description is required.");
+	}
+
+	// start convert_from_v8 block
+	long long int from_owner;
+	from_owner = (long long int)args[0]->ToNumber()->Value();
+
+	const char *from_name;
+	String::Utf8Value name_buf(args[1]->ToString());
+	from_name = (const char *)strdup(*name_buf);
+
+	const char *from_desc;
+	String::Utf8Value desc_buf(args[2]->ToString());
+	from_desc = (const char *)strdup(*desc_buf);
+	// end convert_from_v8 block
+
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
+	char *reponum = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
+
+	if (reponum){
+		git_mysql_commit(mysql);
+		mysql->repo = std::stoi(reponum);
+
+		git_reference *ref;
+		git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL, NULL);
+		git_reference_symbolic_create(&ref, repo, "refs/heads/master", "no commit yet", 0, NULL, NULL);
+		git_reference_free(ref);
+
+		Handle<v8::Value> to;
+		to = NanNew<Number>(mysql->repo);
+		NanReturnValue(to);
+	}
+	else{
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_repo_create error");
+	}
+}
+
+NAN_METHOD(GitMysql::GetRepo) {
+	NanEscapableScope();
+
+	Handle<v8::Value> to;
+	to = NanNew<Number>(mysql->repo);
+	NanReturnValue(to);
+}
+
+NAN_METHOD(GitMysql::SetRepo) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsNumber()) {
+		return NanThrowError("repo is required.");
+	}
+
+
+	mysql->repo = (long long int)args[0]->ToNumber()->Value();
+
 }
 
 Persistent<Function> GitMysql::constructor_template;

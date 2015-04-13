@@ -4,7 +4,7 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 {
   git_mysql_odb *backend;
   int error;
-  MYSQL_BIND bind_buffers[1];
+  MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[1];
 
   assert(len_p && type_p && _backend && oid);
@@ -15,11 +15,18 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   memset(bind_buffers, 0, sizeof(bind_buffers));
   memset(result_buffers, 0, sizeof(result_buffers));
 
-  // bind the oid passed to the statement
-  bind_buffers[0].buffer = (void*)oid->id;
-  bind_buffers[0].buffer_length = 20;
+  // bind the repo passed to the statement
+  bind_buffers[0].buffer = &(backend->mysql->repo);
+  bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
   bind_buffers[0].length = &bind_buffers[0].buffer_length;
-  bind_buffers[0].buffer_type = MYSQL_TYPE_BLOB;
+  bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
+
+  // bind the oid passed to the statement
+  bind_buffers[1].buffer = (void*)oid->id;
+  bind_buffers[1].buffer_length = 20;
+  bind_buffers[1].length = &bind_buffers[1].buffer_length;
+  bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
+
   if (mysql_stmt_bind_param(backend->mysql->odb_read_header, bind_buffers) != 0)
     return 0;
 
@@ -66,7 +73,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 {
   git_mysql_odb *backend;
   int error;
-  MYSQL_BIND bind_buffers[1];
+  MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
   unsigned long data_len;
   unsigned long type_len;
@@ -80,11 +87,18 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   memset(bind_buffers, 0, sizeof(bind_buffers));
   memset(result_buffers, 0, sizeof(result_buffers));
 
-  // bind the oid passed to the statement
-  bind_buffers[0].buffer = (void*)oid->id;
-  bind_buffers[0].buffer_length = 20;
+  // bind the repo passed to the statement
+  bind_buffers[0].buffer = &(backend->mysql->repo);
+  bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
   bind_buffers[0].length = &bind_buffers[0].buffer_length;
-  bind_buffers[0].buffer_type = MYSQL_TYPE_BLOB;
+  bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
+
+  // bind the oid passed to the statement
+  bind_buffers[1].buffer = (void*)oid->id;
+  bind_buffers[1].buffer_length = 20;
+  bind_buffers[1].length = &bind_buffers[1].buffer_length;
+  bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
+
   if (mysql_stmt_bind_param(backend->mysql->odb_read, bind_buffers) != 0)
     return 0;
 
@@ -141,13 +155,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 			return GIT_ERROR;
 	}
 
-	if (len_len > 0){
-		//len_p = malloc(sizeof(len_p));
-		//result_buffers[0].buffer = len_p;
-		//result_buffers[0].buffer_length = len_len;
-		//if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[1], 1, 0) != 0)
-		//	return GIT_ERROR;
-	}
 
     if (data_len > 0) {
       *data_p = malloc(data_len);
@@ -157,7 +164,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	  if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[2], 2, 0) != 0)
         return GIT_ERROR;
 
-	  //printf("%s", *data_p);
     }
 
 	error = GIT_OK;
@@ -176,7 +182,7 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 {
   git_mysql_odb *backend;
   int found;
-  MYSQL_BIND bind_buffers[1];
+  MYSQL_BIND bind_buffers[2];
 
   assert(_backend && oid);
 
@@ -185,11 +191,18 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
-  // bind the oid passed to the statement
-  bind_buffers[0].buffer = (void*)oid->id;
-  bind_buffers[0].buffer_length = 20;
+  // bind the repo passed to the statement
+  bind_buffers[0].buffer = &(backend->mysql->repo);
+  bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
   bind_buffers[0].length = &bind_buffers[0].buffer_length;
-  bind_buffers[0].buffer_type = MYSQL_TYPE_BLOB;
+  bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
+
+  // bind the oid passed to the statement
+  bind_buffers[1].buffer = (void*)oid->id;
+  bind_buffers[1].buffer_length = 20;
+  bind_buffers[1].length = &bind_buffers[1].buffer_length;
+  bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
+
   if (mysql_stmt_bind_param(backend->mysql->odb_read_header, bind_buffers) != 0)
     return 0;
 
@@ -218,7 +231,7 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 {
   int error;
   git_mysql_odb *backend;
-  MYSQL_BIND bind_buffers[4];
+  MYSQL_BIND bind_buffers[5];
   my_ulonglong affected_rows;
 
   assert(oid && _backend && data);
@@ -230,25 +243,31 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
-  // bind the oid
-  bind_buffers[0].buffer = (void*)oid->id;
-  bind_buffers[0].buffer_length = 20;
+  // bind the repo passed to the statement
+  bind_buffers[0].buffer = &(backend->mysql->repo);
+  bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
   bind_buffers[0].length = &bind_buffers[0].buffer_length;
-  bind_buffers[0].buffer_type = MYSQL_TYPE_BLOB;
+  bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
+
+  // bind the oid
+  bind_buffers[1].buffer = (void*)oid->id;
+  bind_buffers[1].buffer_length = 20;
+  bind_buffers[1].length = &bind_buffers[1].buffer_length;
+  bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
   // bind the type
-  bind_buffers[1].buffer = &type;
-  bind_buffers[1].buffer_type = MYSQL_TYPE_TINY;
+  bind_buffers[2].buffer = &type;
+  bind_buffers[2].buffer_type = MYSQL_TYPE_TINY;
 
   // bind the size of the data
-  bind_buffers[2].buffer = &len;
-  bind_buffers[2].buffer_type = MYSQL_TYPE_LONG;
+  bind_buffers[3].buffer = &len;
+  bind_buffers[3].buffer_type = MYSQL_TYPE_LONG;
 
   // bind the data
-  bind_buffers[3].buffer = (void*)data;
-  bind_buffers[3].buffer_length = len;
-  bind_buffers[3].length = &bind_buffers[3].buffer_length;
-  bind_buffers[3].buffer_type = MYSQL_TYPE_BLOB;
+  bind_buffers[4].buffer = (void*)data;
+  bind_buffers[4].buffer_length = len;
+  bind_buffers[4].length = &bind_buffers[4].buffer_length;
+  bind_buffers[4].buffer_type = MYSQL_TYPE_BLOB;
 
   if (mysql_stmt_bind_param(backend->mysql->odb_write, bind_buffers) != 0)
     return GIT_ERROR;

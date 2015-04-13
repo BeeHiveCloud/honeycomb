@@ -5,31 +5,34 @@ int init_statements(git_mysql *mysql)
   my_bool truth = 1;
 
   static const char *sql_odb_read =
-    "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `oid` = ?;";
+    "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
 
   static const char *sql_odb_read_header =
-    "SELECT `type`, `size` FROM GIT_ODB WHERE `oid` = ?;";
+    "SELECT `type`, `size` FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
 
   static const char *sql_odb_write =
-    "INSERT IGNORE INTO GIT_ODB VALUES (?, ?, ?, COMPRESS(?));";
+    "INSERT IGNORE INTO GIT_ODB VALUES (?, ?, ?, ?, COMPRESS(?));";
 
   static const char *sql_index_read =
-	  "SELECT `oid` FROM GIT_INDEX WHERE `path` = ?;";
+	  "SELECT `oid` FROM GIT_INDEX WHERE `repo` = ? AND `path` = ?;";
 
   static const char *sql_index_write =
-	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
+	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
 
   static const char *sql_refdb_read =
-	  "SELECT `type`, `target` FROM GIT_REFDB WHERE `name` = ?;";
+	  "SELECT `type`, `target` FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
 
   static const char *sql_refdb_read_header =
-	  "SELECT `type` FROM GIT_REFDB WHERE `name` = ?;";
+	  "SELECT `type` FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
 
   static const char *sql_refdb_write =
-	  "INSERT IGNORE INTO GIT_REFDB VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `target` = VALUES(`target`);";
+	  "INSERT IGNORE INTO GIT_REFDB VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `target` = VALUES(`target`);";
 
   static const char *sql_refdb_del =
-	  "DELETE FROM GIT_REFDB WHERE `name` = ?;";
+	  "DELETE FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
+
+  static const char *sql_repo_create =
+	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (?, ?, ?)";
 
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
@@ -128,6 +131,18 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->refdb_del, sql_refdb_del, strlen(sql_refdb_del)) != 0)
 	  return GIT_ERROR;
 
+
+  mysql->repo_create = mysql_stmt_init(mysql->db);
+  if (mysql->repo_create == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->repo_create, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->repo_create, sql_repo_create, strlen(sql_repo_create)) != 0)
+	  return GIT_ERROR;
+
+
   return GIT_OK;
 }
 
@@ -216,4 +231,8 @@ void git_mysql_commit(git_mysql *mysql){
 
 void git_mysql_rollback(git_mysql *mysql){
 	mysql_query(mysql->db, "ROLLBACK");
+}
+
+int git_mysql_adhoc(git_mysql *mysql, const char *cmd){
+	return mysql_query(mysql->db, cmd);
 }

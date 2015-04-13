@@ -2,7 +2,7 @@
   "name": "honeycomb.js",
   "version": "0.1.0",
   "description": "Honeycomb data orchestration layer",
-  "keywords": ["honeycomb","node.js","libgit2","mysql","redis","mongodb"],
+  "keywords": ["honeycomb","node.js","libgit2","mysql","redis"],
   "main": "./lib/index.js",
   "dependencies": {
     "bluebird": "2.9.7",
@@ -25,8 +25,8 @@
     "mocha": "2.1.0"
   },
   "engines": {
-      "node": ">= 0.10.0",
-      "npm": ">= 1.4.0"
+      "node": ">= 0.12.0",
+      "npm": ">= 2.7.0"
   },
   "bugs": {
         "url": "http://github.com/BeeHiveCloud/honeycomb/issues"

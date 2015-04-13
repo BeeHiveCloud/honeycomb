@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS `GIT_INDEX`;
+
+CREATE TABLE GIT_INDEX(
+  `repo`  BIGINT UNSIGNED NOT NULL,
+  `oid`   BINARY(20) NOT NULL,
+  `path`  VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`repo`,`path`),
+  KEY `oid` (`oid`)
+)
+ENGINE = "InnoDB"
+DEFAULT CHARSET = utf8
+COLLATE = utf8_bin;
