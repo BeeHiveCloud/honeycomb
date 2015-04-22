@@ -10,6 +10,7 @@ extern "C" {
 #include "../mysql/mysql_odb.h"
 #include "../mysql/mysql_refdb.h"
 #include "../mysql/mysql_index.h"
+#include "../mysql/mysql_tree.h"
 #include "../mysql/mysql_repo.h"
 #include "../patch/repo_path.h"
 #include "git2/sys/repository.h"

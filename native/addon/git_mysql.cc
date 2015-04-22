@@ -14,7 +14,7 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "Close", Close);
 
-	NODE_SET_METHOD(object, "CreateBlob", CreateBlob);
+	NODE_SET_METHOD(object, "Add", CreateBlob);
 
 	NODE_SET_METHOD(object, "WriteTree", WriteTree);
 
@@ -190,10 +190,6 @@ NAN_METHOD(GitMysql::Close) {
 NAN_METHOD(GitMysql::CreateBlob) {
 	NanEscapableScope();
 
-	//if (args.Length() == 0 || !args[0]->IsNumber()) {
-	//	return NanThrowError("repo is required.");
-	//}
-
 	if (args.Length() == 0 || !args[0]->IsString()) {
 		return NanThrowError("path is required.");
 	}
@@ -203,9 +199,6 @@ NAN_METHOD(GitMysql::CreateBlob) {
 	}
 
 	// start convert_from_v8 block
-	//long long int from_repo;
-	//from_repo = (long long int)args[0]->ToNumber()->Value();
-
 	const char *from_path;
 	String::Utf8Value path_buf(args[0]->ToString());
 	from_path = (const char *)strdup(*path_buf);
@@ -227,7 +220,7 @@ NAN_METHOD(GitMysql::CreateBlob) {
 		return NanThrowError("git_blob_create_frombuffer error");
 	}
 
-	error = git_mysql_index_write(mysql, &oid, from_path);
+	error = git_mysql_index_add(mysql, &oid, from_path);
 	if (error < 0){
 		git_mysql_rollback(mysql);
 		return NanThrowError("git_mysql_index_write error");
@@ -247,42 +240,30 @@ NAN_METHOD(GitMysql::CreateBlob) {
 NAN_METHOD(GitMysql::WriteTree) {
 	NanEscapableScope();
 
-	int				  error;
-	git_oid			  oid,tree;
-	git_treebuilder   *bld = NULL;
-
-	git_oid_fromstr(&oid, "41842f42ac3734774a6192c9d7f03ad972c684fc");
-
-	error = git_treebuilder_new(&bld, repo, NULL);
-	if (error < 0){
-		return NanThrowError("git_treebuilder_new error");
-	}
-
-	error = git_treebuilder_insert(NULL, bld, "README.md", &oid, GIT_FILEMODE_BLOB);
-	if (error < 0){
-		return NanThrowError("git_treebuilder_insert error");
-	}
+	int error;
 
 	// Transaction Start
 	git_mysql_transaction(mysql);
 
-	error = git_treebuilder_write(&tree, bld);
+	error = git_mysql_tree_init(mysql);
 	if (error < 0){
 		git_mysql_rollback(mysql);
-		return NanThrowError("git_treebuilder_write error");
+		return NanThrowError("git_mysql_tree_init error");
+	}
+
+	error = git_mysql_tree_blob(mysql, repo);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_blob error");
 	}
 
 	git_mysql_commit(mysql);
 
-	git_treebuilder_free(bld);
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
 
-	char sha1[GIT_OID_HEXSZ + 2] = { 0 };
-	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, &tree);
-
-	Handle<v8::Value> to;
-	to = NanNew<String>(sha1);
-
-	NanReturnValue(to);
 }
 
 NAN_METHOD(GitMysql::Lookup) {
@@ -528,13 +509,45 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	char *reponum = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
 
 	if (reponum){
-		git_mysql_commit(mysql);
 		mysql->repo = std::stoi(reponum);
 
+		int error;
 		git_reference *ref;
-		git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL, NULL);
-		git_reference_symbolic_create(&ref, repo, "refs/heads/master", "no commit yet", 0, NULL, NULL);
+		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL, NULL);
 		git_reference_free(ref);
+
+		git_mysql_commit(mysql);
+
+		/*
+		git_reference *head;
+		error = git_repository_head(&head, repo);
+		if (!error){
+			const git_ref_t ref_type = git_reference_type(head);
+			if (ref_type == GIT_REF_OID){
+				const git_oid *t = git_reference_target(head);
+				printf("%s", t);
+			}
+			else if (ref_type == GIT_REF_SYMBOLIC){
+				const char *t = git_reference_symbolic_target(head);
+				printf("%s", t);
+			}
+			else{
+				return NanThrowError("unknown ref type");
+			}
+		}
+		else if (error == GIT_EUNBORNBRANCH){
+			printf("GIT_EUNBORNBRANCH");
+		}
+		else if (error == GIT_ENOTFOUND){
+			printf("GIT_ENOTFOUND");
+		}
+		else
+		{
+			printf("error");
+		}
+		
+		*/
+		
 
 		Handle<v8::Value> to;
 		to = NanNew<Number>(mysql->repo);

@@ -14,10 +14,13 @@ int init_statements(git_mysql *mysql)
     "INSERT IGNORE INTO GIT_ODB VALUES (?, ?, ?, ?, COMPRESS(?));";
 
   static const char *sql_index_read =
-	  "SELECT `oid` FROM GIT_INDEX WHERE `repo` = ? AND `path` = ?;";
+	  "SELECT `oid`, `level`, `dir`, `file` FROM GIT_INDEX_V WHERE `repo` = ? ORDER BY `level` DESC, `dir`;";
 
   static const char *sql_index_write =
 	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
+
+  static const char *sql_index_del =
+	  "DELETE FROM GIT_INDEX WHERE `repo` = ? AND `path` = ?;";
 
   static const char *sql_refdb_read =
 	  "SELECT `type`, `target` FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
@@ -33,6 +36,15 @@ int init_statements(git_mysql *mysql)
 
   static const char *sql_repo_create =
 	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (?, ?, ?)";
+
+  static const char *sql_tree_init = "CALL git_tree_init(?);";
+  static const char *sql_tree_update = "CALL git_tree_update(?, ?, ?);";
+
+  static const char *sql_tree_blob = 
+	  "SELECT `oid`, `dir`, `entry` FROM GIT_TREE WHERE `repo` = ? and `type` = 'BLOB' AND dir <> '/' ORDER BY `dir`, entry;";
+
+  static const char *sql_tree_tree =
+	  "SELECT `dir`, `entry`, `oid` FROM GIT_TREE WHERE `repo` = ? and `type` = 'BLOB'; ";
 
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
@@ -85,6 +97,17 @@ int init_statements(git_mysql *mysql)
 	  return GIT_ERROR;
 
   if (mysql_stmt_prepare(mysql->index_write, sql_index_write, strlen(sql_index_write)) != 0)
+	  return GIT_ERROR;
+
+
+  mysql->index_del = mysql_stmt_init(mysql->db);
+  if (mysql->index_del == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->index_del, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->index_del, sql_index_del, strlen(sql_index_del)) != 0)
 	  return GIT_ERROR;
 
 
@@ -142,6 +165,39 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->repo_create, sql_repo_create, strlen(sql_repo_create)) != 0)
 	  return GIT_ERROR;
 
+  mysql->tree_init = mysql_stmt_init(mysql->db);
+  if (mysql->tree_init == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->tree_init, sql_tree_init, strlen(sql_tree_init)) != 0)
+	  return GIT_ERROR;
+
+  mysql->tree_update = mysql_stmt_init(mysql->db);
+  if (mysql->tree_update == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->tree_update, sql_tree_update, strlen(sql_tree_update)) != 0)
+	  return GIT_ERROR;
+
+  mysql->tree_blob = mysql_stmt_init(mysql->db);
+  if (mysql->tree_blob == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->tree_blob, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->tree_blob, sql_tree_blob, strlen(sql_tree_blob)) != 0)
+	  return GIT_ERROR;
+
+  mysql->tree_tree = mysql_stmt_init(mysql->db);
+  if (mysql->tree_tree == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->tree_tree, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->tree_tree, sql_tree_tree, strlen(sql_tree_tree)) != 0)
+	  return GIT_ERROR;
 
   return GIT_OK;
 }
