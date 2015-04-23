@@ -11,7 +11,7 @@ int init_statements(git_mysql *mysql)
     "SELECT `type`, `size` FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
 
   static const char *sql_odb_write =
-    "INSERT IGNORE INTO GIT_ODB VALUES (?, ?, ?, ?, COMPRESS(?));";
+    "INSERT INTO GIT_ODB VALUES (?, ?, ?, ?, COMPRESS(?));";
 
   static const char *sql_index_read =
 	  "SELECT `oid`, `level`, `dir`, `file` FROM GIT_INDEX_V WHERE `repo` = ? ORDER BY `level` DESC, `dir`;";

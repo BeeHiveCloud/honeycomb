@@ -28,14 +28,14 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
   if (mysql_stmt_bind_param(backend->mysql->odb_read_header, bind_buffers) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read_header) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   if (mysql_stmt_store_result(backend->mysql->odb_read_header) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   // this should either be 0 or 1
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
@@ -100,14 +100,14 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
   if (mysql_stmt_bind_param(backend->mysql->odb_read, bind_buffers) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   if (mysql_stmt_store_result(backend->mysql->odb_read) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   // this should either be 0 or 1
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
@@ -208,10 +208,10 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read_header) != 0)
-    return 0;
+	return 0;
 
   if (mysql_stmt_store_result(backend->mysql->odb_read_header) != 0)
-    return 0;
+	return 0;
 
   // now lets see if any rows matched our query
   // this should either be 0 or 1
@@ -222,7 +222,7 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)
-    return 0;
+	return 0;
 
   return found;
 }
@@ -257,10 +257,14 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
   // bind the type
   bind_buffers[2].buffer = &type;
+  bind_buffers[2].buffer_length = sizeof(type);
+  bind_buffers[2].length = &bind_buffers[2].buffer_length;
   bind_buffers[2].buffer_type = MYSQL_TYPE_TINY;
 
   // bind the size of the data
   bind_buffers[3].buffer = &len;
+  bind_buffers[3].buffer_length = sizeof(len);
+  bind_buffers[3].length = &bind_buffers[3].buffer_length;
   bind_buffers[3].buffer_type = MYSQL_TYPE_LONG;
 
   // bind the data
@@ -274,8 +278,8 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
   // TODO: use the streaming backend API so this actually makes sense to use :P
   // once we want to use this we should comment out
-  // if (mysql_stmt_send_long_data(backend->st_odb_write, 2, data, len) != 0)
-  //   return GIT_ERROR;
+   if (mysql_stmt_send_long_data(backend->mysql->odb_write, 4, data, len) != 0)
+     return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_write) != 0)
