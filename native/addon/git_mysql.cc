@@ -34,6 +34,8 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "SetRepo", SetRepo);
 
+	NODE_SET_METHOD(object, "TreeWalk", TreeWalk);
+
     target->Set(NanNew<String>("MySQL"), object);
 }
 
@@ -251,11 +253,22 @@ NAN_METHOD(GitMysql::WriteTree) {
 		return NanThrowError("git_mysql_tree_init error");
 	}
 
-	error = git_mysql_tree_blob(mysql, repo);
+	error = git_mysql_tree_build(mysql, repo, "BLOB");
 	if (error < 0){
 		git_mysql_rollback(mysql);
-		return NanThrowError("git_mysql_tree_blob error");
+		return NanThrowError("git_mysql_tree_build error");
 	}
+	error = git_mysql_tree_build(mysql, repo, "TREE");
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_build error");
+	}
+	error = git_mysql_tree_root(mysql, repo);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_build error");
+	}
+
 
 	git_mysql_commit(mysql);
 
@@ -378,7 +391,7 @@ NAN_METHOD(GitMysql::Commit) {
 	//	git_mysql_rollback(mysql);
 	//	return NanThrowError("git_revparse_single error");
 	//}
-	git_oid_fromstr(&oid, "e1ca16979da4db87b96af5268ac2ba8facb1a4f4");
+	git_oid_fromstr(&oid, "19ee624b3c2983ca0a09b7435dccdaae76a16cad");
 
 
 	error = git_tree_lookup(&tree, repo, &oid);
@@ -430,7 +443,7 @@ NAN_METHOD(GitMysql::CreateBranch) {
 	git_reference	   *ref;
 	git_commit	    *commit;
 
-	git_oid_fromstr(&oid, "900773840d4604fd48d328d1b5f489f3cb36f533");
+	git_oid_fromstr(&oid, "5e5af8327eb6ea85d85ea94fd2f64c7317ff3867");
 
 	error = git_commit_lookup(&commit, repo, &oid);
 	if (error < 0){
@@ -576,6 +589,13 @@ NAN_METHOD(GitMysql::SetRepo) {
 
 
 	mysql->repo = (long long int)args[0]->ToNumber()->Value();
+
+}
+
+NAN_METHOD(GitMysql::TreeWalk) {
+	NanEscapableScope();
+
+	git_mysql_tree_walk(mysql, repo);
 
 }
 

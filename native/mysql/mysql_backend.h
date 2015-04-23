@@ -29,8 +29,8 @@ typedef struct {
   MYSQL_STMT *repo_create;
   MYSQL_STMT *tree_init;
   MYSQL_STMT *tree_update;
-  MYSQL_STMT *tree_blob;
-  MYSQL_STMT *tree_tree;
+  MYSQL_STMT *tree_build;
+  MYSQL_STMT *tree_root;
 } git_mysql;
 
 GIT_BEGIN_DECL

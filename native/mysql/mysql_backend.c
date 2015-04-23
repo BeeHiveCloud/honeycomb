@@ -40,11 +40,11 @@ int init_statements(git_mysql *mysql)
   static const char *sql_tree_init = "CALL git_tree_init(?);";
   static const char *sql_tree_update = "CALL git_tree_update(?, ?, ?);";
 
-  static const char *sql_tree_blob = 
-	  "SELECT `oid`, `dir`, `entry` FROM GIT_TREE WHERE `repo` = ? and `type` = 'BLOB' AND dir <> '/' ORDER BY `dir`, entry;";
+  static const char *sql_tree_build = 
+	  "SELECT `oid`, `dir`, `entry` FROM GIT_TREE WHERE `repo` = ? AND `type` = ? AND `dir` <> '/' ORDER BY `dir`, `entry`;";
 
-  static const char *sql_tree_tree =
-	  "SELECT `dir`, `entry`, `oid` FROM GIT_TREE WHERE `repo` = ? and `type` = 'BLOB'; ";
+  static const char *sql_tree_root =
+	  "SELECT `oid`, `dir`, `entry`, `type` FROM GIT_TREE WHERE `repo` = ? AND `dir` = '/' ORDER BY `type` DESC, `entry`;";
 
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
@@ -179,24 +179,24 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->tree_update, sql_tree_update, strlen(sql_tree_update)) != 0)
 	  return GIT_ERROR;
 
-  mysql->tree_blob = mysql_stmt_init(mysql->db);
-  if (mysql->tree_blob == NULL)
+  mysql->tree_build = mysql_stmt_init(mysql->db);
+  if (mysql->tree_build == NULL)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->tree_blob, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+  if (mysql_stmt_attr_set(mysql->tree_build, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_prepare(mysql->tree_blob, sql_tree_blob, strlen(sql_tree_blob)) != 0)
+  if (mysql_stmt_prepare(mysql->tree_build, sql_tree_build, strlen(sql_tree_build)) != 0)
 	  return GIT_ERROR;
 
-  mysql->tree_tree = mysql_stmt_init(mysql->db);
-  if (mysql->tree_tree == NULL)
+  mysql->tree_root = mysql_stmt_init(mysql->db);
+  if (mysql->tree_root == NULL)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->tree_tree, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+  if (mysql_stmt_attr_set(mysql->tree_root, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_prepare(mysql->tree_tree, sql_tree_tree, strlen(sql_tree_tree)) != 0)
+  if (mysql_stmt_prepare(mysql->tree_root, sql_tree_root, strlen(sql_tree_root)) != 0)
 	  return GIT_ERROR;
 
   return GIT_OK;

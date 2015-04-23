@@ -53,6 +53,8 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(GetRepo);
 
 	  static NAN_METHOD(SetRepo);
+
+	  static NAN_METHOD(TreeWalk);
 };
 
 #endif

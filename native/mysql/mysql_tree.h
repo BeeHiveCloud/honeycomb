@@ -8,9 +8,11 @@ GIT_BEGIN_DECL
 
 GIT_EXTERN(int) git_mysql_tree_init(git_mysql *mysql);
 
-GIT_EXTERN(int) git_mysql_tree_blob(git_mysql *mysql, git_repository *repo);
+GIT_EXTERN(int) git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *type);
 
-GIT_EXTERN(int) git_mysql_tree_tree(git_mysql *mysql, git_repository *repo);
+GIT_EXTERN(int) git_mysql_tree_root(git_mysql *mysql, git_repository *repo);
+
+GIT_EXTERN(int) git_mysql_tree_walk(git_mysql *mysql, git_repository *repo);
 
 GIT_END_DECL
 
