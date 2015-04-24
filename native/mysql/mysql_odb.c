@@ -278,8 +278,8 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
   // TODO: use the streaming backend API so this actually makes sense to use :P
   // once we want to use this we should comment out
-   if (mysql_stmt_send_long_data(backend->mysql->odb_write, 4, data, len) != 0)
-     return GIT_ERROR;
+  // if (mysql_stmt_send_long_data(backend->mysql->odb_write, 4, data, len) != 0)
+  //   return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_write) != 0)

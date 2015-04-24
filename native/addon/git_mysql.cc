@@ -36,6 +36,8 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "TreeWalk", TreeWalk);
 
+	NODE_SET_METHOD(object, "Config", Config);
+
     target->Set(NanNew<String>("MySQL"), object);
 }
 
@@ -142,29 +144,44 @@ NAN_METHOD(GitMysql::Open) {
 
   git_repository_set_refdb(repo, refdb);
 
-  git_config *config;
-  error = git_config_open_default(&config);
+  git_config *cfg;
+  error = git_config_open_default(&cfg);
   if (error < 0){
 	  return NanThrowError("git_config_open_default error");
   }
+  
+  /*
+  git_config_backend *cfg_backend;
 
-  git_repository_set_config(repo,config);
+  error = git_mysql_config_init(&cfg_backend, mysql);
+  if (error < 0){
+	  return NanThrowError("git_mysql_config_init error");
+  }
+
+  error = git_config_new(&cfg);
+  if (error < 0){
+	  return NanThrowError("git_config_new error");
+  }
+
+  error = git_config_add_backend(cfg, cfg_backend, GIT_CONFIG_LEVEL_LOCAL, 0);
+  if (error < 0){
+	  return NanThrowError("git_config_add_backend error");
+  }
+  */
+
+  git_repository_set_config(repo,cfg);
 
 
   error = git_repository_set_workdir(repo, "/", 0);
   if (error < 0){
 	  return NanThrowError("git_repository_set_workdir error");
   }
-   //printf("workdir:%s", git_repository_workdir(repo));
 
   error = git_repository_set_path(repo, "/");
   if (error < 0){
 	  return NanThrowError("git_repository_set_path error");
   }
-  //printf("path:%s", git_repository_path(repo));
 
-  //Handle<v8::Value> obj = GitMysql::New(from_out, false);
-  //NanReturnValue(obj);
   if (!error)
 	  NanReturnValue(NanTrue());
   else
@@ -597,6 +614,48 @@ NAN_METHOD(GitMysql::TreeWalk) {
 
 	git_mysql_tree_walk(mysql, repo);
 
+}
+
+
+NAN_METHOD(GitMysql::Config) {
+	NanEscapableScope();
+
+	int error;
+	git_config *cfg;
+	git_config_backend *cfg_backend;
+
+	error = git_mysql_config_init(&cfg_backend, mysql);
+	if (error < 0){
+		return NanThrowError("git_mysql_config_init error");
+	}
+
+	error = git_config_new(&cfg);
+	if (error < 0){
+		return NanThrowError("git_config_new error");
+	}
+
+	error = git_config_add_backend(cfg, cfg_backend, GIT_CONFIG_LEVEL_LOCAL, 0);
+	if (error < 0){
+		return NanThrowError("git_config_add_backend error");
+	}
+
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
+	error = git_config_set_string(cfg, "user", "jerry");
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_config_set_string error");
+	}
+
+	git_mysql_commit(mysql);
+
+	git_config_free(cfg);
+
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
 }
 
 Persistent<Function> GitMysql::constructor_template;

@@ -12,6 +12,7 @@ extern "C" {
 #include "../mysql/mysql_index.h"
 #include "../mysql/mysql_tree.h"
 #include "../mysql/mysql_repo.h"
+#include "../mysql/mysql_config.h"
 #include "../patch/repo_path.h"
 #include "git2/sys/repository.h"
 }
@@ -55,6 +56,8 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(SetRepo);
 
 	  static NAN_METHOD(TreeWalk);
+
+	  static NAN_METHOD(Config);
 };
 
 #endif

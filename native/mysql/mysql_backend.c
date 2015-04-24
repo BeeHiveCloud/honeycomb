@@ -46,6 +46,15 @@ int init_statements(git_mysql *mysql)
   static const char *sql_tree_root =
 	  "SELECT `oid`, `dir`, `entry`, `type` FROM GIT_TREE WHERE `repo` = ? AND `dir` = '/' ORDER BY `type` DESC, `entry`;";
 
+  static const char *sql_config_get =
+	  "SELECT `value` FROM GIT_CONFIG WHERE `repo` = ? AND `key` = ?;";
+
+  static const char *sql_config_set =
+	  "INSERT INTO GIT_CONFIG VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);";
+
+  static const char *sql_config_del =
+	  "DELETE FROM GIT_CONFIG WHERE `repo` = ? AND `key` = ?;";
+
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
     return GIT_ERROR;
@@ -198,6 +207,38 @@ int init_statements(git_mysql *mysql)
 
   if (mysql_stmt_prepare(mysql->tree_root, sql_tree_root, strlen(sql_tree_root)) != 0)
 	  return GIT_ERROR;
+
+
+  mysql->config_get = mysql_stmt_init(mysql->db);
+  if (mysql->config_get == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->config_get, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->config_get, sql_config_get, strlen(sql_config_get)) != 0)
+	  return GIT_ERROR;
+
+  mysql->config_set = mysql_stmt_init(mysql->db);
+  if (mysql->config_set == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->config_set, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->config_set, sql_config_set, strlen(sql_config_set)) != 0)
+	  return GIT_ERROR;
+
+  mysql->config_del = mysql_stmt_init(mysql->db);
+  if (mysql->config_del == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->config_del, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->config_del, sql_config_del, strlen(sql_config_del)) != 0)
+	  return GIT_ERROR;
+
 
   return GIT_OK;
 }

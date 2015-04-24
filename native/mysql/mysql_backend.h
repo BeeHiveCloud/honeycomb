@@ -31,6 +31,9 @@ typedef struct {
   MYSQL_STMT *tree_update;
   MYSQL_STMT *tree_build;
   MYSQL_STMT *tree_root;
+  MYSQL_STMT *config_get;
+  MYSQL_STMT *config_set;
+  MYSQL_STMT *config_del;
 } git_mysql;
 
 GIT_BEGIN_DECL
