@@ -114,7 +114,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   if (mysql_stmt_num_rows(backend->mysql->odb_read) == 1) {
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
 	result_buffers[0].buffer = type_p;
-	result_buffers[0].buffer_length = sizeof(type_p);
+	result_buffers[0].buffer_length = sizeof(type_p); //sizeof(signed char);
 	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &type_len;
     memset(type_p, 0, sizeof(type_p));
@@ -256,8 +256,8 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
   bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
   // bind the type
-  bind_buffers[2].buffer = &type;
-  bind_buffers[2].buffer_length = sizeof(type);
+  bind_buffers[2].buffer = &((signed char)type);
+  bind_buffers[2].buffer_length = sizeof(signed char);
   bind_buffers[2].length = &bind_buffers[2].buffer_length;
   bind_buffers[2].buffer_type = MYSQL_TYPE_TINY;
 
@@ -272,6 +272,17 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
   bind_buffers[4].buffer_length = len;
   bind_buffers[4].length = &bind_buffers[4].buffer_length;
   bind_buffers[4].buffer_type = MYSQL_TYPE_BLOB;
+
+  /*
+  * print debug info
+  char sha1[GIT_OID_HEXSZ + 1];
+  git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, oid);
+  printf("oid: %s \n", sha1);
+  printf("type: %d \n", type);
+  printf("size: %d \n", len);
+  printf("data: %s \n", data);
+  */
+
 
   if (mysql_stmt_bind_param(backend->mysql->odb_write, bind_buffers) != 0)
     return GIT_ERROR;

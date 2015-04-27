@@ -3,7 +3,16 @@ Honeycomb
 
 Status
 ------
-This project is at early stage, it's not tested yet.
+This project is still at early stage, DO NOT use for production.
+
+TODO
+----
+
+- [ ] git config backend
+  - [ ] able to config at different levels
+  - [ ] load git_cvar_cached for repository object
+
+
 
 License
 -------

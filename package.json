@@ -1,8 +1,8 @@
 {
-  "name": "honeycomb.js",
+  "name": "honeycomb",
   "version": "0.1.0",
-  "description": "Honeycomb data orchestration layer",
-  "keywords": ["honeycomb","node.js","libgit2","mysql","redis"],
+  "description": "honeycomb data layer",
+  "keywords": ["honeycomb","node.js","libgit2","git","MySQL","MariaDB","Redis","MongoDB"],
   "main": "./lib/index.js",
   "dependencies": {
     "bluebird": "2.9.7",

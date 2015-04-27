@@ -3,6 +3,7 @@
 int init_statements(git_mysql *mysql)
 {
   my_bool truth = 1;
+  unsigned long type = (unsigned long)CURSOR_TYPE_READ_ONLY;
 
   static const char *sql_odb_read =
     "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
@@ -59,11 +60,14 @@ int init_statements(git_mysql *mysql)
   if (mysql->odb_read == NULL)
     return GIT_ERROR;
 
+  if (mysql_stmt_prepare(mysql->odb_read, sql_odb_read, strlen(sql_odb_read)) != 0)
+    return GIT_ERROR;
+
   if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
     return GIT_ERROR;
 
-  if (mysql_stmt_prepare(mysql->odb_read, sql_odb_read, strlen(sql_odb_read)) != 0)
-    return GIT_ERROR;
+  if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	  return GIT_ERROR;
 
 
   mysql->odb_read_header = mysql_stmt_init(mysql->db);
@@ -75,6 +79,9 @@ int init_statements(git_mysql *mysql)
 
   if (mysql_stmt_prepare(mysql->odb_read_header, sql_odb_read_header, strlen(sql_odb_read_header)) != 0)
     return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->odb_read_header, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	  return GIT_ERROR;
 
 
   mysql->odb_write = mysql_stmt_init(mysql->db);
@@ -257,12 +264,34 @@ int git_mysql_free(git_mysql *mysql)
 	  mysql_stmt_close(mysql->index_read);
   if (mysql->index_write)
 	  mysql_stmt_close(mysql->index_write);
+  if (mysql->index_del)
+	  mysql_stmt_close(mysql->index_del);
   if (mysql->refdb_read)
 	  mysql_stmt_close(mysql->refdb_read);
   if (mysql->refdb_read_header)
 	  mysql_stmt_close(mysql->refdb_read_header);
   if (mysql->refdb_write)
 	  mysql_stmt_close(mysql->refdb_write);
+  if (mysql->refdb_del)
+	  mysql_stmt_close(mysql->refdb_del);
+  if (mysql->refdb_rename)
+	  mysql_stmt_close(mysql->refdb_rename);
+  if (mysql->repo_create)
+	  mysql_stmt_close(mysql->repo_create);
+  if (mysql->tree_init)
+	  mysql_stmt_close(mysql->tree_init);
+  if (mysql->tree_update)
+	  mysql_stmt_close(mysql->tree_update);
+  if (mysql->tree_build)
+	  mysql_stmt_close(mysql->tree_build);
+  if (mysql->tree_root)
+	  mysql_stmt_close(mysql->tree_root);
+  if (mysql->config_get)
+	  mysql_stmt_close(mysql->config_get);
+  if (mysql->config_set)
+	  mysql_stmt_close(mysql->config_set);
+  if (mysql->config_del)
+	  mysql_stmt_close(mysql->config_del);
 
   mysql_close(mysql->db);
 

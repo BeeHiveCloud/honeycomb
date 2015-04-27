@@ -167,7 +167,7 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		error = git_treebuilder_write(&tree, bld);
 		git_mysql_tree_update(mysql, curr_dir, &tree);
 		git_treebuilder_free(bld);
-
+		memset(curr_dir, 0, strlen(curr_dir));
 	}
 	else 
 		error = GIT_ENOTFOUND;
@@ -299,7 +299,11 @@ int tree_walk_cb(const char *root, const git_tree_entry *entry, void *payload)
 {
 	const char *name = git_tree_entry_name(entry);
 
+	char sha1[GIT_OID_HEXSZ + 1];
+	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, git_tree_entry_id(entry));
+	
 	printf("entry: %s \n", name);
+	printf("oid: %s \n", sha1);
 
     return 0;
 }
@@ -309,7 +313,9 @@ int git_mysql_tree_walk(git_mysql *mysql, git_repository *repo){
 	git_oid oid;
 	git_tree *tree = NULL;
 
-	git_oid_fromstr(&oid, "19ee624b3c2983ca0a09b7435dccdaae76a16cad");
+	git_oid_fromstr(&oid, "352991f53e11f93fb6c6d729b8251d5b762547a8");
+
+	//git_oid_fromstr(&oid, "7969f8b194a15e5ae6fec35b65c26c21c49fee23");
 
 	error = git_tree_lookup(&tree, repo, &oid);
 
