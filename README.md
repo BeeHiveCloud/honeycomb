@@ -1,5 +1,6 @@
-Honeycomb
+Honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb)
 =========
+
 
 Status
 ------
@@ -8,11 +9,10 @@ This project is still at early stage, DO NOT use for production.
 TODO
 ----
 
-- [ ] git config backend
-  - [ ] able to config at different levels
-  - [ ] load git_cvar_cached for repository object
-
-
+- [ ] git mysql backend
+  - [ ] config backend
+    - [ ] able to config at different levels
+    - [ ] load git_cvar_cached for repository object
 
 License
 -------
