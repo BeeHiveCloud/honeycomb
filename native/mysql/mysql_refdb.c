@@ -37,14 +37,14 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read_header, bind_buffers) != 0)
-		return 0;
+		return GIT_ERROR;
 
 	// execute the statement
 	if (mysql_stmt_execute(backend->mysql->refdb_read_header) != 0)
-		return 0;
+		return GIT_ERROR;
 
 	if (mysql_stmt_store_result(backend->mysql->refdb_read_header) != 0)
-		return 0;
+		return GIT_ERROR;
 
 	// now lets see if any rows matched our query
 	// this should either be 0 or 1
@@ -58,7 +58,7 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 		return 0;
 
 	*exists = found;
-	return 0;
+	return GIT_OK;
 }
 
 int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const char *ref_name){
@@ -94,14 +94,14 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read, bind_buffers) != 0)
-		return 0;
+		return GIT_ERROR;
 
 	// execute the statement
 	if (mysql_stmt_execute(backend->mysql->refdb_read) != 0)
-		return 0;
+		return GIT_ERROR;
 
 	if (mysql_stmt_store_result(backend->mysql->refdb_read) != 0)
-		return 0;
+		return GIT_ERROR;
 
 	// now lets see if any rows matched our query
 	// this should either be 0 or 1
@@ -139,9 +139,9 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		}
 
 		if (target_len > 0){
-			target_buf = malloc(target_len);
+			target_buf = malloc(target_len + 1);
 			result_buffers[1].buffer = target_buf;
-			result_buffers[1].buffer_length = target_len;
+			result_buffers[1].buffer_length = target_len + 1;
 
 			if (mysql_stmt_fetch_column(backend->mysql->refdb_read, &result_buffers[1], 1, 0) != 0)
 				return GIT_ERROR;
@@ -165,10 +165,10 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read) != 0)
-		return 0;
+		return GIT_ERROR;
 
 
-	return error;
+	return GIT_OK;
 }
 
 int mysql_refdb_iterator(git_reference_iterator **iter, git_refdb_backend *backend, const char *glob){
@@ -204,7 +204,7 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 
 	// bind the name
 	bind_buffers[1].buffer = ref_name;
-	bind_buffers[1].buffer_length = strlen(ref_name) + 1;
+	bind_buffers[1].buffer_length = strlen(ref_name);
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 	
 	// bind the type
@@ -220,12 +220,12 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 		git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, target);
 
 		bind_buffers[3].buffer = sha1;
-		bind_buffers[3].buffer_length = GIT_OID_HEXSZ + 1;
+		bind_buffers[3].buffer_length = GIT_OID_HEXSZ;
 		bind_buffers[3].length = &bind_buffers[3].buffer_length;
 	}
 	else if (ref_type == GIT_REF_SYMBOLIC) {
 		bind_buffers[3].buffer = symbolic_target;
-		bind_buffers[3].buffer_length = strlen(symbolic_target) + 1;
+		bind_buffers[3].buffer_length = strlen(symbolic_target);
 		bind_buffers[3].length = &bind_buffers[3].buffer_length;
 	}
 	else {

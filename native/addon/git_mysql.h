@@ -3,6 +3,7 @@
 
 #include <nan.h>
 #include <string>
+#include <mutex>
 
 extern "C" {
 #include "git2.h"
@@ -28,6 +29,7 @@ class GitMysql : public ObjectWrap {
 
 	static git_mysql *mysql;
 	static git_repository *repo;
+	static std::mutex mutex;
 
   private:
 
@@ -46,6 +48,8 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(Commit);
 
 	  static NAN_METHOD(CreateBranch);
+
+	  static NAN_METHOD(RevParse);
 
 	  static NAN_METHOD(AdHoc);
 

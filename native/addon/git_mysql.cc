@@ -22,6 +22,8 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "CreateRef", CreateRef);
 
+	NODE_SET_METHOD(object, "RevParse", RevParse);
+
 	NODE_SET_METHOD(object, "Commit", Commit);
 
 	NODE_SET_METHOD(object, "CreateBranch", CreateBranch);
@@ -408,7 +410,7 @@ NAN_METHOD(GitMysql::Commit) {
 	//	git_mysql_rollback(mysql);
 	//	return NanThrowError("git_revparse_single error");
 	//}
-	git_oid_fromstr(&oid, "19ee624b3c2983ca0a09b7435dccdaae76a16cad");
+	git_oid_fromstr(&oid, "352991f53e11f93fb6c6d729b8251d5b762547a8");
 
 
 	error = git_tree_lookup(&tree, repo, &oid);
@@ -416,7 +418,7 @@ NAN_METHOD(GitMysql::Commit) {
 		return NanThrowError("git_tree_lookup error");
 	}
 
-	error = git_signature_now(&me, "Me", "me@example.com");
+	error = git_signature_now(&me, "Jerry Jin", "jerry.yang.jin@gmail.com");
 	if (error < 0){
 		return NanThrowError("git_signature_now error");
 	}
@@ -539,7 +541,10 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	char *reponum = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
 
 	if (reponum){
+
+		mutex.lock();
 		mysql->repo = std::stoi(reponum);
+		mutex.unlock();
 
 		int error;
 		git_reference *ref;
@@ -604,9 +609,9 @@ NAN_METHOD(GitMysql::SetRepo) {
 		return NanThrowError("repo is required.");
 	}
 
-
+	mutex.lock();
 	mysql->repo = (long long int)args[0]->ToNumber()->Value();
-
+	mutex.unlock();
 }
 
 NAN_METHOD(GitMysql::TreeWalk) {
@@ -658,6 +663,41 @@ NAN_METHOD(GitMysql::Config) {
 		NanReturnValue(NanFalse());
 }
 
+NAN_METHOD(GitMysql::RevParse) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsString()) {
+		return NanThrowError("spec is required.");
+	}
+
+	// start convert_from_v8 block
+	const char *from_spec;
+	String::Utf8Value spec_buf(args[0]->ToString());
+	from_spec = (const char *)strdup(*spec_buf);
+	// end convert_from_v8 block
+
+	int error;
+
+	git_object *tree;
+	const git_oid *oid;
+
+	error = git_revparse_single(&tree, repo, from_spec);
+	if (!error)
+		oid = git_tree_id((git_tree *)tree);
+
+	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
+	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, oid);
+
+	git_object_free(tree);
+
+	Handle<v8::Value> to;
+	to = NanNew<String>(sha1);
+
+	NanReturnValue(to);
+
+}
+
 Persistent<Function> GitMysql::constructor_template;
 git_mysql * GitMysql::mysql;
 git_repository * GitMysql::repo;
+std::mutex GitMysql::mutex;
