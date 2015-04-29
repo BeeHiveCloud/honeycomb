@@ -3,7 +3,7 @@
 int init_statements(git_mysql *mysql)
 {
   my_bool truth = 1;
-  unsigned long type = (unsigned long)CURSOR_TYPE_READ_ONLY;
+  //unsigned long type = (unsigned long)CURSOR_TYPE_READ_ONLY;
 
   static const char *sql_odb_read =
     "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
@@ -38,6 +38,8 @@ int init_statements(git_mysql *mysql)
   static const char *sql_repo_create =
 	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (?, ?, ?)";
 
+  static const char *sql_repo_del = "CALL git_repo_del(?);";
+
   static const char *sql_tree_init = "CALL git_tree_init(?);";
   static const char *sql_tree_update = "CALL git_tree_update(?, ?, ?);";
 
@@ -63,8 +65,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->odb_read, sql_odb_read, strlen(sql_odb_read)) != 0)
     return GIT_ERROR;
 
-  //if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
-  //  return GIT_ERROR;
+  if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+    return GIT_ERROR;
 
   //if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
 	//  return GIT_ERROR;
@@ -80,11 +82,9 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->odb_read_header, sql_odb_read_header, strlen(sql_odb_read_header)) != 0)
     return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->odb_read_header, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->odb_read_header, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->odb_read_header, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
 
 
   mysql->odb_write = mysql_stmt_init(mysql->db);
@@ -108,8 +108,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->index_read, sql_index_read, strlen(sql_index_read)) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->index_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->index_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
 
   mysql->index_write = mysql_stmt_init(mysql->db);
@@ -144,8 +144,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->refdb_read, sql_refdb_read, strlen(sql_refdb_read)) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->refdb_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->refdb_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
 
   mysql->refdb_read_header = mysql_stmt_init(mysql->db);
@@ -158,8 +158,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->refdb_read_header, sql_refdb_read_header, strlen(sql_refdb_read_header)) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->refdb_read_header, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->refdb_read_header, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
 
   mysql->refdb_write = mysql_stmt_init(mysql->db);
@@ -194,6 +194,17 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->repo_create, sql_repo_create, strlen(sql_repo_create)) != 0)
 	  return GIT_ERROR;
 
+  mysql->repo_del = mysql_stmt_init(mysql->db);
+  if (mysql->repo_del == NULL)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_attr_set(mysql->repo_del, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+	  return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->repo_del, sql_repo_del, strlen(sql_repo_del)) != 0)
+	  return GIT_ERROR;
+
+
   mysql->tree_init = mysql_stmt_init(mysql->db);
   if (mysql->tree_init == NULL)
 	  return GIT_ERROR;
@@ -218,8 +229,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->tree_build, sql_tree_build, strlen(sql_tree_build)) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->tree_build, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->tree_build, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
   mysql->tree_root = mysql_stmt_init(mysql->db);
   if (mysql->tree_root == NULL)
@@ -231,8 +242,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->tree_root, sql_tree_root, strlen(sql_tree_root)) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->tree_root, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->tree_root, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
 
   mysql->config_get = mysql_stmt_init(mysql->db);
@@ -245,8 +256,8 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->config_get, sql_config_get, strlen(sql_config_get)) != 0)
 	  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->config_get, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+ // if (mysql_stmt_attr_set(mysql->config_get, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+// return GIT_ERROR;
 
   mysql->config_set = mysql_stmt_init(mysql->db);
   if (mysql->config_set == NULL)

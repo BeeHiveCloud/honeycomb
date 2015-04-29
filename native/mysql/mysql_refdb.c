@@ -161,17 +161,19 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 			giterr_set_str(GITERR_REFERENCE, "unknown ref type returned");
 			error = GIT_ERROR;
 		}
+
+		error = GIT_OK;
 	}
-	else {
+	else 
 		error = GIT_ENOTFOUND;
-	}
+	
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
 
 
-	return GIT_OK;
+	return error;
 }
 
 int mysql_refdb_iterator(git_reference_iterator **iter, git_refdb_backend *backend, const char *glob){

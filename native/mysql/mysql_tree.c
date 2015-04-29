@@ -171,20 +171,27 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		git_treebuilder_free(bld);
 		memset(curr_dir, 0, strlen(curr_dir));
 	}
-	else 
-		error = GIT_ENOTFOUND;
-	
+	/*
+	else {
+	if (!strcmp(type, "BLOB"))
+	error = GIT_ENOTFOUND;
+	else
+	error = GIT_OK;
+	}
+	*/
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->tree_build) != 0)
 		return GIT_ERROR;
 
-	return error;
+	return GIT_OK;
 }
 
-int git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
+git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
 	int error;
+	git_oid root;
+	git_tree *tree;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[4];
 
@@ -199,14 +206,14 @@ int git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
 
 	if (mysql_stmt_bind_param(mysql->tree_root, bind_buffers) != 0)
-		return GIT_ERROR;
+		return NULL;
 
 	// execute the statement
 	if (mysql_stmt_execute(mysql->tree_root) != 0)
-		return GIT_ERROR;
+		return NULL;
 
 	if (mysql_stmt_store_result(mysql->tree_root) != 0)
-		return GIT_ERROR;
+		return NULL;
 
 	if (mysql_stmt_num_rows(mysql->tree_root) > 0){
 		git_oid oid;
@@ -243,9 +250,8 @@ int git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		result_buffers[3].length = &type_len;
 
 		if (mysql_stmt_bind_result(mysql->tree_root, result_buffers) != 0)
-			return GIT_ERROR;
+			return NULL;
 
-		git_oid tree;
 		git_treebuilder   *bld = NULL;
 		git_treebuilder_new(&bld, repo, NULL);
 
@@ -255,19 +261,19 @@ int git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 			result_buffers[1].buffer = dir;
 			result_buffers[1].buffer_length = dir_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_root, &result_buffers[1], 1, 0) != 0)
-				return GIT_ERROR;
+				return NULL;
 
 			entry = malloc(entry_len + 1);
 			result_buffers[2].buffer = entry;
 			result_buffers[2].buffer_length = entry_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_root, &result_buffers[2], 2, 0) != 0)
-				return GIT_ERROR;
+				return NULL;
 
 			type = malloc(type_len + 1);
 			result_buffers[3].buffer = type;
 			result_buffers[3].buffer_length = type_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_root, &result_buffers[3], 3, 0) != 0)
-				return GIT_ERROR;
+				return NULL;
 
 			if (!strcmp(type, "BLOB"))
 				error = git_treebuilder_insert(NULL, bld, entry, &oid, GIT_FILEMODE_BLOB);
@@ -280,10 +286,11 @@ int git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		};
 
 
-		error = git_treebuilder_write(&tree, bld);
-		git_mysql_tree_update(mysql, "/", &tree);
+		error = git_treebuilder_write(&root, bld);
+		git_mysql_tree_update(mysql, "/", &root);
 		git_treebuilder_free(bld);
 
+		error = git_tree_lookup(&tree, repo, &root);
 	}
 	else
 		error = GIT_ENOTFOUND;
@@ -291,9 +298,12 @@ int git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->tree_root) != 0)
-		return GIT_ERROR;
+		return NULL;
 
-	return error;
+	if (!error)
+		return tree;
+	else
+		return NULL;
 }
 
 

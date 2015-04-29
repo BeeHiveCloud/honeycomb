@@ -41,7 +41,7 @@ class GitMysql : public ObjectWrap {
 
 	  static NAN_METHOD(WriteTree);
 
-	  static NAN_METHOD(Lookup);
+	  static NAN_METHOD(BranchLookup);
 
 	  static NAN_METHOD(CreateRef);
 
@@ -54,6 +54,8 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(AdHoc);
 
 	  static NAN_METHOD(CreateRepo);
+
+	  static NAN_METHOD(DeleteRepo);
 
 	  static NAN_METHOD(GetRepo);
 

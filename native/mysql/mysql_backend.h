@@ -27,6 +27,7 @@ typedef struct {
   MYSQL_STMT *refdb_del;
   MYSQL_STMT *refdb_rename;
   MYSQL_STMT *repo_create;
+  MYSQL_STMT *repo_del;
   MYSQL_STMT *tree_init;
   MYSQL_STMT *tree_update;
   MYSQL_STMT *tree_build;
