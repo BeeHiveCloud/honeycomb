@@ -79,7 +79,7 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	error = GIT_ERROR;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
-	memset(result_buffers, 0, sizeof(result_buffers));
+
 
 	// bind the repo passed to the statement
 	bind_buffers[0].buffer = &(backend->mysql->repo);
@@ -107,6 +107,9 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	// this should either be 0 or 1
 	// if it's > 1 MySQL's unique index failed and we should all fear for our lives
 	if (mysql_stmt_num_rows(backend->mysql->refdb_read) == 1) {
+
+		memset(result_buffers, 0, sizeof(result_buffers));
+
 		result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
 		result_buffers[0].buffer = &type;
 		result_buffers[0].buffer_length = sizeof(type);

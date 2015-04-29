@@ -63,11 +63,11 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->odb_read, sql_odb_read, strlen(sql_odb_read)) != 0)
     return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
-    return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+  //  return GIT_ERROR;
 
-  if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
-	  return GIT_ERROR;
+  //if (mysql_stmt_attr_set(mysql->odb_read, STMT_ATTR_CURSOR_TYPE, (const void *)&type) != 0)
+	//  return GIT_ERROR;
 
 
   mysql->odb_read_header = mysql_stmt_init(mysql->db);

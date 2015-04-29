@@ -22,7 +22,6 @@ int mysql_config_get(git_config_backend *_backend, const char *key, const git_co
 	error = GIT_ERROR;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
-	memset(result_buffers, 0, sizeof(result_buffers));
 
 	// bind the repo passed to the statement
 	bind_buffers[0].buffer = &(backend->mysql->repo);
@@ -49,6 +48,8 @@ int mysql_config_get(git_config_backend *_backend, const char *key, const git_co
 	// this should either be 0 or 1
 	// if it's > 1 MySQL's unique index failed and we should all fear for our lives
 	if (mysql_stmt_num_rows(backend->mysql->odb_read_header) == 1) {
+
+		memset(result_buffers, 0, sizeof(result_buffers));
 
 		char *value;
 		int val_len;

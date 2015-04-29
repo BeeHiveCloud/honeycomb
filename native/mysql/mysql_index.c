@@ -47,13 +47,11 @@ int git_mysql_index_add(git_mysql *mysql, git_oid *oid, const char *path){
 int git_mysql_index_del(git_oid *oid, git_mysql *mysql, long long int repo, const char *path){
 	int error;
 	MYSQL_BIND bind_buffers[2];
-	MYSQL_BIND result_buffers[1];
 	my_ulonglong affected_rows;
 
 	assert(mysql && path);
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
-	memset(result_buffers, 0, sizeof(result_buffers));
 
 	// bind the repo passed to the statement
 	bind_buffers[0].buffer = &mysql->repo;

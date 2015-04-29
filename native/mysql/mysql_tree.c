@@ -72,7 +72,6 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	MYSQL_BIND result_buffers[3];
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
-	memset(result_buffers, 0, sizeof(result_buffers));
 
 	// bind the repo passed to the statement
 	bind_buffers[0].buffer = &(mysql->repo);
@@ -97,6 +96,9 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		return GIT_ERROR;
 
 	if (mysql_stmt_num_rows(mysql->tree_build) > 0){
+
+		memset(result_buffers, 0, sizeof(result_buffers));
+
 		git_oid oid;
 		char *dir;
 		char *entry;

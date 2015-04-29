@@ -8,7 +8,8 @@ This project is still at early stage, DO NOT use for production.
 
 TODO
 ----
-
+- [X] **mysql_stmt_fetch access violation**
+- [x] mutext to protect global viarable
 - [ ] git mysql backend
   - [ ] config backend
     - [ ] able to config at different levels
