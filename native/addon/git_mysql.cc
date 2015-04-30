@@ -42,6 +42,10 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "Config", Config);
 
+	NODE_SET_METHOD(object, "CreateTag", CreateTag);
+
+	NODE_SET_METHOD(object, "Diff", Diff);
+
     target->Set(NanNew<String>("MySQL"), object);
 }
 
@@ -243,7 +247,7 @@ NAN_METHOD(GitMysql::CreateBlob) {
 		return NanThrowError("git_blob_create_frombuffer error");
 	}
 
-	error = git_mysql_index_add(mysql, &oid, from_path);
+	error = git_mysql_index_write(mysql, &oid, from_path);
 	if (error < 0){
 		git_mysql_rollback(mysql);
 		return NanThrowError("git_mysql_index_write error");
@@ -397,34 +401,49 @@ NAN_METHOD(GitMysql::Commit) {
 	from_msg = (const char *)strdup(*msg_buf);
 	// end convert_from_v8 block
 
-	int				  error;
-	git_oid oid;
+	int	error;
 	git_signature *me;
 	git_oid commit;
 	git_tree *tree;
-
-	//error = git_revparse_single((git_object**)&tree, repo, "HEAD~^{tree}");
-	//if (error < 0){
-	//	git_mysql_rollback(mysql);
-	//	return NanThrowError("git_revparse_single error");
-	//}
-	git_oid_fromstr(&oid, "b72e349a56fca69c0f1e150f49fc9afe50d7316b");
-
-
-	error = git_tree_lookup(&tree, repo, &oid);
-	if (error < 0){
-		return NanThrowError("git_tree_lookup error");
-	}
+	git_object *parent;
 
 	error = git_signature_now(&me, "Jerry Jin", "jerry.yang.jin@gmail.com");
 	if (error < 0){
 		return NanThrowError("git_signature_now error");
 	}
 
+	error = git_revparse_single(&parent, repo, "HEAD^{commit}");
+	if (error < 0){
+		return NanThrowError("git_revparse_single error");
+	}
+
 	// Transaction Start
 	git_mysql_transaction(mysql);
 
-	error = git_commit_create(&commit, repo, from_ref, me, me, "UTF-8", from_msg, tree, 0, NULL);
+	error = git_mysql_tree_init(mysql);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_init error");
+	}
+
+	error = git_mysql_tree_build(mysql, repo, "BLOB");
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_build error");
+	}
+	error = git_mysql_tree_build(mysql, repo, "TREE");
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_build error");
+	}
+	tree = git_mysql_tree_root(mysql, repo);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_mysql_tree_build error");
+	}
+
+	const git_commit *parents[] = { (git_commit *)parent };
+	error = git_commit_create(&commit, repo, from_ref, me, me, "UTF-8", from_msg, tree, 1, parents);
 	if (error < 0){
 		git_mysql_rollback(mysql);
 		return NanThrowError("git_commit_create error");
@@ -559,7 +578,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 			return NanThrowError("git_blob_create_frombuffer error");
 		}
 
-		error = git_mysql_index_add(mysql, &oid, "/README.md");
+		error = git_mysql_index_write(mysql, &oid, "/README.md");
 		if (error < 0){
 			git_mysql_rollback(mysql);
 			return NanThrowError("git_mysql_index_write error");
@@ -728,6 +747,99 @@ NAN_METHOD(GitMysql::DeleteRepo) {
 	}
 
 	git_mysql_commit(mysql);
+
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(GitMysql::CreateTag) {
+	NanEscapableScope();
+
+	if (args.Length() == 0 || !args[0]->IsString()) {
+		return NanThrowError("tag is required.");
+	}
+
+	if (args.Length() == 1 || !args[1]->IsString()) {
+		return NanThrowError("message is required.");
+	}
+
+	// start convert_from_v8 block
+	const char *from_tag;
+	String::Utf8Value tag_buf(args[0]->ToString());
+	from_tag = (const char *)strdup(*tag_buf);
+
+	const char *from_msg;
+	String::Utf8Value msg_buf(args[1]->ToString());
+	from_msg = (const char *)strdup(*msg_buf);
+	// end convert_from_v8 block
+
+	int error;
+	git_oid oid;
+	git_object *target = NULL;
+	git_signature *tagger = NULL;
+
+	error = git_revparse_single(&target, repo, "HEAD^{commit}");
+	if (error < 0){
+		return NanThrowError("git_revparse_single error");
+	}
+
+	error = git_signature_now(&tagger,"Jerry Jin", "jerry.yang.jin@gmail.com");   
+
+	// Transaction Start
+	git_mysql_transaction(mysql);
+
+	error = git_tag_create(&oid, repo, from_tag, target, tagger, from_msg, 0);
+	if (error < 0){
+		git_mysql_rollback(mysql);
+		return NanThrowError("git_tag_create error");
+	}
+
+	git_mysql_commit(mysql);
+
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(GitMysql::Diff) {
+	NanEscapableScope();
+
+	int error;
+	git_object *commit;
+	git_commit *parent = NULL;
+	error = git_revparse_single(&commit, repo, "HEAD^{commit}");
+	error = git_commit_parent(&parent, (git_commit *)commit, 0);
+
+	git_tree *commit_tree = NULL, *parent_tree = NULL;
+	error = git_commit_tree(&commit_tree, (git_commit *)commit);
+	error = git_commit_tree(&parent_tree, parent);
+
+	git_diff *diff = NULL;
+	error = git_diff_tree_to_tree(&diff, repo, commit_tree, parent_tree, NULL);
+	if (error < 0){
+		return NanThrowError("git_diff_tree_to_tree error");
+	}
+
+	git_mysql_tree_diff(mysql, repo, diff);
+	if (error < 0){
+		return NanThrowError("git_mysql_tree_diff error");
+	}
+
+	git_patch *patch = NULL;
+	error = git_patch_from_diff(&patch, diff, 0);
+	if (error < 0){
+		return NanThrowError("git_patch_from_diff error");
+	}
+
+	git_patch_free(patch);
+	git_object_free(commit);
+	git_commit_free(parent);
+	git_tree_free(commit_tree);
+	git_tree_free(parent_tree);
+	git_diff_free(diff);
 
 	if (!error)
 		NanReturnValue(NanTrue());

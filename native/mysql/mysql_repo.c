@@ -20,12 +20,12 @@ char *git_mysql_repo_create(git_mysql *mysql, const long long int owner, const c
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
 	bind_buffers[1].buffer = name;
-	bind_buffers[1].buffer_length = strlen(name)+1;
+	bind_buffers[1].buffer_length = strlen(name);
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	bind_buffers[2].buffer = description;
-	bind_buffers[2].buffer_length = strlen(description) + 1;
+	bind_buffers[2].buffer_length = strlen(description);
 	bind_buffers[2].length = &bind_buffers[2].buffer_length;
 	bind_buffers[2].buffer_type = MYSQL_TYPE_BLOB;
 

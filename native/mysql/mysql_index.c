@@ -1,6 +1,6 @@
 #include "mysql_index.h"
 
-int git_mysql_index_add(git_mysql *mysql, git_oid *oid, const char *path){
+int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
 	int error;
 	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
@@ -23,7 +23,7 @@ int git_mysql_index_add(git_mysql *mysql, git_oid *oid, const char *path){
 
 	// bind the name
 	bind_buffers[2].buffer = (void*)path;
-	bind_buffers[2].buffer_length = strlen(path) + 1;
+	bind_buffers[2].buffer_length = strlen(path);
 	bind_buffers[2].length = &bind_buffers[2].buffer_length;
 	bind_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
 
@@ -36,8 +36,8 @@ int git_mysql_index_add(git_mysql *mysql, git_oid *oid, const char *path){
 
 	// now lets see if the insert worked
 	affected_rows = mysql_stmt_affected_rows(mysql->index_write);
-	if (affected_rows > 1)
-		return GIT_ERROR;
+	//if (affected_rows > 1)
+	//	return GIT_ERROR;
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->index_write) != 0)
@@ -61,7 +61,7 @@ int git_mysql_index_del(git_oid *oid, git_mysql *mysql, long long int repo, cons
 
 	// bind the path
 	bind_buffers[1].buffer = (void*)path;
-	bind_buffers[1].buffer_length = strlen(path) + 1;
+	bind_buffers[1].buffer_length = strlen(path);
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_STRING;
 

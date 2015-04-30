@@ -335,3 +335,34 @@ int git_mysql_tree_walk(git_mysql *mysql, git_repository *repo){
 
 	return error;
 }
+
+
+int each_file_cb(const git_diff_delta *delta,float progress,void *payload)
+{
+	printf("file progress:%f \n", progress);
+	return 0;
+}
+
+int each_hunk_cb(const git_diff_delta *delta,const git_diff_hunk *hunk,void *payload)
+{
+	printf("hunk:%s \n", hunk->header);
+	return 0;
+}
+
+int each_line_cb(const git_diff_delta *delta,const git_diff_hunk *hunk,const git_diff_line *line,void *payload)
+{
+	printf("line:%s \n", line->content);
+	return 0;
+}
+
+int git_mysql_tree_diff(git_mysql *mysql, git_repository *repo, git_diff *diff){
+	int error;
+
+	error = git_diff_foreach(diff,
+		each_file_cb,
+		each_hunk_cb,
+		each_line_cb,
+		NULL);
+
+	return error;
+}

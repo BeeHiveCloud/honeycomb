@@ -64,6 +64,10 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(TreeWalk);
 
 	  static NAN_METHOD(Config);
+
+	  static NAN_METHOD(CreateTag);
+
+	  static NAN_METHOD(Diff);
 };
 
 #endif

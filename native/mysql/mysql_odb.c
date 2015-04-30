@@ -79,7 +79,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   MYSQL_BIND result_buffers[3];
   unsigned long data_len;
   unsigned long type_len;
-  unsigned long len_len;
+  //unsigned long len_len;
 
   assert(len_p && type_p && _backend && oid);
 
@@ -127,7 +127,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	result_buffers[1].buffer = len_p;
 	result_buffers[1].buffer_length = sizeof(len_p);
 	result_buffers[1].is_null = 0;
-	result_buffers[1].length = &len_len;
+	result_buffers[1].length = &result_buffers[1].buffer_length; // &len_len;
     memset(len_p, 0, sizeof(len_p));
 
     // by setting buffer and buffer_length to 0, this tells libmysql

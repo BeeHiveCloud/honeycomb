@@ -18,7 +18,7 @@ int init_statements(git_mysql *mysql)
 	  "SELECT `oid`, `level`, `dir`, `file` FROM GIT_INDEX_V WHERE `repo` = ? ORDER BY `level` DESC, `dir`;";
 
   static const char *sql_index_write =
-	"INSERT IGNORE INTO GIT_INDEX VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
+	"INSERT INTO GIT_INDEX VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
 
   static const char *sql_index_del =
 	  "DELETE FROM GIT_INDEX WHERE `repo` = ? AND `path` = ?;";

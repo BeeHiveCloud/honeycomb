@@ -7,7 +7,7 @@
 
 GIT_BEGIN_DECL
 
-GIT_EXTERN(int) git_mysql_index_add(git_mysql *mysql, git_oid *oid, const char *path);
+GIT_EXTERN(int) git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path);
 
 GIT_EXTERN(int) git_mysql_index_del(git_mysql *mysql, const char *path);
 
