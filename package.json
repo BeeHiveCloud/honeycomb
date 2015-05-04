@@ -2,11 +2,11 @@
   "name": "honeycomb",
   "version": "0.1.0",
   "description": "honeycomb data layer",
-  "keywords": ["honeycomb","node.js","libgit2","git","MySQL","MariaDB","Redis","MongoDB"],
+  "keywords": ["honeycomb","io.js","node.js","libgit2","git","MySQL","MariaDB","Redis","MongoDB"],
   "main": "./lib/index.js",
   "dependencies": {
-    "bluebird": "2.9.7",
-    "nan": "^1.7.0"
+    "nan": "^1.7.0",
+    "lodash": "3.8.0"
   },
   "scripts": {
     "test": "mocha -b",
@@ -15,7 +15,6 @@
   "directories": {
     "lib": "lib"
   },
-
   "repository": {
     "type": "git",
     "url": "git://github.com/BeeHiveCloud/honeycomb.git"
@@ -25,8 +24,8 @@
     "mocha": "2.1.0"
   },
   "engines": {
-      "node": ">= 0.12.0",
-      "npm": ">= 2.7.0"
+      "node": ">= 1.8.0",
+      "npm": ">= 2.8.0"
   },
   "bugs": {
         "url": "http://github.com/BeeHiveCloud/honeycomb/issues"

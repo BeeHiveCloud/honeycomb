@@ -1,14 +1,22 @@
 Honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb)
 =========
 
-
 Status
 ------
 This project is still at early stage, DO NOT use for production.
 
+Dependencies
+------------
+| name | version |
+| ---- | ------- |
+| io.js | 1.8.1 |
+| libgit2 | 0.22.2 |
+| mysql | 5.6.22 |
+
 TODO
 ----
-- [X] **mysql_stmt_fetch access violation**
+- [ ] ES6 native promise
+- [x] **mysql_stmt_fetch access violation**
 - [x] mutext to protect global viarable
 - [ ] git mysql backend
   - [ ] config backend

@@ -33,6 +33,8 @@ class GitMysql : public ObjectWrap {
 
   private:
 
+	  static NAN_METHOD(LastError);
+
 	  static NAN_METHOD(Open);
 
 	  static NAN_METHOD(Close);

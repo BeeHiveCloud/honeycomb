@@ -10,6 +10,8 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
     Local<Object> object = NanNew<Object>();
 
+	NODE_SET_METHOD(object, "LastError", LastError);
+
 	NODE_SET_METHOD(object, "Open", Open);
 
 	NODE_SET_METHOD(object, "Close", Close);
@@ -49,6 +51,20 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
     target->Set(NanNew<String>("MySQL"), object);
 }
 
+NAN_METHOD(GitMysql::LastError) {
+	NanEscapableScope();
+
+	const git_error *e = giterr_last();
+	//char *error_msg;
+
+	//sprintf(error_msg, "Error %d: %s\n", e->klass, e->message);
+
+	Handle<v8::Value> to;
+	//to = NanNew<String>(error_msg);
+	to = NanNew<String>(e->message);
+
+	NanReturnValue(to);
+}
 
 NAN_METHOD(GitMysql::Open) {
   NanEscapableScope();
