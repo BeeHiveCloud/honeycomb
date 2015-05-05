@@ -10,7 +10,7 @@ MESSAGE( STATUS "LIBMYSQL_LIBRARY:         " ${LIBMYSQL_LIBRARY} )
 
 FIND_PATH(LIBMYSQL_INCLUDE_DIR mysql.h)
 
-FIND_LIBRARY(LIBMYSQL_LIBRARY libmysql)
+FIND_LIBRARY(LIBMYSQL_LIBRARY mysqlclient)
 
 # handle the QUIETLY and REQUIRED arguments and set Libmysql_FOUND to TRUE if
 # all listed variables are TRUE

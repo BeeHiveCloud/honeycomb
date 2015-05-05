@@ -1,6 +1,8 @@
 Honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb)
 =========
 
+A hybrid data platform
+
 Status
 ------
 This project is still at early stage, DO NOT use for production.

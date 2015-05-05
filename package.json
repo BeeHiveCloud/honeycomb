@@ -5,7 +5,7 @@
   "keywords": ["honeycomb","io.js","node.js","libgit2","git","MySQL","MariaDB","Redis","MongoDB"],
   "main": "./lib/index.js",
   "dependencies": {
-    "nan": "^1.7.0",
+    "nan": "1.8.4",
     "lodash": "3.8.0"
   },
   "scripts": {
