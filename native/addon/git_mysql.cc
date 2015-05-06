@@ -834,23 +834,22 @@ NAN_METHOD(GitMysql::Diff) {
 	error = git_commit_tree(&parent_tree, parent);
 
 	git_diff *diff = NULL;
-	error = git_diff_tree_to_tree(&diff, repo, commit_tree, parent_tree, NULL);
+	git_diff_options opts;
+	error = git_diff_init_options(&opts, GIT_DIFF_OPTIONS_VERSION);
+
+	opts.context_lines = 1;
+	opts.interhunk_lines = 1;
+
+	error = git_diff_tree_to_tree(&diff, repo, commit_tree, parent_tree, &opts);
 	if (error < 0){
 		return NanThrowError("git_diff_tree_to_tree error");
 	}
 
-	git_mysql_tree_diff(mysql, repo, diff);
+	git_mysql_tree_diff(diff);
 	if (error < 0){
 		return NanThrowError("git_mysql_tree_diff error");
 	}
 
-	git_patch *patch = NULL;
-	error = git_patch_from_diff(&patch, diff, 0);
-	if (error < 0){
-		return NanThrowError("git_patch_from_diff error");
-	}
-
-	git_patch_free(patch);
 	git_object_free(commit);
 	git_commit_free(parent);
 	git_tree_free(commit_tree);

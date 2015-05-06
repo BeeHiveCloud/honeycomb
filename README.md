@@ -7,18 +7,18 @@ Status
 ------
 This project is still at early stage, DO NOT use for production.
 
-Dependencies
-------------
+Integration
+-----------
 | name | version |
 | ---- | ------- |
-| io.js | 1.8.1 |
+| io.js | 2.0.0 |
 | libgit2 | 0.22.2 |
 | mysql | 5.6.22 |
 
 TODO
 ----
 - [ ] ES6 native promise
-- [x] **mysql_stmt_fetch access violation**
+- [x] mysql_stmt_fetch access violation
 - [x] mutext to protect global viarable
 - [ ] git mysql backend
   - [ ] config backend

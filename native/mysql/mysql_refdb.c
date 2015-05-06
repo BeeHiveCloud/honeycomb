@@ -117,12 +117,6 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		result_buffers[0].length = &type_len;
 		memset(&type, 0, sizeof(type));
 
-		//result_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
-		//result_buffers[1].buffer = target.id;
-		//result_buffers[1].buffer_length = 20;
-		//result_buffers[1].is_null = 0;
-		//memset(&target, 0, sizeof(target));
-
 		result_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 		result_buffers[1].buffer = 0;
 		result_buffers[1].buffer_length = 0;

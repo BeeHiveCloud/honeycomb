@@ -44,7 +44,7 @@ int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
 		return GIT_ERROR;
 }
 
-int git_mysql_index_del(git_oid *oid, git_mysql *mysql, long long int repo, const char *path){
+int git_mysql_index_del(git_mysql *mysql, const char *path){
 	int error;
 	MYSQL_BIND bind_buffers[2];
 	my_ulonglong affected_rows;

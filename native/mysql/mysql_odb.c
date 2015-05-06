@@ -1,11 +1,33 @@
 #include "mysql_odb.h"
 
+int mysql_odb_read_prefix(	git_oid *out_oid,
+							void **data_p,
+							size_t *len_p,
+							git_otype *type_p,
+							git_odb_backend *_backend,
+							const git_oid *short_oid,
+							size_t len)
+{
+	if (len >= GIT_OID_HEXSZ) {
+		/* Just match the full identifier */
+		int error = mysql_odb_read(data_p, len_p, type_p, _backend, short_oid);
+		if (error == GIT_OK)
+			git_oid_cpy(out_oid, short_oid);
+
+		return error;
+	}
+	else{
+		giterr_set_str(GITERR_ODB, "mysql odb doesn't not implement oid prefix lookup");
+		return GITERR_INVALID;
+	}
+}
+
 int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_backend, const git_oid *oid)
 {
   git_mysql_odb *backend;
   int error;
   MYSQL_BIND bind_buffers[2];
-  MYSQL_BIND result_buffers[1];
+  MYSQL_BIND result_buffers[2];
 
   assert(len_p && type_p && _backend && oid);
 
@@ -45,11 +67,15 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
     result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
     result_buffers[0].buffer = type_p;
     result_buffers[0].buffer_length = sizeof(type_p);
+	result_buffers[0].is_null = 0;
+	result_buffers[0].length = &result_buffers[0].buffer_length;
     memset(type_p, 0, sizeof(type_p));
 
     result_buffers[1].buffer_type = MYSQL_TYPE_LONGLONG;
     result_buffers[1].buffer = len_p;
-    result_buffers[1].buffer_length = sizeof(len_p);
+	result_buffers[1].buffer_length = sizeof(len_p);
+	result_buffers[1].is_null = 0;
+	result_buffers[1].length = &result_buffers[1].buffer_length;
     memset(len_p, 0, sizeof(len_p));
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read_header, result_buffers) != 0)
@@ -66,7 +92,7 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   return error;
 }
@@ -153,13 +179,9 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 
 
 	if (type_len > 0){
-		//type_p = malloc(sizeof(type_p));
-		//result_buffers[0].buffer = type_p;
-		//result_buffers[0].buffer_length = type_len;
 		if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[0], 0, 0) != 0)
 			return GIT_ERROR;
 	}
-
 
     if (data_len > 0) {
       *data_p = malloc(data_len);
@@ -178,7 +200,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read) != 0)
-    return 0;
+	  return GIT_ERROR;
 
   return error;
 }
@@ -261,8 +283,8 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
   bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
   // bind the type
-  bind_buffers[2].buffer = &((signed char)type);
-  bind_buffers[2].buffer_length = sizeof(signed char);
+  bind_buffers[2].buffer = &type;
+  bind_buffers[2].buffer_length = sizeof(type);
   bind_buffers[2].length = &bind_buffers[2].buffer_length;
   bind_buffers[2].buffer_type = MYSQL_TYPE_TINY;
 
@@ -329,6 +351,7 @@ int git_mysql_odb_init(git_odb_backend **out, git_mysql *mysql)
 
   mysql_odb->parent.read = &mysql_odb_read;
   mysql_odb->parent.read_header = &mysql_odb_read_header;
+  mysql_odb->parent.read_prefix = &mysql_odb_read_prefix;
   mysql_odb->parent.write = &mysql_odb_write;
   mysql_odb->parent.exists = &mysql_odb_exists;
   mysql_odb->parent.free = &mysql_odb_free;

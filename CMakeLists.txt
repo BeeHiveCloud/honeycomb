@@ -7,7 +7,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 
 # override STATIC_CRT
-SET(STATIC_CRT OFF CACHE BOOL "Link the dynamic CRT libraries" FORCE)
+IF (MSVC_IDE)
+  SET(STATIC_CRT OFF CACHE BOOL "Link the dynamic CRT libraries" FORCE)
+ENDIF ()
 
 # Set build directory
 SET(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
@@ -50,7 +52,7 @@ ADD_DEPENDENCIES(git2mysql git2)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(git2mysql ${LIBMYSQL_LIBRARY}/libmysql)
 ELSE ()
-  TARGET_LINK_LIBRARIES(git2mysql ${LIBMYSQL_LIBRARY}/mysqlclient)
+  TARGET_LINK_LIBRARIES(git2mysql ${LIBMYSQL_LIBRARY}/libmysqlclient.a)
 ENDIF ()
 TARGET_LINK_LIBRARIES(git2mysql git2)
 
@@ -83,6 +85,7 @@ INCLUDE_DIRECTORIES(node_modules/nan)
 FILE(GLOB SRC_NODE native/addon/*.h native/addon/*.cc)
 
 ADD_LIBRARY(addon ${SRC_NODE})
+ADD_DEPENDENCIES(addon git2mysql)
 TARGET_LINK_LIBRARIES(addon git2mysql)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(addon ${NODE_GYP_DIR}/Release/iojs)
