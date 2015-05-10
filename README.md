@@ -14,6 +14,7 @@ Integration
 | io.js | 2.0.0 |
 | libgit2 | 0.22.2 |
 | mysql | 5.6.22 |
+| hadoop | 2.5.0 |
 
 TODO
 ----
