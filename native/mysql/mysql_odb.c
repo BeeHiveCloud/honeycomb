@@ -28,6 +28,8 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   int error;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[2];
+  unsigned long len_len;
+  unsigned long type_len;
 
   assert(len_p && type_p && _backend && oid);
 
@@ -62,21 +64,21 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
   if (mysql_stmt_num_rows(backend->mysql->odb_read_header) == 1) {
 
-	  memset(result_buffers, 0, sizeof(result_buffers));
+	memset(result_buffers, 0, sizeof(result_buffers));
 
-    result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
+	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
     result_buffers[0].buffer = type_p;
-    result_buffers[0].buffer_length = sizeof(type_p);
+	result_buffers[0].buffer_length = sizeof(git_otype);
 	result_buffers[0].is_null = 0;
-	result_buffers[0].length = &result_buffers[0].buffer_length;
-    memset(type_p, 0, sizeof(type_p));
+	result_buffers[0].length = &result_buffers[0].buffer_length; // &type_len;
+	memset(type_p, 0, sizeof(git_otype));
 
-    result_buffers[1].buffer_type = MYSQL_TYPE_LONGLONG;
+    result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
     result_buffers[1].buffer = len_p;
-	result_buffers[1].buffer_length = sizeof(len_p);
+	result_buffers[1].buffer_length = sizeof(size_t);
 	result_buffers[1].is_null = 0;
-	result_buffers[1].length = &result_buffers[1].buffer_length;
-    memset(len_p, 0, sizeof(len_p));
+	result_buffers[1].length = &result_buffers[1].buffer_length; // &len_len;
+	memset(len_p, 0, sizeof(size_t));
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read_header, result_buffers) != 0)
       return GIT_ERROR;
@@ -84,6 +86,11 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
     // this should populate the buffers at *type_p and *len_p
 	if (mysql_stmt_fetch(backend->mysql->odb_read_header) != 0)
       return GIT_ERROR;
+
+	printf("length of type: %d \n", result_buffers[0].buffer_length);
+	printf("Value of type: %d \n", *type_p);
+	printf("length of len: %d \n", result_buffers[1].buffer_length);
+	printf("Value of len: %d \n", *len_p);
 
 	error = GIT_OK;
   } else {
@@ -103,9 +110,9 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   int error;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
-  unsigned long data_len;
+  unsigned long len_len;
   unsigned long type_len;
-  //unsigned long len_len;
+  unsigned long data_len;
 
   assert(len_p && type_p && _backend && oid);
 
@@ -140,21 +147,21 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
   if (mysql_stmt_num_rows(backend->mysql->odb_read) == 1) {
 
-	  memset(result_buffers, 0, sizeof(result_buffers));
+	memset(result_buffers, 0, sizeof(result_buffers));
 
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
 	result_buffers[0].buffer = type_p;
-	result_buffers[0].buffer_length = sizeof(type_p); //sizeof(signed char);
+	result_buffers[0].buffer_length = sizeof(git_otype);
 	result_buffers[0].is_null = 0;
-	result_buffers[0].length = &type_len;
-    memset(type_p, 0, sizeof(type_p));
+	result_buffers[0].length = &result_buffers[0].buffer_length;// &type_len;
+	memset(type_p, 0, sizeof(git_otype));
 
-    result_buffers[1].buffer_type = MYSQL_TYPE_LONGLONG;
+    result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
 	result_buffers[1].buffer = len_p;
-	result_buffers[1].buffer_length = sizeof(len_p);
+	result_buffers[1].buffer_length = sizeof(size_t);
 	result_buffers[1].is_null = 0;
-	result_buffers[1].length = &result_buffers[1].buffer_length; // &len_len;
-    memset(len_p, 0, sizeof(len_p));
+	result_buffers[1].length = &result_buffers[1].buffer_length;// &len_len;
+	memset(len_p, 0, sizeof(size_t));
 
     // by setting buffer and buffer_length to 0, this tells libmysql
     // we want it to set data_len to the *actual* length of that field
@@ -177,11 +184,21 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     // if(error != 0 || error != MYSQL_DATA_TRUNCATED)
     //   return GIT_ERROR;
 
+	//if (type_len > 0){
+	//	if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[0], 0, 0) != 0)
+	//		return GIT_ERROR;
+	//}
 
-	if (type_len > 0){
-		if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[0], 0, 0) != 0)
-			return GIT_ERROR;
-	}
+	//if (len_len > 0){
+	//	if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[1], 1, 0) != 0)
+	//		return GIT_ERROR;
+	//}
+
+	printf("length of type: %d \n", result_buffers[0].buffer_length);
+	printf("Value of type: %d \n", *type_p);
+	printf("length of len: %d \n", result_buffers[1].buffer_length);
+	printf("Value of len: %d \n", *len_p);
+	printf("length of data: %d \n", data_len);
 
     if (data_len > 0) {
       *data_p = malloc(data_len);
@@ -190,7 +207,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 
 	  if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[2], 2, 0) != 0)
         return GIT_ERROR;
-
     }
 
 	error = GIT_OK;
@@ -351,7 +367,7 @@ int git_mysql_odb_init(git_odb_backend **out, git_mysql *mysql)
 
   mysql_odb->parent.read = &mysql_odb_read;
   mysql_odb->parent.read_header = &mysql_odb_read_header;
-  mysql_odb->parent.read_prefix = &mysql_odb_read_prefix;
+  //mysql_odb->parent.read_prefix = &mysql_odb_read_prefix;
   mysql_odb->parent.write = &mysql_odb_write;
   mysql_odb->parent.exists = &mysql_odb_exists;
   mysql_odb->parent.free = &mysql_odb_free;

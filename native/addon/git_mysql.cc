@@ -837,8 +837,8 @@ NAN_METHOD(GitMysql::Diff) {
 	git_diff_options opts;
 	error = git_diff_init_options(&opts, GIT_DIFF_OPTIONS_VERSION);
 
-	opts.context_lines = 1;
-	opts.interhunk_lines = 1;
+	//opts.context_lines = 1;
+	//opts.interhunk_lines = 1;
 
 	error = git_diff_tree_to_tree(&diff, repo, commit_tree, parent_tree, &opts);
 	if (error < 0){

@@ -79,13 +79,13 @@ TARGET_LINK_LIBRARIES(git2mysql git2)
 
 # hadoop
 
-INCLUDE_DIRECTORIES(${HADOOP_INCLUDE_DIR})
-FILE(GLOB SRC_HADOOP native/hadoop/*.h native/hadoop/*.hh native/hadoop/*.c native/hadoop/*.cc)
-ADD_LIBRARY(hadoop ${SRC_HADOOP})
-TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/libhdfs)
-IF (MSVC_IDE)
-  TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/hadoop)
-ENDIF ()
+#INCLUDE_DIRECTORIES(${HADOOP_INCLUDE_DIR})
+#FILE(GLOB SRC_HADOOP native/hadoop/*.h native/hadoop/*.hh native/hadoop/*.c native/hadoop/*.cc)
+#ADD_LIBRARY(hadoop ${SRC_HADOOP})
+#TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/libhdfs)
+#IF (MSVC_IDE)
+#  TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/hadoop)
+#ENDIF ()
 
 # node native addon
 
@@ -97,9 +97,7 @@ FILE(GLOB SRC_NODE native/addon/*.h native/addon/*.cc)
 
 ADD_LIBRARY(addon ${SRC_NODE})
 ADD_DEPENDENCIES(addon git2mysql)
-ADD_DEPENDENCIES(addon hadoop)
 TARGET_LINK_LIBRARIES(addon git2mysql)
-TARGET_LINK_LIBRARIES(addon hadoop)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(addon ${NODE_GYP_DIR}/Release/iojs)
 ELSE ()
