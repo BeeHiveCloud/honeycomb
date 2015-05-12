@@ -53,7 +53,7 @@ ADD_DEPENDENCIES(git2mysql git2)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(git2mysql ${LIBMYSQL_LIBRARY}/libmysql)
 ELSE ()
-  TARGET_LINK_LIBRARIES(git2mysql ${LIBMYSQL_LIBRARY}/libmysqlclient.a)
+  TARGET_LINK_LIBRARIES(git2mysql ${LIBMYSQL_LIBRARY}/libmysqlclient_r.a)
 ENDIF ()
 TARGET_LINK_LIBRARIES(git2mysql git2)
 
@@ -79,13 +79,11 @@ TARGET_LINK_LIBRARIES(git2mysql git2)
 
 # hadoop
 
-#INCLUDE_DIRECTORIES(${HADOOP_INCLUDE_DIR})
-#FILE(GLOB SRC_HADOOP native/hadoop/*.h native/hadoop/*.hh native/hadoop/*.c native/hadoop/*.cc)
-#ADD_LIBRARY(hadoop ${SRC_HADOOP})
-#TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/libhdfs)
-#IF (MSVC_IDE)
-#  TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/hadoop)
-#ENDIF ()
+INCLUDE_DIRECTORIES(${HADOOP_INCLUDE_DIR})
+FILE(GLOB SRC_HADOOP native/hadoop/*.h native/hadoop/*.c)
+ADD_LIBRARY(hadoop ${SRC_HADOOP})
+TARGET_LINK_LIBRARIES(hadoop ${HADOOP_LIBRARY}/libhdfs)
+TARGET_LINK_LIBRARIES(hadoop ${JAVA_HOME}/lib/jvm)
 
 # node native addon
 
@@ -100,9 +98,10 @@ ADD_DEPENDENCIES(addon git2mysql)
 TARGET_LINK_LIBRARIES(addon git2mysql)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(addon ${NODE_GYP_DIR}/Release/iojs)
-ELSE ()
-  SET (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
 ENDIF ()
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  SET (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+ENDIF()
 
 SET_TARGET_PROPERTIES(addon PROPERTIES SUFFIX ".node")
 SET_TARGET_PROPERTIES(addon PROPERTIES PREFIX "")
