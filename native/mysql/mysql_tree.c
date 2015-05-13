@@ -351,7 +351,7 @@ int each_hunk_cb(
 	void *payload)
 {
 
-	//printf("hunk header:%s \n", hunk->header);
+	printf("hunk header:%s \n", hunk->header);
 
 	return 0;
 }
@@ -362,7 +362,7 @@ int each_line_cb(
 	const git_diff_line *line,
 	void *payload)
 {
-	//printf("line content:%s \n", line->content);
+	printf("line content:%s \n", line->content);
 
 	return 0;
 }

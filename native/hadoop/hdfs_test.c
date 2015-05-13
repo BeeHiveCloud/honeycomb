@@ -4,11 +4,14 @@
 #include <stdlib.h>
 
 int hdfs_test(){
+  hdfsFS fs = hdfsConnect("default", 0);
+  if (!fs) {
+	  printf("Oops! Failed to connect to hdfs!\n");
+	  return -1;
+  }else
+	  printf("connect to hdfs!\n");
 
-  putenv("CLASSPATH=");
-
-  hdfsFS fs = hdfsConnect("localhost", 50070);
-  const char* writePath = "/tmp/testfile.txt";
+  const char* writePath = "/testfile.txt";
   hdfsFile writeFile = hdfsOpenFile(fs, writePath, O_WRONLY |O_CREAT, 0, 0, 0);
   if(!writeFile) {
         printf("Failed to open %s for writing!\n", writePath);
@@ -22,4 +25,8 @@ int hdfs_test(){
   }
   hdfsCloseFile(fs, writeFile);
   return 0;
+}
+
+int main(int argc, char **argv) {
+  return hdfs_test();
 }
