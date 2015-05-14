@@ -18,13 +18,26 @@ Integration
 
 TODO
 ----
-- [ ] ES6 native promise
-- [x] mysql_stmt_fetch access violation
+- [ ] Hadoop integration
+  - [ ] libhdfs
+  - [ ] pipe, stream
+  - [ ] map reduce
+- [x] ES6 native promise
 - [x] mutext to protect global viarable
 - [ ] git mysql backend
   - [ ] config backend
     - [ ] able to config at different levels
     - [ ] load git_cvar_cached for repository object
+
+Issue
+-----
+- [ ] is.js 2.0.0 native addon compile fail on Linux and Mac
+- [x] JNI_CreateJavaVM always return -3 (JNI_EVERSION)
+- [ ] org/apache/hadoop/fs/FileSystem not found
+- [ ] Run-Time Check Failure #2 - Stack around the variable 'xxx' was corrupted
+  - [x] Windows 7 32-bit, Release mode fixed
+  - [ ] Windows 7 32-bit, Debug mode, the odb_read still throws this error
+- [x] mysql_stmt_fetch access violation
 
 License
 -------

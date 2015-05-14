@@ -4,6 +4,9 @@
 #include <stdlib.h>
 
 int hdfs_test(){
+  //putenv("PATH=%CLASSPATH%;%PATH%");
+  //printf("PATH=%s \n", getenv("PATH"));
+
   hdfsFS fs = hdfsConnect("default", 0);
   if (!fs) {
 	  printf("Oops! Failed to connect to hdfs!\n");

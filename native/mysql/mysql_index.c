@@ -42,6 +42,8 @@ int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->index_write) != 0)
 		return GIT_ERROR;
+
+	return GIT_OK;
 }
 
 int git_mysql_index_del(git_mysql *mysql, const char *path){
