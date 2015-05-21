@@ -7,13 +7,11 @@ using namespace node;
 using namespace v8;
 
 #include "git_mysql.h"
-#include "hadoop.h"
 
 void init(Handle<v8::Object> target) {
   NanScope();
 
   GitMysql::InitializeComponent(target);
-  Hadoop::InitializeComponent(target);
 }
 
 NODE_MODULE(addon, init)

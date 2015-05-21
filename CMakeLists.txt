@@ -31,7 +31,6 @@ INCLUDE(FindMysql)
 #INCLUDE(FindMongo)
 #INCLUDE(FindRedis)
 INCLUDE(FindNode)
-INCLUDE(FindHadoop)
 
 # Add libgit2 include
 INCLUDE_DIRECTORIES("vendor/libgit2/include")
@@ -68,34 +67,18 @@ TARGET_LINK_LIBRARIES(mysql git2)
 #TARGET_LINK_LIBRARIES(mongodb ${LIBMONGO_LIBRARY}/bson-1.0)
 
 # redis
-FILE(GLOB SRC_REDIS native/redis/*.c native/redis/*.h)
-INCLUDE_DIRECTORIES(${LIBREDIS_INCLUDE_DIR})
+#FILE(GLOB SRC_REDIS native/redis/*.c native/redis/*.h)
+#INCLUDE_DIRECTORIES(${LIBREDIS_INCLUDE_DIR})
 
-ADD_LIBRARY(redis ${SRC_REDIS})
-ADD_DEPENDENCIES(redis git2)
-TARGET_LINK_LIBRARIES(redis git2)
-TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/hiredis)
-IF (MSVC_IDE)
-    TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/Win32_Interop)
-ENDIF ()
-
-# hadoop
-INCLUDE_DIRECTORIES(${HADOOP_INCLUDE_DIR})
-FILE(GLOB SRC_HADOOP native/hadoop/*.h native/hadoop/*.c)
-
-LINK_DIRECTORIES(${HADOOP_LIBRARY})
-LINK_DIRECTORIES(${JAVA_HOME}/lib)
-ADD_EXECUTABLE(hdfsjni ${SRC_HADOOP})
-TARGET_LINK_LIBRARIES(hdfsjni libhdfs)
-TARGET_LINK_LIBRARIES(hdfsjni hadoop)
-TARGET_LINK_LIBRARIES(hdfsjni jvm)
-#ADD_LIBRARY(hadoop ${SRC_HADOOP})
-#TARGET_LINK_LIBRARIES(hadoop libhdfs)
-#TARGET_LINK_LIBRARIES(hadoop hadoop)
-#TARGET_LINK_LIBRARIES(hadoop jvm)
+#ADD_LIBRARY(redis ${SRC_REDIS})
+#ADD_DEPENDENCIES(redis git2)
+#TARGET_LINK_LIBRARIES(redis git2)
+#TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/hiredis)
+#IF (MSVC_IDE)
+#    TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/Win32_Interop)
+#ENDIF ()
 
 # node native addon
-
 INCLUDE_DIRECTORIES(${NODE_GYP_DIR}/src)
 INCLUDE_DIRECTORIES(${NODE_GYP_DIR}/deps/uv/include)
 INCLUDE_DIRECTORIES(${NODE_GYP_DIR}/deps/v8/include)
@@ -103,9 +86,8 @@ INCLUDE_DIRECTORIES(node_modules/nan)
 FILE(GLOB SRC_NODE native/addon/*.h native/addon/*.cc)
 
 ADD_LIBRARY(addon ${SRC_NODE})
-ADD_DEPENDENCIES(addon git2mysql)
-TARGET_LINK_LIBRARIES(addon git2mysql)
-TARGET_LINK_LIBRARIES(addon hadoop)
+ADD_DEPENDENCIES(addon mysql)
+TARGET_LINK_LIBRARIES(addon mysql)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(addon ${NODE_GYP_DIR}/Release/iojs)
 ENDIF ()

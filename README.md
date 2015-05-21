@@ -7,21 +7,9 @@ Status
 ------
 This project is still at early stage, DO NOT use for production.
 
-Integration
------------
-| name | version |
-| ---- | ------- |
-| io.js | 2.0.0 |
-| libgit2 | 0.22.2 |
-| mysql | 5.6.22 |
-| hadoop | 2.5.0 |
-
 TODO
 ----
-- [ ] Hadoop integration
-  - [ ] libhdfs
-  - [ ] pipe, stream
-  - [ ] map reduce
+- [ ] drop JNI, use protobuf instead
 - [x] ES6 native promise
 - [x] mutext to protect global viarable
 - [ ] git mysql backend
@@ -32,12 +20,29 @@ TODO
 Issue
 -----
 - [ ] is.js 2.0.0 native addon compile fail on Linux and Mac
-- [x] JNI_CreateJavaVM always return -3 (JNI_EVERSION)
-- [ ] org/apache/hadoop/fs/FileSystem not found
 - [ ] Run-Time Check Failure #2 - Stack around the variable 'xxx' was corrupted
   - [x] Windows 7 32-bit, Release mode fixed
   - [ ] Windows 7 32-bit, Debug mode, the odb_read still throws this error
 - [x] mysql_stmt_fetch access violation
+- [ ] when sub-project built into static library, addon won't work
+
+```
+module.js:356
+  Module._extensions[extension](this, filename);
+                               ^
+Error: %1 is not a valid Win32 application.
+addon.node
+    at Error (native)
+    at Module.load (module.js:356:32)
+    at Function.Module._load (module.js:311:12)
+    at Module.require (module.js:366:17)
+    at require (module.js:385:17)
+    at Object.<anonymous> (honeycomb.js:7:12)
+    at Module._compile (module.js:431:26)
+    at Object.Module._extensions..js (module.js:449:10)
+    at Module.load (module.js:356:32)
+    at Function.Module._load (module.js:311:12)
+```
 
 License
 -------
