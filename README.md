@@ -9,10 +9,11 @@ This project is still at early stage, DO NOT use for production.
 
 TODO
 ----
-- [ ] drop JNI, use protobuf instead
+- [x] drop JNI, use protobuf instead
 - [x] ES6 native promise
-- [x] mutext to protect global viarable
+- [ ] mutext to protect global viarable
 - [ ] git mysql backend
+  - [ ] workdir backend
   - [ ] config backend
     - [ ] able to config at different levels
     - [ ] load git_cvar_cached for repository object
@@ -24,25 +25,7 @@ Issue
   - [x] Windows 7 32-bit, Release mode fixed
   - [ ] Windows 7 32-bit, Debug mode, the odb_read still throws this error
 - [x] mysql_stmt_fetch access violation
-- [ ] when sub-project built into static library, addon won't work
 
-```
-module.js:356
-  Module._extensions[extension](this, filename);
-                               ^
-Error: %1 is not a valid Win32 application.
-addon.node
-    at Error (native)
-    at Module.load (module.js:356:32)
-    at Function.Module._load (module.js:311:12)
-    at Module.require (module.js:366:17)
-    at require (module.js:385:17)
-    at Object.<anonymous> (honeycomb.js:7:12)
-    at Module._compile (module.js:431:26)
-    at Object.Module._extensions..js (module.js:449:10)
-    at Module.load (module.js:356:32)
-    at Function.Module._load (module.js:311:12)
-```
 
 License
 -------

@@ -26,11 +26,16 @@ ADD_SUBDIRECTORY(vendor/libgit2)
 # Load cmake modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+INCLUDE(FindThrift)
 INCLUDE(FindMysql)
 #INCLUDE(FindPostgres)
 #INCLUDE(FindMongo)
 #INCLUDE(FindRedis)
 INCLUDE(FindNode)
+
+# Find packages
+
+FIND_PACKAGE(Boost)
 
 # Add libgit2 include
 INCLUDE_DIRECTORIES("vendor/libgit2/include")
@@ -78,6 +83,14 @@ TARGET_LINK_LIBRARIES(mysql git2)
 #    TARGET_LINK_LIBRARIES(redis ${LIBREDIS_LIBRARY}/Win32_Interop)
 #ENDIF ()
 
+# HBase
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${LIBTHRIFT_INCLUDE_DIR})
+FILE(GLOB SRC_HBASE native/hbase/*.h native/hbase/*.cpp)
+LINK_DIRECTORIES(${LIBTHRIFTL_LIBRARY})
+ADD_LIBRARY(hbase ${SRC_HBASE})
+TARGET_LINK_LIBRARIES(hbase libthrift)
+
 # node native addon
 INCLUDE_DIRECTORIES(${NODE_GYP_DIR}/src)
 INCLUDE_DIRECTORIES(${NODE_GYP_DIR}/deps/uv/include)
@@ -88,6 +101,7 @@ FILE(GLOB SRC_NODE native/addon/*.h native/addon/*.cc)
 ADD_LIBRARY(addon ${SRC_NODE})
 ADD_DEPENDENCIES(addon mysql)
 TARGET_LINK_LIBRARIES(addon mysql)
+TARGET_LINK_LIBRARIES(addon hbase)
 IF (MSVC_IDE)
   TARGET_LINK_LIBRARIES(addon ${NODE_GYP_DIR}/Release/iojs)
 ENDIF ()
