@@ -9,7 +9,8 @@ This project is still at early stage, DO NOT use for production.
 
 TODO
 ----
-- [x] drop JNI, use protobuf instead
+- [ ] HBase integration
+- [ ] R integration
 - [x] ES6 native promise
 - [ ] mutext to protect global viarable
 - [ ] git mysql backend

@@ -1,0 +1,19 @@
+#  LIBR_INCLUDE
+#  LIBR_LIBRARY
+#  LIBR_FOUND
+
+#  Read environment variables to find mysql include/lib directories
+SET(LIBR_INCLUDE $ENV{R_HOME}/include)
+MESSAGE( STATUS "LIBR_INCLUDE:         " ${LIBR_INCLUDE} )
+SET(LIBR_LIBRARY $ENV{R_HOME}/bin/i386)
+MESSAGE( STATUS "LIBR_LIBRARY:         " ${LIBR_LIBRARY} )
+
+FIND_PATH(LIBR_INCLUDE R.h)
+FIND_LIBRARY(LIBR_LIBRARY R.lib)
+
+# handle the QUIETLY and REQUIRED arguments and set Libmysql_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBR DEFAULT_MSG LIBR_INCLUDE LIBR_LIBRARY)
+
+MARK_AS_ADVANCED(LIBR_INCLUDE LIBR_LIBRARY)
