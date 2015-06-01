@@ -8,14 +8,19 @@
 void NodeHBase::InitializeComponent(Handle<v8::Object> target){
   NanScope();
 
-  Local<Object> object = NanNew<Object>();
+  Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>();
 
-  NODE_SET_METHOD(object, "Connect", Connect);
-  NODE_SET_METHOD(object, "DisConnect", DisConnect);
-  //NODE_SET_METHOD(object, "GetRow", GetRow);
-  NODE_SET_METHOD(object, "PutRow", PutRow);
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  tpl->SetClassName(NanNew<String>("HBase"));
 
-  target->Set(NanNew<String>("HBase"), object);
+  NODE_SET_METHOD(tpl, "Connect", Connect);
+  NODE_SET_METHOD(tpl, "DisConnect", DisConnect);
+  //NODE_SET_METHOD(tpl, "GetRow", GetRow);
+  NODE_SET_METHOD(tpl, "PutRow", PutRow);
+
+  Local<Function> _constructor_template = tpl->GetFunction();
+  NanAssignPersistent(constructor_template, _constructor_template);
+  target->Set(NanNew<String>("HBase"), _constructor_template);
 }
 
 NAN_METHOD(NodeHBase::Connect) {
