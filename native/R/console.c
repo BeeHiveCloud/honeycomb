@@ -10,6 +10,8 @@
 /* for signal-handling code */
 #include <signal.h>
 
+#include "console.h"
+
 /* simple input, simple output */
 
 /* This version blocks all events: a real one needs to call ProcessEvents
@@ -40,7 +42,7 @@ void myBusy(int which)
 
 static void my_onintr(int sig) { UserBreak = 1; }
 
-int main (int argc, char **argv)
+int execute (int argc, char **argv)
 {
     structRstart rp;
     Rstart Rp = &rp;
@@ -49,7 +51,7 @@ int main (int argc, char **argv)
     sprintf(Rversion, "%s.%s", R_MAJOR, R_MINOR);
     if(strcmp(getDLLVersion(), Rversion) != 0) {
         fprintf(stderr, "Error: R.DLL version does not match\n");
-        exit(1);
+        return -1;
     }
 
     R_setStartTime();

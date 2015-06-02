@@ -1,5 +1,5 @@
 #include <nan.h>
-#include <string.h>
+#include <string>
 #include <chrono>
 #include <thread>
 
@@ -8,52 +8,59 @@
 void GitMysql::InitializeComponent(Handle<v8::Object> target) {
     NanScope();
 
+	/*
 	Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>();
 
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 	tpl->SetClassName(NanNew<String>("MySQL"));
+	*/
 
-	NODE_SET_METHOD(tpl, "LastError", LastError);
+	Local<Object> object = NanNew<Object>();
 
-	NODE_SET_METHOD(tpl, "Open", Open);
+	NODE_SET_METHOD(object, "LastError", LastError);
 
-	NODE_SET_METHOD(tpl, "Close", Close);
+	NODE_SET_METHOD(object, "Open", Open);
 
-	NODE_SET_METHOD(tpl, "Add", CreateBlob);
+	NODE_SET_METHOD(object, "Close", Close);
 
-	NODE_SET_METHOD(tpl, "WriteTree", WriteTree);
+	NODE_SET_METHOD(object, "Add", CreateBlob);
 
-	NODE_SET_METHOD(tpl, "BranchLookup", BranchLookup);
+	NODE_SET_METHOD(object, "WriteTree", WriteTree);
 
-	NODE_SET_METHOD(tpl, "CreateRef", CreateRef);
+	NODE_SET_METHOD(object, "BranchLookup", BranchLookup);
 
-	NODE_SET_METHOD(tpl, "RevParse", RevParse);
+	NODE_SET_METHOD(object, "CreateRef", CreateRef);
 
-	NODE_SET_METHOD(tpl, "Commit", Commit);
+	NODE_SET_METHOD(object, "RevParse", RevParse);
 
-	NODE_SET_METHOD(tpl, "CreateBranch", CreateBranch);
+	NODE_SET_METHOD(object, "Commit", Commit);
 
-	NODE_SET_METHOD(tpl, "AdHoc", AdHoc);
+	NODE_SET_METHOD(object, "CreateBranch", CreateBranch);
 
-	NODE_SET_METHOD(tpl, "CreateRepo", CreateRepo);
+	NODE_SET_METHOD(object, "AdHoc", AdHoc);
 
-	NODE_SET_METHOD(tpl, "DeleteRepo", DeleteRepo);
+	NODE_SET_METHOD(object, "CreateRepo", CreateRepo);
 
-	NODE_SET_METHOD(tpl, "GetRepo", GetRepo);
+	NODE_SET_METHOD(object, "DeleteRepo", DeleteRepo);
 
-	NODE_SET_METHOD(tpl, "SetRepo", SetRepo);
+	NODE_SET_METHOD(object, "GetRepo", GetRepo);
 
-	NODE_SET_METHOD(tpl, "TreeWalk", TreeWalk);
+	NODE_SET_METHOD(object, "SetRepo", SetRepo);
 
-	NODE_SET_METHOD(tpl, "Config", Config);
+	NODE_SET_METHOD(object, "TreeWalk", TreeWalk);
 
-	NODE_SET_METHOD(tpl, "CreateTag", CreateTag);
+	NODE_SET_METHOD(object, "Config", Config);
 
-	NODE_SET_METHOD(tpl, "Diff", Diff);
+	NODE_SET_METHOD(object, "CreateTag", CreateTag);
 
+	NODE_SET_METHOD(object, "Diff", Diff);
+
+	/*
 	Local<Function> _constructor_template = tpl->GetFunction();
 	NanAssignPersistent(constructor_template, _constructor_template);
 	target->Set(NanNew<String>("MySQL"), _constructor_template);
+	*/
+	target->Set(NanNew<String>("MySQL"), object);
 }
 
 

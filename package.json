@@ -2,7 +2,7 @@
   "name": "honeycomb",
   "version": "0.1.0",
   "description": "A hybrid data platform",
-  "keywords": ["honeycomb","node.js","git","Hadoop","HBase","MySQL","Redis","MongoDB","R"],
+  "keywords": ["honeycomb","node.js","Hadoop","HBase","Hive","MySQL","Redis","MongoDB","R","git"],
   "main": "./lib/index.js",
   "dependencies": {
     "nan": "1.8.4",

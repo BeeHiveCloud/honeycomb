@@ -1,5 +1,5 @@
 #include <nan.h>
-#include <string.h>
+#include <string>
 #include <chrono>
 #include <thread>
 
@@ -8,19 +8,27 @@
 void NodeHBase::InitializeComponent(Handle<v8::Object> target){
   NanScope();
 
+  /*
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>();
 
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   tpl->SetClassName(NanNew<String>("HBase"));
+  */
 
-  NODE_SET_METHOD(tpl, "Connect", Connect);
-  NODE_SET_METHOD(tpl, "DisConnect", DisConnect);
-  //NODE_SET_METHOD(tpl, "GetRow", GetRow);
-  NODE_SET_METHOD(tpl, "PutRow", PutRow);
+  Local<Object> object = NanNew<Object>();
 
+  NODE_SET_METHOD(object, "Connect", Connect);
+  NODE_SET_METHOD(object, "DisConnect", DisConnect);
+  //NODE_SET_METHOD(object, "GetRow", GetRow);
+  NODE_SET_METHOD(object, "PutRow", PutRow);
+
+  /*
   Local<Function> _constructor_template = tpl->GetFunction();
   NanAssignPersistent(constructor_template, _constructor_template);
   target->Set(NanNew<String>("HBase"), _constructor_template);
+  */
+
+  target->Set(NanNew<String>("HBase"), object);
 }
 
 NAN_METHOD(NodeHBase::Connect) {

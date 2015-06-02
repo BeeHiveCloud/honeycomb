@@ -1,4 +1,15 @@
-#include "roger.h"
+#define Win32
+#include <windows.h>
+#include <stdio.h>
+#undef ERROR
+#include <Rversion.h>
+#include <Rembedded.h>
+#include <R_ext/RStartup.h>
+#include <Rinternals.h>
+#include <Rdefines.h>
+#include <R_ext/Parse.h>
+
+#include "execute.h"
 
 int LoadR(int argc, char **argv){
   char Rversion[25];
@@ -39,7 +50,7 @@ SEXP ParseOneLine(const char *code, SEXP env, ParseStatus *status){
   SET_STRING_ELT(cmd, 0, mkChar(code));
   PROTECT(expr = R_ParseVector(cmd, -1, status, R_NilValue));
   UNPROTECT(2);
-  
+
   return expr;
 }
 
@@ -51,7 +62,7 @@ SEXP ExecuteOneLine(char *cmd, SEXP env, int *errorOccured){
 	return val;
 }
 
-int main(int argc, char **argv){
+int call(int argc, char **argv){
 	char *c = "hello";
 	int errorOccured;
 	LoadR(argc,argv);
