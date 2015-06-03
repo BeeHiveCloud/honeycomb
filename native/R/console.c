@@ -1,6 +1,7 @@
 #define Win32
 #include <windows.h>
 #include <stdio.h>
+#include <R.h>
 #include <Rversion.h>
 #include <Rembedded.h>
 #include <R_ext/RStartup.h>
@@ -18,14 +19,17 @@
    frequently. See rterm.c and ../system.c for one approach using
    a separate thread for input.
 */
-int myReadConsole(const char *prompt, char *buf, int len, int addtohistory)
+int readConsole(const char *prompt, char *buf, int len, int addtohistory)
 {
     fputs(prompt, stdout);
     fflush(stdout);
     if(fgets(buf, len, stdin)) return 1; else return 0;
+
+	//R_WaitEvent();
+	//R_ProcessEvents();
 }
 
-void myWriteConsole(const char *buf, int len)
+void writeConsole(const char *buf, int len)
 {
     printf("%s", buf);
 }
@@ -63,8 +67,8 @@ int execute (int argc, char **argv)
     Rp->rhome = RHome;
     Rp->home = getRUser();
     Rp->CharacterMode = LinkDLL;
-    Rp->ReadConsole = myReadConsole;
-    Rp->WriteConsole = myWriteConsole;
+    Rp->ReadConsole = readConsole;
+    Rp->WriteConsole = writeConsole;
     Rp->CallBack = myCallBack;
     Rp->ShowMessage = askok;
     Rp->YesNoCancel = askyesnocancel;

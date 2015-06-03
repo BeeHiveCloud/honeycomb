@@ -33,6 +33,8 @@ class RConsole : public NanAsyncWorker {
  private:
 
    static NAN_METHOD(Run);
+
+   static NAN_METHOD(Read);
    
 };
 
