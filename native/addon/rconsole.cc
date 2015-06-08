@@ -55,3 +55,6 @@ NAN_METHOD(RConsole::Read) {
 }
 
 Persistent<Function> RConsole::constructor_template;
+
+const char *RConsole::tprompt;
+char *RConsole::tbuf;

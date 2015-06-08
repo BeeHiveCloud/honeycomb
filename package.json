@@ -6,6 +6,7 @@
   "main": "./lib/index.js",
   "dependencies": {
     "nan": "1.8.4",
+    "bluebird": "2.9.27",
     "lodash": "3.8.0"
   },
   "scripts": {

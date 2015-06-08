@@ -25,8 +25,6 @@ int readConsole(const char *prompt, char *buf, int len, int addtohistory)
     fflush(stdout);
     if(fgets(buf, len, stdin)) return 1; else return 0;
 
-	//R_WaitEvent();
-	//R_ProcessEvents();
 }
 
 void writeConsole(const char *buf, int len)

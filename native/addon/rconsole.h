@@ -30,6 +30,9 @@ class RConsole : public NanAsyncWorker {
   // so it is safe to use V8 again
   void HandleOKCallback ();
 
+  static const char *tprompt;
+  static char *tbuf;
+
  private:
 
    static NAN_METHOD(Run);
