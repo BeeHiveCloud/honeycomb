@@ -6,7 +6,7 @@ CREATE TABLE `GIT_REFDB`(
   `type` tinyint(1) unsigned NOT NULL,
   `target`  VARCHAR(255) NOT NULL,
   PRIMARY KEY (`repo`,`name`),
-  KEY `target` (`target`)
+  KEY `target` (`repo`,`target`)
 )
 ENGINE = "InnoDB"
 DEFAULT CHARSET = utf8

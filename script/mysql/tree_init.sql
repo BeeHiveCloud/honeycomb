@@ -1,8 +1,8 @@
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS git_tree_init;
+DROP PROCEDURE IF EXISTS GIT_TREE_INIT;
 
-CREATE PROCEDURE git_tree_init (IN p_repo BIGINT UNSIGNED)
+CREATE PROCEDURE GIT_TREE_INIT (IN p_repo BIGINT UNSIGNED)
 BEGIN
 
 DECLARE v_count INT UNSIGNED DEFAULT 1;
@@ -11,7 +11,7 @@ DECLARE v_count INT UNSIGNED DEFAULT 1;
 
  INSERT INTO GIT_TREE(`repo`, `dir`, `type`, `entry`, `oid`)
  SELECT `repo`, `dir`, 'BLOB',`file`, `oid`
- from git_index_v where repo = p_repo;
+ from GIT_INDEX_V where repo = p_repo;
 
  WHILE v_count > 0 DO
 	select count(1) into v_count
@@ -19,7 +19,7 @@ DECLARE v_count INT UNSIGNED DEFAULT 1;
 	                        LEFT(`c`, LENGTH(`c`)-LOCATE('/', REVERSE(`c`))+1) parent,
 	                        repo
 	          from (select distinct p.dir p, substring(c.dir,1,length(c.dir)-1)  c, c.repo
-	                  from git_tree p right join git_tree c
+	                  from GIT_TREE p right join GIT_TREE c
 	                    on p.repo = c.repo
 	                   and concat(p.dir,p.entry,'/') = c.dir
 					   )d
@@ -34,7 +34,7 @@ DECLARE v_count INT UNSIGNED DEFAULT 1;
 	                        LEFT(`c`, LENGTH(`c`)-LOCATE('/', REVERSE(`c`))+1) parent,
 	                        repo
 	          from (select distinct p.dir p, substring(c.dir,1,length(c.dir)-1)  c, c.repo
-	                  from git_tree p right join git_tree c
+	                  from GIT_TREE p right join GIT_TREE c
 	                    on p.repo = c.repo
 	                   and concat(p.dir,p.entry,'/') = c.dir
 					   )d

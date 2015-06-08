@@ -5,7 +5,7 @@ CREATE TABLE GIT_INDEX(
   `oid`   BINARY(20) NOT NULL,
   `path`  VARCHAR(255) NOT NULL,
   PRIMARY KEY (`repo`,`path`),
-  KEY `oid` (`oid`)
+  KEY `oid` (`repo`,`oid`)
 )
 ENGINE = "InnoDB"
 DEFAULT CHARSET = utf8

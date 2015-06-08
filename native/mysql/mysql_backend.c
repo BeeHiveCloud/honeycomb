@@ -38,12 +38,12 @@ int init_statements(git_mysql *mysql)
   static const char *sql_repo_create =
 	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (?, ?, ?)";
 
-  static const char *sql_repo_del = "CALL git_repo_del(?);";
+  static const char *sql_repo_del = "CALL GIT_REPO_DEL(?);";
 
-  static const char *sql_tree_init = "CALL git_tree_init(?);";
-  static const char *sql_tree_update = "CALL git_tree_update(?, ?, ?);";
+  static const char *sql_tree_init = "CALL GIT_TREE_INIT(?);";
+  static const char *sql_tree_update = "CALL GIT_TREE_UPDATE(?, ?, ?);";
 
-  static const char *sql_tree_build = 
+  static const char *sql_tree_build =
 	  "SELECT `oid`, `dir`, `entry` FROM GIT_TREE WHERE `repo` = ? AND `type` = ? AND `dir` <> '/' ORDER BY `dir`, `entry`;";
 
   static const char *sql_tree_root =
@@ -333,7 +333,7 @@ int git_mysql_free(git_mysql *mysql)
   return GIT_OK;
 }
 
-int git_mysql_init(git_mysql **out, 
+int git_mysql_init(git_mysql **out,
 				   const char *mysql_host,
 				   const char *mysql_user,
 				   const char *mysql_passwd,

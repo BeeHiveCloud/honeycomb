@@ -9,9 +9,9 @@ This project is still at early stage, DO NOT use for production.
 
 TODO
 ----
+- [ ] Linux Segmentation fault (core dumped)
 - [ ] HBase integration
 - [ ] R integration
-- [x] ES6 native promise
 - [ ] mutext to protect global viarable
 - [ ] git mysql backend
   - [ ] workdir backend
@@ -21,7 +21,6 @@ TODO
 
 Issue
 -----
-- [ ] is.js 2.x native addon compile fail on Linux and Mac
 - [ ] Run-Time Check Failure #2 - Stack around the variable 'xxx' was corrupted
   - [x] Windows 7 32-bit, Release mode fixed
   - [ ] Windows 7 32-bit, Debug mode, the odb_read still throws this error

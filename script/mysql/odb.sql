@@ -7,8 +7,8 @@ CREATE TABLE `GIT_ODB` (
  `size` BIGINT UNSIGNED NOT NULL,
  `data` LONGBLOB NOT NULL,
  PRIMARY KEY (`repo`,`oid`),
- KEY `type` (`type`),
- KEY `size` (`size`)
+ KEY `type` (`repo`,`type`),
+ KEY `size` (`repo`,`size`)
 )
 ENGINE = "InnoDB"
 DEFAULT CHARSET=utf8
