@@ -9,7 +9,6 @@ This project is still at early stage, DO NOT use for production.
 
 TODO
 ----
-- [ ] Linux Segmentation fault (core dumped)
 - [ ] HBase integration
 - [ ] R integration
 - [ ] mutext to protect global viarable
@@ -21,11 +20,24 @@ TODO
 
 Issue
 -----
+- [ ] Cent OS 7 - Segmentation fault (core dumped)
 - [ ] Run-Time Check Failure #2 - Stack around the variable 'xxx' was corrupted
   - [x] Windows 7 32-bit, Release mode fixed
   - [ ] Windows 7 32-bit, Debug mode, the odb_read still throws this error
 - [x] mysql_stmt_fetch access violation
 
+
+Config
+------
+
+Mac OS X
+
+```sh
+export NODE_GYP_DIR=~/.node-gyp
+export LIBMYSQL_INCLUDE_DIR=/usr/local/mysql/include
+export LIBMYSQL_LIBRARY=/usr/local/mysql/lib
+export DYLD_LIBRARY_PATH=$LIBMYSQL_LIBRARY:$DYLD_LIBRARY_PATH
+```
 
 License
 -------
