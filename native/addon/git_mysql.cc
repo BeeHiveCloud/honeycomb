@@ -1,7 +1,5 @@
 #include <nan.h>
 #include <string>
-#include <chrono>
-#include <thread>
 
 #include "git_mysql.h"
 
@@ -584,13 +582,11 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	// Transaction Start
 	git_mysql_transaction(mysql);
 
-	char *reponum = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
+	long long int rid = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
 
-	if (reponum){
+	if (rid > 0){
 
-		mutex.lock();
-		mysql->repo = std::stoi(reponum);
-		mutex.unlock();
+		mysql->repo = rid;
 
 		int error;
 		git_oid oid;
@@ -673,9 +669,7 @@ NAN_METHOD(GitMysql::SetRepo) {
 		return NanThrowError("repo is required.");
 	}
 
-	mutex.lock();
 	mysql->repo = (long long int)args[0]->ToNumber()->Value();
-	mutex.unlock();
 }
 
 NAN_METHOD(GitMysql::TreeWalk) {
@@ -878,4 +872,3 @@ NAN_METHOD(GitMysql::Diff) {
 Persistent<Function> GitMysql::constructor_template;
 git_mysql * GitMysql::mysql;
 git_repository * GitMysql::repo;
-std::mutex GitMysql::mutex;

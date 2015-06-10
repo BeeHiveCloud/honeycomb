@@ -5,6 +5,8 @@ int init_statements(git_mysql *mysql)
   my_bool truth = 1;
   //unsigned long type = (unsigned long)CURSOR_TYPE_READ_ONLY;
 
+  static const char *sql_last_seq = "SELECT LAST_INSERT_ID();";
+
   static const char *sql_odb_read =
     "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
 
@@ -57,6 +59,13 @@ int init_statements(git_mysql *mysql)
 
   static const char *sql_config_del =
 	  "DELETE FROM GIT_CONFIG WHERE `repo` = ? AND `key` = ?;";
+
+  mysql->last_seq = mysql_stmt_init(mysql->db);
+  if (mysql->last_seq == NULL)
+    return GIT_ERROR;
+
+  if (mysql_stmt_prepare(mysql->last_seq, sql_last_seq, strlen(sql_last_seq)) != 0)
+    return GIT_ERROR;
 
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
@@ -287,6 +296,8 @@ int git_mysql_free(git_mysql *mysql)
 {
   assert(mysql);
 
+  if (mysql->last_seq)
+    mysql_stmt_close(mysql->last_seq);
   if (mysql->odb_read)
     mysql_stmt_close(mysql->odb_read);
   if (mysql->odb_read_header)

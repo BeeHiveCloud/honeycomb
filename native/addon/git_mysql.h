@@ -3,7 +3,6 @@
 
 #include <nan.h>
 #include <string>
-#include <mutex>
 
 extern "C" {
 #include "git2.h"
@@ -29,7 +28,6 @@ class GitMysql : public ObjectWrap {
 
 	static git_mysql *mysql;
 	static git_repository *repo;
-	static std::mutex mutex;
 
   private:
 

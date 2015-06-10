@@ -6,10 +6,11 @@
 
 #include <mysql.h>
 
-char *git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description){
+long long int git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description){
 
 	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
+	long long int repo;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -45,15 +46,9 @@ char *git_mysql_repo_create(git_mysql *mysql, const long long int owner, const c
 	if (mysql_stmt_reset(mysql->repo_create) != 0)
 		return NULL;
 
-	mysql_query(mysql->db, "SELECT LAST_INSERT_ID();");
+	repo = git_mysql_last_seq(mysql);
 
-	MYSQL_RES *result = mysql_store_result(mysql->db);
-
-	MYSQL_ROW row = mysql_fetch_row(result);
-
-	mysql_free_result(result);
-
-	return row[0];
+	return repo;
 }
 
 int git_mysql_repo_del(git_mysql *mysql){
@@ -80,4 +75,44 @@ int git_mysql_repo_del(git_mysql *mysql){
 		return GIT_ERROR;
 
 	return GIT_OK;
+}
+
+long long int git_mysql_last_seq(git_mysql *mysql){
+
+	MYSQL_BIND result_buffers[1];
+	long long int repo;
+
+	// execute the statement
+	if (mysql_stmt_execute(mysql->last_seq) != 0)
+		return -1;
+
+	if (mysql_stmt_store_result(mysql->last_seq) != 0)
+		return -1;
+
+	if (mysql_stmt_num_rows(mysql->last_seq) == 1){
+		memset(result_buffers, 0, sizeof(result_buffers));
+
+		result_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
+		result_buffers[0].buffer = &repo;
+		result_buffers[0].buffer_length = sizeof(repo);
+		result_buffers[0].is_null = 0;
+		result_buffers[0].length = &result_buffers[0].buffer_length;
+		memset(&repo, 0, sizeof(repo));
+
+		if (mysql_stmt_bind_result(mysql->last_seq, result_buffers) != 0)
+			return -1;
+
+		mysql_stmt_fetch(mysql->last_seq);
+		
+		return repo;
+	}
+	else
+		return -1;
+
+
+	// reset the statement for further use
+	if (mysql_stmt_reset(mysql->last_seq) != 0)
+		return -1;
+
+	return -1;
 }
