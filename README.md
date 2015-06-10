@@ -9,9 +9,7 @@ This project is still at early stage, DO NOT use for production.
 
 TODO
 ----
-- [ ] HBase integration
 - [ ] R integration
-- [ ] mutext to protect global viarable
 - [ ] git mysql backend
   - [ ] workdir backend
   - [ ] config backend

@@ -6,7 +6,7 @@
 
 #include <mysql.h>
 
-long long int git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description){
+int git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description){
 
 	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
@@ -31,24 +31,22 @@ long long int git_mysql_repo_create(git_mysql *mysql, const long long int owner,
 	bind_buffers[2].buffer_type = MYSQL_TYPE_BLOB;
 
 	if (mysql_stmt_bind_param(mysql->repo_create, bind_buffers) != 0)
-		return NULL;
+		return GIT_ERROR;
 
 	// execute the statement
 	if (mysql_stmt_execute(mysql->repo_create) != 0)
-		return NULL;
+		return GIT_ERROR;
 
 	// now lets see if the insert worked
 	affected_rows = mysql_stmt_affected_rows(mysql->repo_create);
 	if (affected_rows != 1)
-		return NULL;
+		return GIT_ERROR;
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->repo_create) != 0)
-		return NULL;
+		return GIT_ERROR;
 
-	repo = git_mysql_last_seq(mysql);
-
-	return repo;
+	return GIT_OK;
 }
 
 int git_mysql_repo_del(git_mysql *mysql){
