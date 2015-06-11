@@ -135,13 +135,13 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 
 		while (mysql_stmt_fetch(mysql->tree_build) == MYSQL_DATA_TRUNCATED){
 	
-			dir = malloc(dir_len + 1);
+			dir = calloc(1, dir_len + 1);
 			result_buffers[1].buffer = dir;
 			result_buffers[1].buffer_length = dir_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_build, &result_buffers[1], 1, 0) != 0)
 				return GIT_ERROR;
 
-			entry = malloc(entry_len + 1);
+			entry = calloc(1, entry_len + 1);
 			result_buffers[2].buffer = entry;
 			result_buffers[2].buffer_length = entry_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_build, &result_buffers[2], 2, 0) != 0)
@@ -257,19 +257,19 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
 		while (mysql_stmt_fetch(mysql->tree_root) == MYSQL_DATA_TRUNCATED){
 
-			dir = malloc(dir_len + 1);
+			dir = calloc(1, dir_len + 1);
 			result_buffers[1].buffer = dir;
 			result_buffers[1].buffer_length = dir_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_root, &result_buffers[1], 1, 0) != 0)
 				return NULL;
 
-			entry = malloc(entry_len + 1);
+			entry = calloc(1, entry_len + 1);
 			result_buffers[2].buffer = entry;
 			result_buffers[2].buffer_length = entry_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_root, &result_buffers[2], 2, 0) != 0)
 				return NULL;
 
-			type = malloc(type_len + 1);
+			type = calloc(1, type_len + 1);
 			result_buffers[3].buffer = type;
 			result_buffers[3].buffer_length = type_len + 1;
 			if (mysql_stmt_fetch_column(mysql->tree_root, &result_buffers[3], 3, 0) != 0)

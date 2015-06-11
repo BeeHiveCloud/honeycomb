@@ -6,6 +6,7 @@
 
 #include "git2.h"
 #include "git2/sys/refdb_backend.h"
+#include "git2/sys/refs.h"
 
 #include "mysql_backend.h"
 

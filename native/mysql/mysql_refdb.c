@@ -114,7 +114,7 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		result_buffers[0].buffer = &type;
 		result_buffers[0].buffer_length = sizeof(type);
 		result_buffers[0].is_null = 0;
-		result_buffers[0].length = &type_len;
+		result_buffers[0].length = &result_buffers[0].buffer_length; //&type_len
 		memset(&type, 0, sizeof(type));
 
 		result_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
@@ -130,13 +130,13 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		//if(error != 0 || error != MYSQL_DATA_TRUNCATED)
 		//   return GIT_ERROR;
 
-		if (type_len > 0){
-			if (mysql_stmt_fetch_column(backend->mysql->refdb_read, &result_buffers[0], 0, 0) != 0)
-				return GIT_ERROR;
-		}
+		//if (type_len > 0){
+		//	if (mysql_stmt_fetch_column(backend->mysql->refdb_read, &result_buffers[0], 0, 0) != 0)
+		//		return GIT_ERROR;
+		//}
 
 		if (target_len > 0){
-			target_buf = malloc(target_len + 1);
+			target_buf = calloc(1, target_len + 1);
 			result_buffers[1].buffer = target_buf;
 			result_buffers[1].buffer_length = target_len + 1;
 
