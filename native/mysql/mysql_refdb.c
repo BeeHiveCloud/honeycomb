@@ -257,8 +257,8 @@ int mysql_refdb_del(git_refdb_backend *backend, const char *ref_name, const git_
 	return GIT_OK;
 }
 
-int mysql_refdb_free(git_refdb_backend *backend){
-	return GIT_OK;
+void mysql_refdb_free(git_refdb_backend *backend){
+
 }
 
 int git_mysql_refdb_init(git_refdb_backend **out, git_mysql *mysql)
