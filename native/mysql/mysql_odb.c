@@ -25,14 +25,13 @@ int mysql_odb_read_prefix(	git_oid *out_oid,
 int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_backend, const git_oid *oid)
 {
   git_mysql_odb *backend;
-  int error;
+  int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[2];
 
   assert(len_p && type_p && _backend && oid);
 
   backend = (git_mysql_odb *)_backend;
-  error = GIT_ERROR;
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -65,14 +64,14 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 	memset(result_buffers, 0, sizeof(result_buffers));
 
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
-  result_buffers[0].buffer = type_p;
+        result_buffers[0].buffer = type_p;
 	result_buffers[0].buffer_length = sizeof(*type_p);
 	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &result_buffers[0].buffer_length;
 	memset(type_p, 0, sizeof(*type_p));
 
-  result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
-  result_buffers[1].buffer = len_p;
+        result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
+        result_buffers[1].buffer = len_p;
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
@@ -142,14 +141,14 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	result_buffers[0].buffer = type_p;
 	result_buffers[0].buffer_length = sizeof(*type_p);
 	result_buffers[0].is_null = 0;
-	result_buffers[0].length = &result_buffers[0].buffer_length;// &type_len;
+	result_buffers[0].length = &result_buffers[0].buffer_length;
 	memset(type_p, 0, sizeof(*type_p));
 
-  result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
+  	result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
 	result_buffers[1].buffer = len_p;
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
-	result_buffers[1].length = &result_buffers[1].buffer_length;// &len_len;
+	result_buffers[1].length = &result_buffers[1].buffer_length;
 	memset(len_p, 0, sizeof(*len_p));
 
     // by setting buffer and buffer_length to 0, this tells libmysql
@@ -160,10 +159,11 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     // once we fetch the result?
 
 	result_buffers[2].buffer_type = MYSQL_TYPE_LONG_BLOB;
-  result_buffers[2].buffer = 0;
+  	result_buffers[2].buffer = 0;
 	result_buffers[2].is_null = 0;
-  result_buffers[2].buffer_length = 0;
-  result_buffers[2].length = &data_len;
+  	result_buffers[2].buffer_length = 0;
+  	result_buffers[2].length = &data_len;
+	memset(&data_len, 0, sizeof(data_len));
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read, result_buffers) != 0)
       return GIT_ERROR;
