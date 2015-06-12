@@ -59,7 +59,7 @@ int mysql_config_get(git_config_backend *_backend, const char *key, const git_co
 		result_buffers[0].buffer_length = 0;
 		result_buffers[0].buffer = 0;
 		result_buffers[0].is_null = 0;
-		result_buffers[0].length = &val_len;
+		result_buffers[0].length = (unsigned long *)&val_len;
 
 		result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
 		result_buffers[1].buffer = &type;

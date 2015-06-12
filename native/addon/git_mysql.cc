@@ -3,13 +3,6 @@
 void GitMysql::InitializeComponent(Handle<v8::Object> target) {
     NanScope();
 
-	/*
-	Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>();
-
-	tpl->InstanceTemplate()->SetInternalFieldCount(1);
-	tpl->SetClassName(NanNew<String>("MySQL"));
-	*/
-
 	Local<Object> object = NanNew<Object>();
 
 	NODE_SET_METHOD(object, "LastError", LastError);
@@ -50,11 +43,6 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "Diff", Diff);
 
-	/*
-	Local<Function> _constructor_template = tpl->GetFunction();
-	NanAssignPersistent(constructor_template, _constructor_template);
-	target->Set(NanNew<String>("MySQL"), _constructor_template);
-	*/
 	target->Set(NanNew<String>("MySQL"), object);
 }
 
@@ -334,7 +322,6 @@ NAN_METHOD(GitMysql::BranchLookup) {
 	NanEscapableScope();
 
 	int				  error;
-	git_oid			  oid;
 	git_reference *	  ref;
 
 	if (args.Length() == 0 || !args[0]->IsString()) {
@@ -734,7 +721,7 @@ NAN_METHOD(GitMysql::RevParse) {
 	int error;
 
 	git_object *tree;
-	const git_oid *oid;
+	const git_oid *oid = NULL;
 
 	error = git_revparse_single(&tree, repo, from_spec);
 	if (!error)

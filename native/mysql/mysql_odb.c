@@ -64,14 +64,14 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 	memset(result_buffers, 0, sizeof(result_buffers));
 
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
-        result_buffers[0].buffer = type_p;
+    result_buffers[0].buffer = type_p;
 	result_buffers[0].buffer_length = sizeof(*type_p);
 	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &result_buffers[0].buffer_length;
 	memset(type_p, 0, sizeof(*type_p));
 
-        result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
-        result_buffers[1].buffer = len_p;
+    result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
+    result_buffers[1].buffer = len_p;
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
@@ -244,7 +244,7 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 
 int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *data, size_t len, git_otype type)
 {
-  int error;
+  //int error;
   git_mysql_odb *backend;
   MYSQL_BIND bind_buffers[5];
   my_ulonglong affected_rows;
@@ -253,8 +253,8 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
   backend = (git_mysql_odb *)_backend;
 
-  if ((error = git_odb_hash(oid, data, len, type)) < 0)
-    return error;
+  //if ((error = git_odb_hash(oid, data, len, type)) < 0)
+  //  return error;
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
