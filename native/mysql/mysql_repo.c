@@ -10,22 +10,21 @@ int git_mysql_repo_create(git_mysql *mysql, const long long int owner, const cha
 
 	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
-	long long int repo;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
 	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &owner;
+	bind_buffers[0].buffer = (void *)&owner;
 	bind_buffers[0].buffer_length = sizeof(owner);
 	bind_buffers[0].length = &bind_buffers[0].buffer_length;
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
-	bind_buffers[1].buffer = name;
+	bind_buffers[1].buffer = (void *)name;
 	bind_buffers[1].buffer_length = strlen(name);
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 
-	bind_buffers[2].buffer = description;
+	bind_buffers[2].buffer = (void *)description;
 	bind_buffers[2].buffer_length = strlen(description);
 	bind_buffers[2].length = &bind_buffers[2].buffer_length;
 	bind_buffers[2].buffer_type = MYSQL_TYPE_BLOB;

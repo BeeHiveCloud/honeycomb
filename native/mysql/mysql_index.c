@@ -1,7 +1,7 @@
 #include "mysql_index.h"
 
 int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
-	int error;
+	//int error;
 	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
 
@@ -47,7 +47,7 @@ int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
 }
 
 int git_mysql_index_del(git_mysql *mysql, const char *path){
-	int error;
+	//int error;
 	MYSQL_BIND bind_buffers[2];
 	my_ulonglong affected_rows;
 

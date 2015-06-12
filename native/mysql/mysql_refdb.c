@@ -1,15 +1,16 @@
 #include "mysql_refdb.h"
 
-int mysql_ref_iterator_next(git_reference **ref, git_reference_iterator *iter){
 
+int mysql_ref_iterator_next(git_reference **ref, git_reference_iterator *iter){
+	return GIT_OK;
 }
 
 int mysql_ref_iterator_next_name(const char **ref_name, git_reference_iterator *iter){
-
+	return GIT_OK;
 }
 
 int mysql_ref_iterator_free(git_reference_iterator *iter){
-
+	return GIT_OK;
 }
 
 int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref_name){
@@ -31,7 +32,7 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
 	// bind the name passed to the statement
-	bind_buffers[1].buffer = ref_name;
+	bind_buffers[1].buffer = (void *)ref_name;
 	bind_buffers[1].buffer_length = strlen(ref_name);
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
@@ -70,7 +71,6 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	git_ref_t type;
 	git_oid target;
 	char *target_buf;
-	unsigned long type_len;
 	unsigned long target_len;
 
 	assert(_backend && ref_name);
@@ -88,7 +88,7 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
 	// bind the name passed to the statement
-	bind_buffers[1].buffer = ref_name;
+	bind_buffers[1].buffer = (void *)ref_name;
 	bind_buffers[1].buffer_length = strlen(ref_name);
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
@@ -130,11 +130,6 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		//if(error != 0 || error != MYSQL_DATA_TRUNCATED)
 		//   return GIT_ERROR;
 
-		//if (type_len > 0){
-		//	if (mysql_stmt_fetch_column(backend->mysql->refdb_read, &result_buffers[0], 0, 0) != 0)
-		//		return GIT_ERROR;
-		//}
-
 		if (target_len > 0){
 			target_buf = calloc(1, target_len + 1);
 			result_buffers[1].buffer = target_buf;
@@ -171,7 +166,7 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 }
 
 int mysql_refdb_iterator(git_reference_iterator **iter, git_refdb_backend *backend, const char *glob){
-
+	return GIT_OK;
 }
 
 int mysql_refdb_write(git_refdb_backend *_backend,
@@ -179,7 +174,7 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 					  const git_signature *who, const char *message,
 					  const git_oid *old, const char *old_target)
 {
-	int error;
+	//int error;
 	git_mysql_refdb *backend;
 	MYSQL_BIND bind_buffers[4];
 	my_ulonglong affected_rows;
@@ -202,12 +197,12 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
 	// bind the name
-	bind_buffers[1].buffer = ref_name;
+	bind_buffers[1].buffer = (void *)ref_name;
 	bind_buffers[1].buffer_length = strlen(ref_name);
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 	
 	// bind the type
-	bind_buffers[2].buffer = &ref_type;
+	bind_buffers[2].buffer = (void *)&ref_type;
 	bind_buffers[2].buffer_length = sizeof(ref_type);
 	bind_buffers[2].buffer_type = MYSQL_TYPE_TINY;
 
@@ -223,7 +218,7 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 		bind_buffers[3].length = &bind_buffers[3].buffer_length;
 	}
 	else if (ref_type == GIT_REF_SYMBOLIC) {
-		bind_buffers[3].buffer = symbolic_target;
+		bind_buffers[3].buffer = (void *)symbolic_target;
 		bind_buffers[3].buffer_length = strlen(symbolic_target);
 		bind_buffers[3].length = &bind_buffers[3].buffer_length;
 	}
@@ -255,15 +250,15 @@ int mysql_refdb_rename(git_reference **out, git_refdb_backend *backend,
 					   const char *old_name, const char *new_name, int force,
 					   const git_signature *who, const char *message)
 {
-
+	return GIT_OK;
 }
 
 int mysql_refdb_del(git_refdb_backend *backend, const char *ref_name, const git_oid *old_id, const char *old_target){
-
+	return GIT_OK;
 }
 
 int mysql_refdb_free(git_refdb_backend *backend){
-
+	return GIT_OK;
 }
 
 int git_mysql_refdb_init(git_refdb_backend **out, git_mysql *mysql)

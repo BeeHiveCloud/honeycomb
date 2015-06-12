@@ -28,8 +28,6 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   int error;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[2];
-  unsigned long len_len;
-  unsigned long type_len;
 
   assert(len_p && type_p && _backend && oid);
 
@@ -87,11 +85,6 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 	if (mysql_stmt_fetch(backend->mysql->odb_read_header) != 0)
       return GIT_ERROR;
 
-	//printf("length of type: %d \n", result_buffers[0].buffer_length);
-	//printf("Value of type: %d \n", *type_p);
-	//printf("length of len: %d \n", result_buffers[1].buffer_length);
-	//printf("Value of len: %d \n", *len_p);
-
 	error = GIT_OK;
   } else {
     error = GIT_ENOTFOUND;
@@ -110,8 +103,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   int error;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
-  unsigned long len_len;
-  unsigned long type_len;
   unsigned long data_len;
 
   assert(len_p && type_p && _backend && oid);
@@ -183,22 +174,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	error = mysql_stmt_fetch(backend->mysql->odb_read);
     // if(error != 0 || error != MYSQL_DATA_TRUNCATED)
     //   return GIT_ERROR;
-
-	//if (type_len > 0){
-	//	if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[0], 0, 0) != 0)
-	//		return GIT_ERROR;
-	//}
-
-	//if (len_len > 0){
-	//	if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[1], 1, 0) != 0)
-	//		return GIT_ERROR;
-	//}
-
-	//printf("length of type: %d \n", result_buffers[0].buffer_length);
-	//printf("Value of type: %d \n", *type_p);
-	//printf("length of len: %d \n", result_buffers[1].buffer_length);
-	//printf("Value of len: %d \n", *len_p);
-	//printf("length of data: %d \n", data_len);
 
     if (data_len > 0) {
       *data_p = malloc(data_len);

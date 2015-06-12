@@ -1,5 +1,7 @@
 #include "mysql_tree.h"
 
+#include <stdio.h>
+
 int git_mysql_tree_init(git_mysql *mysql){
 
 	MYSQL_BIND bind_buffers[1];
@@ -39,7 +41,7 @@ int git_mysql_tree_update(git_mysql *mysql, const char *dir, git_oid *oid){
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
 	// bind the dir passed to the statement
-	bind_buffers[1].buffer = dir;
+	bind_buffers[1].buffer = (void *)dir;
 	bind_buffers[1].buffer_length = strlen(dir) ;
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
@@ -80,7 +82,7 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
 
 	// bind type
-	bind_buffers[1].buffer = type;
+	bind_buffers[1].buffer = (void *)type;
 	bind_buffers[1].buffer_length = strlen(type);
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_STRING;

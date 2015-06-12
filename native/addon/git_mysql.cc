@@ -1,6 +1,3 @@
-#include <nan.h>
-#include <string>
-
 #include "git_mysql.h"
 
 void GitMysql::InitializeComponent(Handle<v8::Object> target) {
