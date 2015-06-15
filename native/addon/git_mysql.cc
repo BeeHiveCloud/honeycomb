@@ -119,6 +119,11 @@ NAN_METHOD(GitMysql::Open) {
 	  return NanThrowError("git_mysql_init error");
   }
 
+  free((char *)from_mysql_host);
+  free((char *)from_mysql_user);
+  free((char *)from_mysql_passwd);
+  free((char *)from_mysql_db);
+
   error = git_libgit2_init();
   if (error < 0){
 	  return NanThrowError("git_libgit2_init error");
@@ -169,7 +174,7 @@ NAN_METHOD(GitMysql::Open) {
   if (error < 0){
 	  return NanThrowError("git_config_open_default error");
   }
-  
+
   /*
   git_config_backend *cfg_backend;
 
@@ -267,6 +272,9 @@ NAN_METHOD(GitMysql::CreateBlob) {
 
 	git_mysql_commit(mysql);
 
+  free((char *)from_path);
+  free((char *)from_buf);
+
 	char sha1[GIT_OID_HEXSZ+1] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ+1, &oid);
 
@@ -341,6 +349,8 @@ NAN_METHOD(GitMysql::BranchLookup) {
 
 	git_reference_free(ref);
 
+  free((char *)from_branch);
+
 	if (!error)
 		NanReturnValue(NanTrue());
 	else
@@ -384,6 +394,9 @@ NAN_METHOD(GitMysql::CreateRef) {
 	}
 
 	git_mysql_commit(mysql);
+
+  free((char *)from_name);
+  free((char *)from_target);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -462,6 +475,9 @@ NAN_METHOD(GitMysql::Commit) {
 
 	git_mysql_commit(mysql);
 
+  free((char *)from_ref);
+  free((char *)from_msg);
+
 	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, &commit);
 
@@ -508,6 +524,8 @@ NAN_METHOD(GitMysql::CreateBranch) {
 
 	git_mysql_commit(mysql);
 
+  free((char *)from_name);
+
 	if (!error)
 		NanReturnValue(NanTrue());
 	else
@@ -528,6 +546,8 @@ NAN_METHOD(GitMysql::AdHoc) {
 	// end convert_from_v8 block
 
 	int error = git_mysql_adhoc(mysql,from_cmd);
+
+  free((char *)from_cmd);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -627,6 +647,9 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		}
 
 		git_mysql_commit(mysql);
+
+    free((char *)from_name);
+    free((char *)from_desc);
 
 		Handle<v8::Value> to;
 		to = NanNew<Number>(mysql->repo);
@@ -731,6 +754,7 @@ NAN_METHOD(GitMysql::RevParse) {
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, oid);
 
 	git_object_free(tree);
+  free((char *)from_spec);
 
 	Handle<v8::Value> to;
 	to = NanNew<String>(sha1);
@@ -792,7 +816,7 @@ NAN_METHOD(GitMysql::CreateTag) {
 		return NanThrowError("git_revparse_single error");
 	}
 
-	error = git_signature_now(&tagger,"Jerry Jin", "jerry.yang.jin@gmail.com");   
+	error = git_signature_now(&tagger,"Jerry Jin", "jerry.yang.jin@gmail.com");
 
 	// Transaction Start
 	git_mysql_transaction(mysql);
@@ -804,6 +828,9 @@ NAN_METHOD(GitMysql::CreateTag) {
 	}
 
 	git_mysql_commit(mysql);
+
+  free((char *)from_tag);
+  free((char *)from_msg);
 
 	if (!error)
 		NanReturnValue(NanTrue());
