@@ -475,8 +475,9 @@ NAN_METHOD(GitMysql::Commit) {
 
 	git_mysql_commit(mysql);
 
-  free((char *)from_ref);
-  free((char *)from_msg);
+    free((char *)from_ref);
+    free((char *)from_msg);
+    git_signature_free(me);
 
 	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, &commit);
@@ -648,8 +649,9 @@ NAN_METHOD(GitMysql::CreateRepo) {
 
 		git_mysql_commit(mysql);
 
-    free((char *)from_name);
-    free((char *)from_desc);
+        free((char *)from_name);
+        free((char *)from_desc);
+        git_signature_free(me);
 
 		Handle<v8::Value> to;
 		to = NanNew<Number>(mysql->repo);
