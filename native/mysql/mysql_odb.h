@@ -3,11 +3,14 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "git2.h"
 #include "git2/sys/odb_backend.h"
 
 #include "mysql_backend.h"
+
+#define DEBUGLOG (printf("(%s,%s),%d\n", __FILE__, __func__, __LINE__))
 
 typedef struct {
 	git_odb_backend parent;

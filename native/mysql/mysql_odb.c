@@ -125,10 +125,9 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	  return GIT_ERROR;
 
   // execute the statement
-	printf("linux x64 memory leak \n");
+    DEBUGLOG;
   if (mysql_stmt_execute(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
-	printf("linux x64 memory leak \n");
 
   if (mysql_stmt_store_result(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
