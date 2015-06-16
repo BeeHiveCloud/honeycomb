@@ -10,7 +10,7 @@
 
 #include "mysql_backend.h"
 
-#define DEBUGLOG (printf("(%s,%s),%d\n", __FILE__, __func__, __LINE__))
+//#define DEBUGLOG (printf("(%s,%s),%d\n", __FILE__, __func__, __LINE__))
 
 typedef struct {
 	git_odb_backend parent;
