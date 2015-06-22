@@ -1,11 +1,14 @@
 #include <stdio.h>
 
+#include <git2/sys/repository.h>
+
 #include "../mysql/mysql_backend.h"
 #include "../mysql/mysql_index.h"
 #include "../mysql/mysql_odb.h"
 #include "../mysql/mysql_refdb.h"
 #include "../mysql/mysql_repo.h"
 #include "../mysql/mysql_tree.h"
+#include "../patch/repo_path.h"
 
 git_mysql *mysql;
 git_repository *repo;
@@ -20,7 +23,7 @@ void create(char *name, char *desc){
   error = git_mysql_repo_create(mysql, 1, name, desc);
   if (!error){
     mysql->repo = git_mysql_last_seq(mysql);
-    printf("rid:%d",mysql->repo);
+    printf("rid:%lld",mysql->repo);
     git_oid oid;
     git_reference *ref;
     git_tree *tree;

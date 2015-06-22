@@ -54,6 +54,10 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 		found = 1;
 	}
 
+    // free result
+    if (mysql_stmt_free_result(backend->mysql->refdb_read_header) != 0)
+        return GIT_ERROR;
+    
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read_header) != 0)
 		return 0;
@@ -156,7 +160,10 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	else 
 		error = GIT_ENOTFOUND;
 	
-
+    // free result
+    if (mysql_stmt_free_result(backend->mysql->refdb_read) != 0)
+        return GIT_ERROR;
+    
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;

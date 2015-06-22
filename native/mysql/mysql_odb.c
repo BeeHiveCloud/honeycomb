@@ -88,6 +88,10 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   } else
     error = GIT_ENOTFOUND;
 
+  // free result
+  if (mysql_stmt_free_result(backend->mysql->odb_read_header) != 0)
+      return GIT_ERROR;
+    
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)
 	  return GIT_ERROR;
@@ -186,6 +190,10 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   } else
     error = GIT_ENOTFOUND;
 
+  // free result
+  if (mysql_stmt_free_result(backend->mysql->odb_read) != 0)
+      return GIT_ERROR;
+    
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
@@ -235,6 +243,10 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
     found = 1;
   }
 
+  // free result
+  if (mysql_stmt_free_result(backend->mysql->odb_read_header) != 0)
+    return GIT_ERROR;
+    
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)
 	return 0;
