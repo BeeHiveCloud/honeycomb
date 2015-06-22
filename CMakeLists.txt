@@ -20,8 +20,11 @@ SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 SET(BUILD_CLAR	OFF CACHE BOOL "Do not build clar test")
 SET(BUILD_SHARED_LIBS	OFF CACHE BOOL "build static library")
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+IF (NOT MSVC_IDE)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ENDIF ()
 
 # Add libgit2 project
 ADD_SUBDIRECTORY(vendor/libgit2)
@@ -103,6 +106,13 @@ TARGET_LINK_LIBRARIES(mysql git2)
 #FILE(GLOB SRC_HIVE native/hive/*.h native/hive/*.cpp)
 #ADD_LIBRARY(hive STATIC ${SRC_HIVE})
 #TARGET_LINK_LIBRARIES(hive libthrift)
+
+# native test app
+FILE(GLOB SRC_TEST native/test/*.h native/test/*.c)
+ADD_EXECUTABLE(ntest ${SRC_TEST})
+TARGET_LINK_LIBRARIES(ntest mysql)
+TARGET_LINK_LIBRARIES(ntest git2)
+
 
 # addon
 INCLUDE_DIRECTORIES(${NODE_GYP_DIR}/src)
