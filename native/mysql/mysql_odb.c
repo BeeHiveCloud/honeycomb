@@ -119,7 +119,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   MYSQL_BIND result_buffers[3];
   MYSQL_RES  *meta_result = NULL;
   unsigned long data_len = 0;
-  my_bool truth = 1;
 
   assert(len_p && type_p && _backend && oid);
 
@@ -153,7 +152,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   if (mysql_stmt_store_result(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
 
-printf("max length:%d\n",meta_result->fields[2].max_length);
+  printf("max length:%lu\n",meta_result->fields[2].max_length);
 
   // this should either be 0 or 1
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
@@ -173,7 +172,7 @@ printf("max length:%d\n",meta_result->fields[2].max_length);
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
-        printf("len_p:%d\n",*len_p);
+    printf("len_p:%lu\n",*len_p);
 	memset(len_p, 0, sizeof(*len_p));
 
     // by setting buffer and buffer_length to 0, this tells libmysql

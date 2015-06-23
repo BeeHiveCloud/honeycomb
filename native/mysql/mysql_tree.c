@@ -335,7 +335,7 @@ int tree_walk_cb(const char *root, const git_tree_entry *entry, void *payload)
 	printf("entry: %s \n", name);
 	printf("oid: %s \n", sha1);
 
-	free(name);
+	free((char *)name);
 
     return 0;
 }
