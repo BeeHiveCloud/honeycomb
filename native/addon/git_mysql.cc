@@ -631,7 +631,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 			return NanThrowError("git_mysql_tree_build error");
 		}
 		tree = git_mysql_tree_root(mysql, repo);
-		if (error < 0){
+		if (!tree){
 			git_mysql_rollback(mysql);
 			return NanThrowError("git_mysql_tree_build error");
 		}

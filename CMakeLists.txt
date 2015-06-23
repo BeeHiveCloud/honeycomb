@@ -4,7 +4,7 @@ PROJECT(honeycomb)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # set CMAKE_BUILD_TYPE
-SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 
 # override STATIC_CRT
 IF (MSVC_IDE)

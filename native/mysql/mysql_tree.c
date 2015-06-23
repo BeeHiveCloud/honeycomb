@@ -197,7 +197,7 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
 	int error;
 	git_oid root;
-	git_tree *tree;
+	git_tree *tree = NULL;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[4];
 
@@ -297,6 +297,10 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		git_treebuilder_free(bld);
 
 		error = git_tree_lookup(&tree, repo, &root);
+		if(error < 0){
+			printf("git_mysql_tree_root git_tree_lookup\n");
+			return NULL;
+		}
 	}
 	else
 		error = GIT_ENOTFOUND;

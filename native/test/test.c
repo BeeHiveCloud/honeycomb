@@ -24,7 +24,7 @@ void create(char *name, char *desc){
   rid = git_mysql_repo_create(mysql, 1, name, desc);
   if (rid > 0){
     mysql->repo = rid;
-    printf("rid:%lld",mysql->repo);
+    printf("rid:%lld\n",mysql->repo);
     git_oid oid;
     git_reference *ref;
     git_tree *tree;
@@ -32,54 +32,71 @@ void create(char *name, char *desc){
     git_oid commit;
     error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL, NULL);
     git_reference_free(ref);
+	printf("git_reference_symbolic_create\n");
 
     error = git_blob_create_frombuffer(&oid, repo, name, strlen(name));
     if (error < 0){
       git_mysql_rollback(mysql);
       printf("git_blob_create_frombuffer error\n");
     }
+printf("git_blob_create_frombuffer\n");
 
     error = git_mysql_index_write(mysql, &oid, "/README.md");
     if (error < 0){
       git_mysql_rollback(mysql);
       printf("git_mysql_index_write error\n");
     }
+printf("git_mysql_index_write\n");
 
     error = git_mysql_tree_init(mysql);
     if (error < 0){
       git_mysql_rollback(mysql);
       printf("git_mysql_tree_init error\n");
     }
+printf("git_mysql_tree_init\n");
 
     error = git_mysql_tree_build(mysql, repo, "BLOB");
     if (error < 0){
       git_mysql_rollback(mysql);
       printf("git_mysql_tree_build error\n");
     }
+printf("git_mysql_tree_build BLOB\n");
+
     error = git_mysql_tree_build(mysql, repo, "TREE");
     if (error < 0){
       git_mysql_rollback(mysql);
       printf("git_mysql_tree_build error\n");
     }
+printf("git_mysql_tree_build TREE\n");
+
     tree = git_mysql_tree_root(mysql, repo);
-    if (error < 0){
+    if (!tree){
       git_mysql_rollback(mysql);
       printf("git_mysql_tree_build error\n");
     }
+printf("git_mysql_tree_root\n");
+
+    const git_oid *tid = git_tree_id(tree);
+	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
+	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, tid);
+printf("tree oid:%s\n",sha1);
 
     error = git_signature_now(&me, "Jerry Jin", "jerry.yang.jin@gmail.com");
     if (error < 0){
       printf("git_signature_now error\n");
     }
+printf("git_signature_now\n");
 
     error = git_commit_create(&commit, repo, "refs/heads/master", me, me, "UTF-8", "Initial Commit", tree, 0, NULL);
     if (error < 0){
       git_mysql_rollback(mysql);
       printf("git_commit_create error\n");
     }
+printf("git_commit_create\n");
 
     git_mysql_commit(mysql);
     git_signature_free(me);
+    git_tree_free(tree);
   }
   else{
     git_mysql_rollback(mysql);
