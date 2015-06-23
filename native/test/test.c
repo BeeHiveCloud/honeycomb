@@ -17,7 +17,7 @@ void create(char *name, char *desc){
   int error = GIT_ERROR;
   my_ulonglong rid = 0;
 
-  printf("name:%s,desc%s\n", name, desc);
+  printf("name:%s,desc:%s\n", name, desc);
 
   git_mysql_transaction(mysql);
 

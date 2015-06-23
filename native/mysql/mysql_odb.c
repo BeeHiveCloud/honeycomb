@@ -117,16 +117,13 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
-  MYSQL_RES  *prepare_meta_result = NULL;
+  MYSQL_RES  *meta_result = NULL;
   unsigned long data_len = 0;
   my_bool truth = 1;
 
   assert(len_p && type_p && _backend && oid);
 
   backend = (git_mysql_odb *)_backend;
-
-  if (mysql_stmt_attr_set(backend->mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
-    return GIT_ERROR;
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -145,13 +142,9 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   if (mysql_stmt_bind_param(backend->mysql->odb_read, bind_buffers) != 0)
 	  return GIT_ERROR;
 
-  prepare_meta_result = mysql_stmt_result_metadata(backend->mysql->odb_read);
-  if(!prepare_meta_result)
+  meta_result = mysql_stmt_result_metadata(backend->mysql->odb_read);
+  if(!meta_result)
     return GIT_ERROR;
-
-  MYSQL_FIELD* data_field = &prepare_meta_result->fields[2];
-
-  printf("max length:%d\n",data_field->max_length);
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read) != 0)
@@ -159,6 +152,8 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 
   if (mysql_stmt_store_result(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
+
+printf("max length:%d\n",meta_result->fields[2].max_length);
 
   // this should either be 0 or 1
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
@@ -178,7 +173,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
-        //printf("len_p:%d\n",*len_p);
+        printf("len_p:%d\n",*len_p);
 	memset(len_p, 0, sizeof(*len_p));
 
     // by setting buffer and buffer_length to 0, this tells libmysql
@@ -188,10 +183,13 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     // come to think of it, we can probably just use the length set in *len_p
     // once we fetch the result?
 
+	data_len = meta_result->fields[2].max_length;
+	*data_p = malloc(data_len);
+
 	result_buffers[2].buffer_type = MYSQL_TYPE_LONG_BLOB;
-  	result_buffers[2].buffer = 0;
+  	result_buffers[2].buffer = *data_p;
 	result_buffers[2].is_null = 0;
-  	result_buffers[2].buffer_length = 0;
+  	result_buffers[2].buffer_length = data_len;
   	result_buffers[2].length = &data_len;
 	//memset(&data_len, 0, sizeof(data_len));
 
@@ -202,7 +200,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	error = mysql_stmt_fetch(backend->mysql->odb_read);
     // if(error != 0 || error != MYSQL_DATA_TRUNCATED)
     //   return GIT_ERROR;
-
+/*
     if (data_len > 0) {
       *data_p = malloc(data_len);
       if(*data_p){
@@ -220,7 +218,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
         return GITERR_NOMEMORY;
       }
     }
-
+*/
 	error = GIT_OK;
   } else
     error = GIT_ENOTFOUND;
@@ -229,7 +227,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   if (mysql_stmt_free_result(backend->mysql->odb_read) != 0)
       return GIT_ERROR;
 
-  mysql_free_result(prepare_meta_result);
+  mysql_free_result(meta_result);
 
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read) != 0)
