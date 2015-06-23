@@ -118,11 +118,15 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
   MYSQL_RES  *prepare_meta_result = NULL;
-  unsigned long data_len;
+  unsigned long data_len = 0;
+  my_bool truth = 1;
 
   assert(len_p && type_p && _backend && oid);
 
   backend = (git_mysql_odb *)_backend;
+
+  if (mysql_stmt_attr_set(backend->mysql->odb_read, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+    return GIT_ERROR;
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -144,6 +148,10 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   prepare_meta_result = mysql_stmt_result_metadata(backend->mysql->odb_read);
   if(!prepare_meta_result)
     return GIT_ERROR;
+
+  MYSQL_FIELD* data_field = &prepare_meta_result->fields[2];
+
+  printf("max length:%d\n",data_field->max_length);
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read) != 0)
@@ -170,7 +178,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
-        printf("len_p:%p\n",len_p);
+        //printf("len_p:%d\n",*len_p);
 	memset(len_p, 0, sizeof(*len_p));
 
     // by setting buffer and buffer_length to 0, this tells libmysql
@@ -185,7 +193,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	result_buffers[2].is_null = 0;
   	result_buffers[2].buffer_length = 0;
   	result_buffers[2].length = &data_len;
-	memset(&data_len, 0, sizeof(data_len));
+	//memset(&data_len, 0, sizeof(data_len));
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read, result_buffers) != 0)
       return GIT_ERROR;
@@ -198,15 +206,18 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     if (data_len > 0) {
       *data_p = malloc(data_len);
       if(*data_p){
+	result_buffers[2].buffer_type = MYSQL_TYPE_LONG_BLOB;
         result_buffers[2].buffer = *data_p;
+	result_buffers[2].is_null = 0;
         result_buffers[2].buffer_length = data_len;
+	result_buffers[2].length = &data_len;
 
 	  if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[2], 2, 0) != 0)
              return GIT_ERROR;
       }
       else{
         printf("odb_read, malloc returned NULL\n");
-        return GIT_ERROR;
+        return GITERR_NOMEMORY;
       }
     }
 
