@@ -72,6 +72,7 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	int error;
 	MYSQL_BIND bind_buffers[2];
 	MYSQL_BIND result_buffers[3];
+	MYSQL_RES  *prepare_meta_result;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -88,6 +89,10 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	bind_buffers[1].buffer_type = MYSQL_TYPE_STRING;
 
 	if (mysql_stmt_bind_param(mysql->tree_build, bind_buffers) != 0)
+		return GIT_ERROR;
+
+	prepare_meta_result = mysql_stmt_result_metadata(mysql->tree_build);
+	if (!prepare_meta_result)
 		return GIT_ERROR;
 
 	// execute the statement
@@ -173,19 +178,12 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		git_treebuilder_free(bld);
 		memset(curr_dir, 0, strlen(curr_dir));
 	}
-	/*
-	else {
-	if (!strcmp(type, "BLOB"))
-	error = GIT_ENOTFOUND;
-	else
-	error = GIT_OK;
-	}
-	*/
 
     // free result
     if (mysql_stmt_free_result(mysql->tree_build) != 0)
         return GIT_ERROR;
-    
+	mysql_free_result(prepare_meta_result);
+
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->tree_build) != 0)
 		return GIT_ERROR;
@@ -200,6 +198,7 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 	git_tree *tree = NULL;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[4];
+	MYSQL_RES  *prepare_meta_result;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 	memset(result_buffers, 0, sizeof(result_buffers));
@@ -212,6 +211,11 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
 
 	if (mysql_stmt_bind_param(mysql->tree_root, bind_buffers) != 0)
+		return NULL;
+
+	/* Fetch result set meta information */
+	prepare_meta_result = mysql_stmt_result_metadata(mysql->tree_root);
+	if (!prepare_meta_result)
 		return NULL;
 
 	// execute the statement
@@ -308,7 +312,8 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
     // free result
     if (mysql_stmt_free_result(mysql->tree_root) != 0)
         return NULL;
-    
+	mysql_free_result(prepare_meta_result);
+
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->tree_root) != 0)
 		return NULL;
@@ -329,6 +334,8 @@ int tree_walk_cb(const char *root, const git_tree_entry *entry, void *payload)
 	
 	printf("entry: %s \n", name);
 	printf("oid: %s \n", sha1);
+
+	free(name);
 
     return 0;
 }

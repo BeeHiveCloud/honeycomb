@@ -652,6 +652,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
         free((char *)from_name);
         free((char *)from_desc);
         git_signature_free(me);
+		git_tree_free(tree);
 
 		Handle<v8::Value> to;
 		to = NanNew<Number>(mysql->repo);
