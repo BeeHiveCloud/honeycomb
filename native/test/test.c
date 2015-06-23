@@ -15,14 +15,15 @@ git_repository *repo;
 
 void create(char *name, char *desc){
   int error = GIT_ERROR;
+  my_ulonglong rid = 0;
 
   printf("name:%s,desc%s\n", name, desc);
 
   git_mysql_transaction(mysql);
 
-  error = git_mysql_repo_create(mysql, 1, name, desc);
-  if (!error){
-    mysql->repo = git_mysql_last_seq(mysql);
+  rid = git_mysql_repo_create(mysql, 1, name, desc);
+  if (rid > 0){
+    mysql->repo = rid;
     printf("rid:%lld",mysql->repo);
     git_oid oid;
     git_reference *ref;

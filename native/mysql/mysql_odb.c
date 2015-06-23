@@ -1,5 +1,6 @@
 #include "mysql_odb.h"
 
+/*
 int mysql_odb_read_prefix(	git_oid *out_oid,
 							void **data_p,
 							size_t *len_p,
@@ -9,7 +10,6 @@ int mysql_odb_read_prefix(	git_oid *out_oid,
 							size_t len)
 {
 	if (len >= GIT_OID_HEXSZ) {
-		/* Just match the full identifier */
 		int error = mysql_odb_read(data_p, len_p, type_p, _backend, short_oid);
 		if (error == GIT_OK)
 			git_oid_cpy(out_oid, short_oid);
@@ -21,6 +21,7 @@ int mysql_odb_read_prefix(	git_oid *out_oid,
 		return GITERR_INVALID;
 	}
 }
+*/
 
 int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_backend, const git_oid *oid)
 {
@@ -28,6 +29,9 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[2];
+  MYSQL_RES  *prepare_meta_result;
+  //my_bool       is_null[2];
+  //my_bool       my_error[2];
 
   assert(len_p && type_p && _backend && oid);
 
@@ -36,7 +40,7 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
   // bind the repo passed to the statement
-  bind_buffers[0].buffer = &(backend->mysql->repo);
+  bind_buffers[0].buffer = (void *)&(backend->mysql->repo);
   bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
   bind_buffers[0].length = &bind_buffers[0].buffer_length;
   bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
@@ -49,6 +53,11 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 
   if (mysql_stmt_bind_param(backend->mysql->odb_read_header, bind_buffers) != 0)
 	  return GIT_ERROR;
+
+  /* Fetch result set meta information */
+  prepare_meta_result = mysql_stmt_result_metadata(backend->mysql->odb_read_header);
+  if(!prepare_meta_result)
+	return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read_header) != 0)
@@ -66,14 +75,16 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
     result_buffers[0].buffer = type_p;
 	result_buffers[0].buffer_length = sizeof(*type_p);
-	result_buffers[0].is_null = 0;
+	result_buffers[0].is_null = 0; // &is_null[0];
+	//result_buffers[0].error = &my_error[0];
 	result_buffers[0].length = &result_buffers[0].buffer_length;
 	memset(type_p, 0, sizeof(*type_p));
 
     result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
     result_buffers[1].buffer = len_p;
 	result_buffers[1].buffer_length = sizeof(*len_p);
-	result_buffers[1].is_null = 0;
+	result_buffers[1].is_null = 0; // &is_null[1];
+	//result_buffers[1].error = &my_error[1];
 	result_buffers[1].length = &result_buffers[1].buffer_length;
 	memset(len_p, 0, sizeof(*len_p));
 
@@ -91,7 +102,8 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   // free result
   if (mysql_stmt_free_result(backend->mysql->odb_read_header) != 0)
       return GIT_ERROR;
-    
+  mysql_free_result(prepare_meta_result);
+
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)
 	  return GIT_ERROR;
@@ -105,6 +117,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
+  MYSQL_RES  *prepare_meta_result;
   unsigned long data_len;
 
   assert(len_p && type_p && _backend && oid);
@@ -127,6 +140,10 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 
   if (mysql_stmt_bind_param(backend->mysql->odb_read, bind_buffers) != 0)
 	  return GIT_ERROR;
+
+  prepare_meta_result = mysql_stmt_result_metadata(backend->mysql->odb_read);
+  if(!prepare_meta_result)
+    return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_read) != 0)
@@ -193,7 +210,9 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   // free result
   if (mysql_stmt_free_result(backend->mysql->odb_read) != 0)
       return GIT_ERROR;
-    
+
+  mysql_free_result(prepare_meta_result);
+
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
@@ -246,7 +265,7 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
   // free result
   if (mysql_stmt_free_result(backend->mysql->odb_read_header) != 0)
     return GIT_ERROR;
-    
+
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)
 	return 0;

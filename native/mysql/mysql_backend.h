@@ -14,7 +14,7 @@
 
 typedef struct {
   MYSQL *db;
-  long long int repo;
+  my_ulonglong repo;
   MYSQL_STMT *last_seq;
   MYSQL_STMT *odb_read;
   MYSQL_STMT *odb_write;

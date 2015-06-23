@@ -587,11 +587,11 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	// Transaction Start
 	git_mysql_transaction(mysql);
 
-	int error = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
+	my_ulonglong rid = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
 
-	if (!error){
+	if (rid > 0){
 
-		mysql->repo = git_mysql_last_seq(mysql);
+		mysql->repo = rid;
 
 		int error;
 		git_oid oid;

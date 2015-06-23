@@ -6,10 +6,11 @@
 
 #include <mysql.h>
 
-int git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description){
+my_ulonglong git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description){
 
 	MYSQL_BIND bind_buffers[3];
-	my_ulonglong affected_rows;
+	my_ulonglong affected_rows = 0;
+	my_ulonglong rid = 0;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -30,22 +31,24 @@ int git_mysql_repo_create(git_mysql *mysql, const long long int owner, const cha
 	bind_buffers[2].buffer_type = MYSQL_TYPE_BLOB;
 
 	if (mysql_stmt_bind_param(mysql->repo_create, bind_buffers) != 0)
-		return GIT_ERROR;
+		return 0;
 
 	// execute the statement
 	if (mysql_stmt_execute(mysql->repo_create) != 0)
-		return GIT_ERROR;
+		return 0;
 
 	// now lets see if the insert worked
 	affected_rows = mysql_stmt_affected_rows(mysql->repo_create);
 	if (affected_rows != 1)
-		return GIT_ERROR;
+		return 0;
+
+	rid = mysql_stmt_insert_id(mysql->repo_create);
 
 	// reset the statement for further use
 	if (mysql_stmt_reset(mysql->repo_create) != 0)
-		return GIT_ERROR;
+		return 0;
 
-	return GIT_OK;
+	return rid;
 }
 
 int git_mysql_repo_del(git_mysql *mysql){
@@ -74,6 +77,7 @@ int git_mysql_repo_del(git_mysql *mysql){
 	return GIT_OK;
 }
 
+/*
 long long int git_mysql_last_seq(git_mysql *mysql){
 
 	MYSQL_BIND result_buffers[1];
@@ -113,3 +117,4 @@ long long int git_mysql_last_seq(git_mysql *mysql){
 
 	return -1;
 }
+*/
