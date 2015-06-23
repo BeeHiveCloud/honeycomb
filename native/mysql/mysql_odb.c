@@ -29,7 +29,7 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[2];
-  MYSQL_RES  *prepare_meta_result;
+  MYSQL_RES  *prepare_meta_result = NULL;
   //my_bool       is_null[2];
   //my_bool       my_error[2];
 
@@ -117,7 +117,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[3];
-  MYSQL_RES  *prepare_meta_result;
+  MYSQL_RES  *prepare_meta_result = NULL;
   unsigned long data_len;
 
   assert(len_p && type_p && _backend && oid);
@@ -170,6 +170,7 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
+        printf("len_p:%p\n",len_p);
 	memset(len_p, 0, sizeof(*len_p));
 
     // by setting buffer and buffer_length to 0, this tells libmysql
@@ -195,12 +196,18 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     //   return GIT_ERROR;
 
     if (data_len > 0) {
-      *data_p = calloc(1, data_len);
-      result_buffers[2].buffer = *data_p;
-      result_buffers[2].buffer_length = data_len;
+      *data_p = malloc(data_len);
+      if(*data_p){
+        result_buffers[2].buffer = *data_p;
+        result_buffers[2].buffer_length = data_len;
 
 	  if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[2], 2, 0) != 0)
+             return GIT_ERROR;
+      }
+      else{
+        printf("odb_read, malloc returned NULL\n");
         return GIT_ERROR;
+      }
     }
 
 	error = GIT_OK;

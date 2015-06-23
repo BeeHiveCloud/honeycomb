@@ -31,7 +31,6 @@ void create(char *name, char *desc){
     git_signature *me;
     git_oid commit;
     error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL, NULL);
-    git_reference_free(ref);
 
     error = git_blob_create_frombuffer(&oid, repo, name, strlen(name));
     if (error < 0){
@@ -69,11 +68,12 @@ void create(char *name, char *desc){
       printf("git_mysql_tree_build error\n");
     }
 
+/*
     const git_oid *tid = git_tree_id(tree);
-	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
-	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, tid);
+    char sha1[GIT_OID_HEXSZ + 1] = { 0 };
+    git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, tid);
     printf("tree oid:%s\n",sha1);
-
+*/
     error = git_signature_now(&me, "Jerry Jin", "jerry.yang.jin@gmail.com");
     if (error < 0){
       printf("git_signature_now error\n");
@@ -88,6 +88,7 @@ void create(char *name, char *desc){
     git_mysql_commit(mysql);
     git_signature_free(me);
     git_tree_free(tree);
+    git_reference_free(ref);
   }
   else{
     git_mysql_rollback(mysql);
