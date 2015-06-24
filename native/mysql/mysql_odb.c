@@ -30,8 +30,6 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   MYSQL_BIND bind_buffers[2];
   MYSQL_BIND result_buffers[2];
   MYSQL_RES  *prepare_meta_result = NULL;
-  //my_bool       is_null[2];
-  //my_bool       my_error[2];
 
   assert(len_p && type_p && _backend && oid);
 
@@ -75,16 +73,14 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
     result_buffers[0].buffer = type_p;
 	result_buffers[0].buffer_length = sizeof(*type_p);
-	result_buffers[0].is_null = 0; // &is_null[0];
-	//result_buffers[0].error = &my_error[0];
+	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &result_buffers[0].buffer_length;
 	memset(type_p, 0, sizeof(*type_p));
 
     result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
     result_buffers[1].buffer = len_p;
 	result_buffers[1].buffer_length = sizeof(*len_p);
-	result_buffers[1].is_null = 0; // &is_null[1];
-	//result_buffers[1].error = &my_error[1];
+	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
 	memset(len_p, 0, sizeof(*len_p));
 
@@ -152,8 +148,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   if (mysql_stmt_store_result(backend->mysql->odb_read) != 0)
 	  return GIT_ERROR;
 
-  //printf("max length:%lu\n",meta_result->fields[2].max_length);
-
   // this should either be 0 or 1
   // if it's > 1 MySQL's unique index failed and we should all fear for our lives
   if (mysql_stmt_num_rows(backend->mysql->odb_read) == 1) {
@@ -175,13 +169,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     //printf("len_p:%lu\n",*len_p);
 	memset(len_p, 0, sizeof(*len_p));
 
-    // by setting buffer and buffer_length to 0, this tells libmysql
-    // we want it to set data_len to the *actual* length of that field
-    // this way we can malloc exactly as much memory as we need for the buffer
-    //
-    // come to think of it, we can probably just use the length set in *len_p
-    // once we fetch the result?
-
 	data_len = meta_result->fields[2].max_length;
 	*data_p = malloc(data_len);
 
@@ -200,14 +187,18 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
     // if(error != 0 || error != MYSQL_DATA_TRUNCATED)
     //   return GIT_ERROR;
 /*
+ // by setting buffer and buffer_length to 0, this tells libmysql
+ // we want it to set data_len to the *actual* length of that field
+ // this way we can malloc exactly as much memory as we need for the buffer
+ //
+ // come to think of it, we can probably just use the length set in *len_p
+ // once we fetch the result?
+ 
     if (data_len > 0) {
       *data_p = malloc(data_len);
       if(*data_p){
-	result_buffers[2].buffer_type = MYSQL_TYPE_LONG_BLOB;
         result_buffers[2].buffer = *data_p;
-	result_buffers[2].is_null = 0;
         result_buffers[2].buffer_length = data_len;
-	result_buffers[2].length = &data_len;
 
 	  if (mysql_stmt_fetch_column(backend->mysql->odb_read, &result_buffers[2], 2, 0) != 0)
              return GIT_ERROR;

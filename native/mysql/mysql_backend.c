@@ -365,6 +365,7 @@ int git_mysql_init(git_mysql **out,
     return GIT_ERROR;
 
   if (mysql_library_init(0, NULL, NULL)) {
+      free(mysql);
     return GIT_ERROR;
   }
 
