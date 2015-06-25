@@ -7,35 +7,12 @@ Status
 ------
 This project is still at early stage, DO NOT use for production.
 
-TODO
-----
-- [ ] R integration
-- [ ] git mysql backend
-  - [ ] workdir backend
-  - [ ] config backend
-    - [ ] able to config at different levels
-    - [ ] load git_cvar_cached for repository object
-
 Issue
 -----
-- [ ] Cent OS 7 - Segmentation fault (core dumped)
-- [ ] Run-Time Check Failure #2 - Stack around the variable 'xxx' was corrupted
-  - [x] Windows 7 32-bit, Release mode fixed
-  - [ ] Windows 7 32-bit, Debug mode, the odb_read still throws this error
-- [x] mysql_stmt_fetch access violation
-
-
-Config
-------
-
-Mac OS X
-
-```sh
-export NODE_GYP_DIR=~/.node-gyp
-export LIBMYSQL_INCLUDE_DIR=/usr/local/mysql/include
-export LIBMYSQL_LIBRARY=/usr/local/mysql/lib
-export DYLD_LIBRARY_PATH=$LIBMYSQL_LIBRARY:$DYLD_LIBRARY_PATH
-```
+- [ ] Memory issues on 3 major operating system
+  - [ ] Linux memory issues fixed for now
+  - [ ] Max OS 10.10 is working fine
+  - [ ] windows version has issue in both Debug and Release build
 
 License
 -------

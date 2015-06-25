@@ -108,10 +108,10 @@ TARGET_LINK_LIBRARIES(mysql git2)
 #TARGET_LINK_LIBRARIES(hive libthrift)
 
 # native test app
-FILE(GLOB SRC_TEST native/test/*.h native/test/*.c)
-ADD_EXECUTABLE(ntest ${SRC_TEST})
-TARGET_LINK_LIBRARIES(ntest mysql)
-TARGET_LINK_LIBRARIES(ntest git2)
+#FILE(GLOB SRC_TEST native/test/*.h native/test/*.c)
+#ADD_EXECUTABLE(ntest ${SRC_TEST})
+#TARGET_LINK_LIBRARIES(ntest mysql)
+#TARGET_LINK_LIBRARIES(ntest git2)
 
 
 # addon
