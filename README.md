@@ -7,13 +7,6 @@ Status
 ------
 This project is still at early stage, DO NOT use for production.
 
-Issue
------
-- [ ] Memory issues on 3 major operating system
-  - [ ] Linux memory issues fixed for now
-  - [ ] Max OS 10.10 is working fine
-  - [ ] windows version has issue in both Debug and Release build
-
 License
 -------
 The MIT License (MIT)

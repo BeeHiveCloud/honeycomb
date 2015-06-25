@@ -43,7 +43,7 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "Diff", Diff);
 
-	target->Set(NanNew<String>("MySQL"), object);
+	target->Set(NanNew<String>("GIT"), object);
 }
 
 
