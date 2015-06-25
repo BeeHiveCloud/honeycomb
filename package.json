@@ -1,17 +1,26 @@
 {
   "name": "honeycomb",
-  "version": "v0.1.1",
+  "version": "v0.1.2",
   "description": "A hybrid data platform",
   "keywords": ["honeycomb","node.js","MySQL","GIT", "R"],
   "main": "./lib/index.js",
   "dependencies": {
     "nan": "1.8.4",
     "bluebird": "2.9.27",
-    "lodash": "3.8.0"
+    "lodash": "3.8.0",
+    "node-pre-gyp": "0.6.7"
   },
+  "bundledDependencies":["node-pre-gyp"],
   "scripts": {
     "test": "mocha -b",
     "prepublish": "npm prune"
+  },
+  "binary": {
+      "module_name": "honeycomb",
+      "module_path": "./build/{module_name}",
+      "host": "https://github.com",
+      "package_name": "{platform}-{arch}.tar.gz",
+      "remote_path": "./BeeHiveCloud/dist/raw/master/v{version}/"
   },
   "directories": {
     "lib": "lib"

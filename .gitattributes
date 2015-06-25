@@ -1,3 +1,5 @@
 *.c eol=lf
 *.cc eol=lf
+*.cpp eol=lf
 *.h eol=lf
+*.js eol=lf
