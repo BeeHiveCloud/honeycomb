@@ -1,11 +1,15 @@
-Honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb)
+Honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb) [![Build Status](https://travis-ci.org/BeeHiveCloud/honeycomb.svg)](https://travis-ci.org/BeeHiveCloud/honeycomb) [![Build status](https://ci.appveyor.com/api/projects/status/7qaxyuns4xfal2ts?svg=true)](https://ci.appveyor.com/project/JerryYangJin/honeycomb)
 =========
 
 A hybrid data platform
 
 Status
 ------
-This project is still at early stage, DO NOT use for production.
+This project is still at early stage, **DO NOT** use for production.
+
+[![NPM](https://nodei.co/npm/honeycomb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/honeycomb/)
+
+[![NPM](https://nodei.co/npm-dl/honeycomb.png?months=6&height=3)](https://nodei.co/npm/honeycomb/)
 
 License
 -------
