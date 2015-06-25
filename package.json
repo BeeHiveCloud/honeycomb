@@ -10,7 +10,6 @@
     "lodash": "3.8.0",
     "node-pre-gyp": "0.6.7"
   },
-  "bundledDependencies":["node-pre-gyp"],
   "scripts": {
     "test": "mocha -b",
     "prepublish": "npm prune"
