@@ -16,7 +16,7 @@
   },
   "binary": {
       "module_name": "honeycomb",
-      "module_path": "./build/{module_name}",
+      "module_path": "./build/",
       "host": "https://github.com",
       "package_name": "{platform}-{arch}.tar.gz",
       "remote_path": "./BeeHiveCloud/dist/raw/master/v{version}/"
