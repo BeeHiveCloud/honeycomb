@@ -7,12 +7,12 @@
   "dependencies": {
     "nan": "1.8.4",
     "bluebird": "2.9.27",
-    "lodash": "3.8.0",
-    "node-pre-gyp": "0.6.7"
+    "lodash": "3.8.0"
   },
   "scripts": {
     "test": "mocha -b",
-    "prepublish": "npm prune"
+    "prepublish": "npm prune",
+    "install": "node-pre-gyp install --fallback-to-build"
   },
   "binary": {
       "module_name": "honeycomb",
@@ -31,7 +31,8 @@
   "devDependencies": {
     "v8-profiler": "5.2.9",
     "should": "3.3.1",
-    "mocha": "2.1.0"
+    "mocha": "2.1.0",
+    "node-pre-gyp": "0.6.7"
   },
   "engines": {
       "node": ">= 0.12.0",
