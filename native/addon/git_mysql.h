@@ -6,14 +6,14 @@
 
 extern "C" {
 #include "git2.h"
-#include "../mysql/mysql_backend.h"
-#include "../mysql/mysql_odb.h"
-#include "../mysql/mysql_refdb.h"
-#include "../mysql/mysql_index.h"
-#include "../mysql/mysql_tree.h"
-#include "../mysql/mysql_repo.h"
-#include "../mysql/mysql_config.h"
-#include "../patch/repo_path.h"
+#include "../git/mysql/mysql_backend.h"
+#include "../git/mysql/mysql_odb.h"
+#include "../git/mysql/mysql_refdb.h"
+#include "../git/mysql/mysql_index.h"
+#include "../git/mysql/mysql_tree.h"
+#include "../git/mysql/mysql_repo.h"
+#include "../git/mysql/mysql_config.h"
+#include "../patch/libgit2/repo_path.h"
 #include "git2/sys/repository.h"
 }
 

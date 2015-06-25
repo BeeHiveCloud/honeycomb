@@ -1,7 +1,7 @@
 #include "repo_path.h"
 
-#include "../../vendor/libgit2/src/common.h"
-#include "../../vendor/libgit2/src/repository.h"
+#include "../../../vendor/libgit2/src/common.h"
+#include "../../../vendor/libgit2/src/repository.h"
 
 
 int git_repository_set_path(git_repository *repo, const char *path)
@@ -16,7 +16,7 @@ int git_repository_set_path(git_repository *repo, const char *path)
 
 	if (repo->path_repository && strcmp(repo->path_repository, buf.ptr) == 0)
 		return 0;
-	
+
 	if (!error) {
 		char *old_path = repo->path_repository;
 		repo->path_repository = git_buf_detach(&buf);

@@ -3,3 +3,5 @@
 *.cpp eol=lf
 *.h eol=lf
 *.js eol=lf
+*.cmake eol=lf
+*.sql eol=lf

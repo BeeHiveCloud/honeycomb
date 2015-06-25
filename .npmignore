@@ -19,6 +19,8 @@ native
 .gitmodules
 .gitattributes
 .gitignore
+.travis.yml
+appveyor.yml
 local.js
 CMakeLists.txt
 *.o
