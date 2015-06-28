@@ -11,7 +11,7 @@ lib-cov
 *.out
 *.pid
 npm-debug.log
-
+bower_modules
 
 ################################################
 # Miscellaneous

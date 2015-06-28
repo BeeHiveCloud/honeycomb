@@ -11,3 +11,11 @@ void Mysql::InitializeComponent(Handle<v8::Object> target) {
 
 	target->Set(NanNew<String>("MySQL"), object);
 }
+
+NAN_METHOD(Mysql::Open) {
+  NanEscapableScope();
+}
+
+NAN_METHOD(Mysql::Close) {
+  NanEscapableScope();
+}

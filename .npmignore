@@ -23,6 +23,7 @@ native
 appveyor.yml
 local.js
 CMakeLists.txt
+bower.json
 *.o
 *.a
 *.exe

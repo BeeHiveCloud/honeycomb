@@ -1,0 +1,39 @@
+{
+  "name": "honeycomb",
+  "version": "0.1.4",
+  "description": "A hybrid data platform",
+  "main": [
+    "lib/index.js"
+  ],
+  "moduleType": [
+    "node"
+  ],
+  "keywords": ["honeycomb","node.js","MySQL","GIT", "R"],
+  "authors": [
+    "Jerry Yang Jin"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "vendor",
+    "script",
+    "native",
+    "cmake",
+    "build",
+    ".gitattributes",
+    ".gitignore",
+    ".gitmodules",
+    ".npmignore",
+    ".travis.yml",
+    "appveyor.yml",
+    "CMakeLists.txt",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/BeeHiveCloud/honeycomb.git"
+  }
+}
