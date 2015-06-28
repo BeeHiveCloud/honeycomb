@@ -17,6 +17,7 @@ class Mysql : public ObjectWrap {
 
 	  static NAN_METHOD(Open);
 	  static NAN_METHOD(Close);
+    static NAN_METHOD(Set);
 
 };
 
