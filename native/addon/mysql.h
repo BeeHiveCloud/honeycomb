@@ -4,6 +4,10 @@
 #include <nan.h>
 #include <string>
 
+extern "C" {
+#include "../mysql/mysql.h"
+}
+
 using namespace node;
 using namespace v8;
 
@@ -15,9 +19,11 @@ class Mysql : public ObjectWrap {
 
   private:
 
-	  static NAN_METHOD(Open);
-	  static NAN_METHOD(Close);
+    static NAN_METHOD(Open);
+    static NAN_METHOD(Close);
     static NAN_METHOD(Set);
+    
+    static MYSQL *db;
 
 };
 

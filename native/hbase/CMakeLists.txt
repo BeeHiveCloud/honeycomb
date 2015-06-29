@@ -1,3 +1,7 @@
 # honeycomb - addon hbase
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+FILE(GLOB SRC_HBASE *.h *.cpp)
+ADD_LIBRARY(hbase STATIC ${SRC_HBASE})
+TARGET_LINK_LIBRARIES(hbase libthrift)

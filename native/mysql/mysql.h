@@ -6,10 +6,11 @@
 #endif
 
 #include <mysql.h>
+#include <stdlib.h>
 
-void mysql_connect(const char *mysql_host, const char *mysql_user, const char *mysql_passwd, const char *mysql_db, unsigned int mysql_port, const char *mysql_unix_socket, unsigned long mysql_client_flag);
+MYSQL *mysql_hc_connect(const char *mysql_host, const char *mysql_user, const char *mysql_passwd, const char *mysql_db, unsigned int mysql_port, const char *mysql_unix_socket, unsigned long mysql_client_flag);
 
-void mysql_disconnect(MYSQL *db);
+void mysql_hc_disconnect(MYSQL *db);
 
 void mysql_trx_start(MYSQL *db);
 

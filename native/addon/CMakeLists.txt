@@ -1,3 +1,25 @@
 # honeycomb - addon module
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+FILE(GLOB SRC_NODE
+  git_mysql.h
+  git_mysql.cc
+  mysql.h
+  mysql.cc
+  addon.cc
+)
+ADD_LIBRARY(addon SHARED ${SRC_NODE})
+ADD_DEPENDENCIES(addon mygit)
+TARGET_LINK_LIBRARIES(addon mygit)
+#TARGET_LINK_LIBRARIES(addon hbase)
+#TARGET_LINK_LIBRARIES(addon roger)
+IF (MSVC_IDE)
+  TARGET_LINK_LIBRARIES(addon ${NODE_GYP_DIR}/Release/node)
+ENDIF ()
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  SET (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+ENDIF()
+#SET_TARGET_PROPERTIES(addon PROPERTIES CXX_STANDARD 11)
+SET_TARGET_PROPERTIES(addon PROPERTIES SUFFIX ".node")
+SET_TARGET_PROPERTIES(addon PROPERTIES PREFIX "")

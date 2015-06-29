@@ -51,12 +51,8 @@ NAN_METHOD(GitMysql::LastError) {
 	NanEscapableScope();
 
 	const git_error *e = giterr_last();
-	//char *error_msg;
-
-	//sprintf(error_msg, "Error %d: %s\n", e->klass, e->message);
 
 	Handle<v8::Value> to;
-	//to = NanNew<String>(error_msg);
 	to = NanNew<String>(e->message);
 
 	NanReturnValue(to);
