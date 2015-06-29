@@ -38,24 +38,11 @@ typedef struct {
   MYSQL_STMT *config_del;
 } git_mysql;
 
-GIT_BEGIN_DECL
-
-GIT_EXTERN(int) git_mysql_init(git_mysql **out,
-							   const char *mysql_host,
-          					   const char *mysql_user,
-          					   const char *mysql_passwd,
-          					   const char *mysql_db,
-          					   unsigned int mysql_port,
-							   const char *mysql_unix_socket,
-							   unsigned long mysql_client_flag);
-
-GIT_EXTERN(int) git_mysql_free(git_mysql *mysql);
-
-GIT_EXTERN(void) git_mysql_transaction(git_mysql *mysql);
-GIT_EXTERN(void) git_mysql_commit(git_mysql *mysql);
-GIT_EXTERN(void) git_mysql_rollback(git_mysql *mysql);
-GIT_EXTERN(int) git_mysql_adhoc(git_mysql *mysql, const char *cmd);
-
-GIT_END_DECL
+int git_mysql_init(git_mysql **out,const char *mysql_host, const char *mysql_user,const char *mysql_passwd,const char *mysql_db,unsigned int mysql_port,const char *mysql_unix_socket,unsigned long mysql_client_flag);
+int git_mysql_free(git_mysql *mysql);
+void git_mysql_transaction(git_mysql *mysql);
+void git_mysql_commit(git_mysql *mysql);
+void git_mysql_rollback(git_mysql *mysql);
+int git_mysql_adhoc(git_mysql *mysql, const char *cmd);
 
 #endif

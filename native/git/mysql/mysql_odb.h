@@ -29,11 +29,6 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
 void mysql_odb_free(git_odb_backend *_backend);
 
-
-GIT_BEGIN_DECL
-
-GIT_EXTERN(int) git_mysql_odb_init(git_odb_backend **out, git_mysql *mysql);
-
-GIT_END_DECL
+int git_mysql_odb_init(git_odb_backend **out, git_mysql *mysql);
 
 #endif

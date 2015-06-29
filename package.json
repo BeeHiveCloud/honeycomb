@@ -1,6 +1,6 @@
 {
   "name": "honeycomb",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A hybrid data platform",
   "keywords": ["honeycomb","node.js","MySQL","GIT", "R"],
   "main": "./lib/index.js",
@@ -13,7 +13,7 @@
   "scripts": {
     "test": "mocha -b",
     "prepublish": "npm prune",
-    "postinstall": "node-pre-gyp install --fallback-to-build"
+    "postinstall": "node_modules/node-pre-gyp/bin/node-pre-gyp install --fallback-to-build"
   },
   "binary": {
       "module_name": "honeycomb",

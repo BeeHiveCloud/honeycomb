@@ -4,12 +4,8 @@
 #include "git2.h"
 #include "mysql_backend.h"
 
-GIT_BEGIN_DECL
+my_ulonglong git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description);
 
-GIT_EXTERN(my_ulonglong) git_mysql_repo_create(git_mysql *mysql, const long long int owner, const char *name, const char *description);
-
-GIT_EXTERN(int) git_mysql_repo_del(git_mysql *mysql);
-
-GIT_END_DECL
+int git_mysql_repo_del(git_mysql *mysql);
 
 #endif

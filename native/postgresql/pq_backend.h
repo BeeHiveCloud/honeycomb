@@ -1,15 +1,10 @@
 #ifndef INCLUDE_git_pq_backend_h__
 #define INCLUDE_git_pq_backend_h__
 
-#include "git2.h"
 #include <libpq-fe.h>
 
-GIT_BEGIN_DECL
+int git_pq_init(PGconn **out, const char *conninfo);
 
-GIT_EXTERN(int)git_pq_init(PGconn **out, const char *conninfo);
-
-GIT_EXTERN(int)git_pq_free(PGconn *conn);
-
-GIT_END_DECL
+int git_pq_free(PGconn *conn);
 
 #endif

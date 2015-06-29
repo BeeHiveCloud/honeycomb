@@ -20,10 +20,6 @@ typedef struct {
 	git_mysql *mysql;
 } git_mysql_refdb;
 
-GIT_BEGIN_DECL
-
-GIT_EXTERN(int) git_mysql_refdb_init(git_refdb_backend **out, git_mysql *mysql);
-
-GIT_END_DECL
+int git_mysql_refdb_init(git_refdb_backend **out, git_mysql *mysql);
 
 #endif

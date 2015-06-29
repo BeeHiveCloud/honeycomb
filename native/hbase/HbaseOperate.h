@@ -22,7 +22,7 @@ typedef struct hbaseRet {
 
 } hbaseRet;
 
-class __declspec(dllexport) CHbaseOperate
+class CHbaseOperate
 {
 public:
   CHbaseOperate();

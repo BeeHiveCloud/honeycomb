@@ -36,14 +36,10 @@ typedef struct {
 
 static redisContext *sharedConnection = NULL;
 
-GIT_BEGIN_DECL
-
-GIT_EXTERN(int) git_refdb_backend_hiredis(git_refdb_backend **backend_out,
+int git_refdb_backend_hiredis(git_refdb_backend **backend_out,
   const char* prefix, const char* path, const char *host, int port, char* password);
 
-GIT_EXTERN(int) git_odb_backend_hiredis(git_odb_backend **backend_out,
+int git_odb_backend_hiredis(git_odb_backend **backend_out,
    const char* prefix, const char* path, const char *host, int port, char* password);
-
-GIT_END_DECL
 
 #endif

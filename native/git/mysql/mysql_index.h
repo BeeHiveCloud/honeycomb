@@ -4,13 +4,8 @@
 #include "git2.h"
 #include "mysql_backend.h"
 
+int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path);
 
-GIT_BEGIN_DECL
-
-GIT_EXTERN(int) git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path);
-
-GIT_EXTERN(int) git_mysql_index_del(git_mysql *mysql, const char *path);
-
-GIT_END_DECL
+int git_mysql_index_del(git_mysql *mysql, const char *path);
 
 #endif

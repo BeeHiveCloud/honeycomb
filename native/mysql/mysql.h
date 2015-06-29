@@ -7,20 +7,18 @@
 
 #include <mysql.h>
 
-#include "../util/util.h"
+void mysql_connect(const char *mysql_host, const char *mysql_user, const char *mysql_passwd, const char *mysql_db, unsigned int mysql_port, const char *mysql_unix_socket, unsigned long mysql_client_flag);
 
-HC_BEGIN_DECL
+void mysql_disconnect(MYSQL *db);
 
-HC_EXTERN(void) mysql_trx_start(MYSQL *db);
+void mysql_trx_start(MYSQL *db);
 
-HC_EXTERN(void) mysql_trx_commit(MYSQL *db);
+void mysql_trx_commit(MYSQL *db);
 
-HC_EXTERN(void) mysql_trx_rollback(MYSQL *db);
+void mysql_trx_rollback(MYSQL *db);
 
-HC_EXTERN(int) mysql_set_variable(const char *name, const char *expr);
+int mysql_set_variable(const char *name, const char *expr);
 
-HC_EXTERN(const char *) mysql_get_variable(const char *name);
-
-HC_END_DECL
+const char *mysql_get_variable(const char *name);
 
 #endif

@@ -8,12 +8,8 @@
 typedef struct {
 	git_config_backend parent;
 	git_mysql *mysql;
-} git_mysql_config; 
+} git_mysql_config;
 
-GIT_BEGIN_DECL
-
-GIT_EXTERN(int) git_mysql_config_init(git_config_backend **out, git_mysql *mysql);
-
-GIT_END_DECL
+int git_mysql_config_init(git_config_backend **out, git_mysql *mysql);
 
 #endif

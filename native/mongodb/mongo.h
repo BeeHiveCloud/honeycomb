@@ -5,6 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int mongo_init();
+int mongo_init();
 
 #endif
