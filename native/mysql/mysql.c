@@ -1,5 +1,7 @@
 #include "mysql.h"
 
+#include <stdio.h>
+
 MYSQL *mysql_hc_connect(const char *mysql_host, const char *mysql_user, const char *mysql_passwd, const char *mysql_db, unsigned int mysql_port, const char *mysql_unix_socket, unsigned long mysql_client_flag){
     
   MYSQL *db = NULL;
@@ -42,10 +44,37 @@ void mysql_trx_rollback(MYSQL *db){
 	mysql_query(db, "ROLLBACK");
 }
 
-int mysql_set_variable(const char *name, const char *expr){
-  return 0;
+int mysql_hc_set_variable(MYSQL *db, const char *name, const char *value){
+    
+    char *sql = malloc(strlen(name)+strlen(value)+8);
+    
+    sprintf(sql,"SET @%s=%s;",name,value);
+    
+    if(mysql_query(db, sql))
+        return -1;
+    
+    free((void *)sql);
+    
+    return 0;
 }
 
-const char * mysql_get_variable(const char *name){
-  return NULL;
+const char * mysql_hc_get_variable(MYSQL *db, const char *name){
+
+    char *sql = malloc(strlen(name)+10);
+ 
+    sprintf(sql,"SELECT @%s;",name);
+    
+    if(mysql_query(db, sql))
+        return -1;
+    
+    MYSQL_RES *result = mysql_store_result(db);
+    
+    MYSQL_ROW row = mysql_fetch_row(result);
+    
+    mysql_free_result(result);
+    
+    free((void *)sql);
+    
+    return row[0];
 }
+

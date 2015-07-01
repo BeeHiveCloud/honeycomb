@@ -10,6 +10,8 @@ void Mysql::InitializeComponent(Handle<v8::Object> target) {
 	NODE_SET_METHOD(object, "Close", Close);
   
     NODE_SET_METHOD(object, "Set", Set);
+    
+    NODE_SET_METHOD(object, "Get", Get);
 
 	target->Set(NanNew<String>("MySQL"), object);
 }
@@ -75,6 +77,49 @@ NAN_METHOD(Mysql::Close) {
 
 NAN_METHOD(Mysql::Set) {
     NanEscapableScope();
+    
+    if (args.Length() == 0 || !args[0]->IsString()) {
+        return NanThrowError("name is required.");
+    }
+    
+    if (args.Length() == 1 || !args[1]->IsString()) {
+        return NanThrowError("value is required.");
+    }
+    
+    // start convert_from_v8 block
+    const char * from_name;
+    String::Utf8Value name_buf(args[0]->ToString());
+    from_name = (const char *) strdup(*name_buf);
+    
+    const char * from_value;
+    String::Utf8Value value_buf(args[1]->ToString());
+    from_value = (const char *) strdup(*value_buf);
+    // end convert_from_v8 block
+    
+    if(mysql_hc_set_variable(db, from_name, from_value)==0)
+        NanReturnValue(NanTrue());
+    else
+        NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(Mysql::Get) {
+    NanEscapableScope();
+    
+    if (args.Length() == 0 || !args[0]->IsString()) {
+        return NanThrowError("name is required.");
+    }
+    
+    // start convert_from_v8 block
+    const char * from_name;
+    String::Utf8Value name_buf(args[0]->ToString());
+    from_name = (const char *) strdup(*name_buf);
+    // end convert_from_v8 block
+    
+    Handle<v8::Value> to;
+    to = NanNew<String>(mysql_hc_get_variable(db, from_name));
+    
+    NanReturnValue(to);
+    
 }
 
 Persistent<Function> Mysql::constructor_template;
