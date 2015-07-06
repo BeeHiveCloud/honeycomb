@@ -38,7 +38,7 @@ typedef struct {
   MYSQL_STMT *config_del;
 } git_mysql;
 
-int git_mysql_init(git_mysql **out,const char *mysql_host, const char *mysql_user,const char *mysql_passwd,const char *mysql_db,unsigned int mysql_port,const char *mysql_unix_socket,unsigned long mysql_client_flag);
+int git_mysql_init(git_mysql **out,MYSQL *db);
 int git_mysql_free(git_mysql *mysql);
 void git_mysql_transaction(git_mysql *mysql);
 void git_mysql_commit(git_mysql *mysql);

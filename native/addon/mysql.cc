@@ -63,6 +63,11 @@ NAN_METHOD(Mysql::Open) {
     
     db = mysql_hc_connect(from_mysql_host, from_mysql_user, from_mysql_passwd, from_mysql_db, from_mysql_port, NULL, 0);
     
+    free((char *)from_mysql_host);
+    free((char *)from_mysql_user);
+    free((char *)from_mysql_passwd);
+    free((char *)from_mysql_db);
+    
     if(db)
         NanReturnValue(NanTrue());
     else

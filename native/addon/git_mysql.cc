@@ -1,4 +1,5 @@
 #include "git_mysql.h"
+#include "mysql.h"
 
 void GitMysql::InitializeComponent(Handle<v8::Object> target) {
     NanScope();
@@ -7,9 +8,9 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "LastError", LastError);
 
-	NODE_SET_METHOD(object, "Open", Open);
+  NODE_SET_METHOD(object, "Init", Init);
 
-	NODE_SET_METHOD(object, "Close", Close);
+  NODE_SET_METHOD(object, "Close", Close);
 
 	NODE_SET_METHOD(object, "Add", CreateBlob);
 
@@ -25,19 +26,9 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "CreateBranch", CreateBranch);
 
-	NODE_SET_METHOD(object, "AdHoc", AdHoc);
-
 	NODE_SET_METHOD(object, "CreateRepo", CreateRepo);
 
 	NODE_SET_METHOD(object, "DeleteRepo", DeleteRepo);
-
-	NODE_SET_METHOD(object, "GetRepo", GetRepo);
-
-	NODE_SET_METHOD(object, "SetRepo", SetRepo);
-
-	NODE_SET_METHOD(object, "TreeWalk", TreeWalk);
-
-	NODE_SET_METHOD(object, "Config", Config);
 
 	NODE_SET_METHOD(object, "CreateTag", CreateTag);
 
@@ -46,185 +37,72 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 	target->Set(NanNew<String>("GIT"), object);
 }
 
-
-NAN_METHOD(GitMysql::LastError) {
-	NanEscapableScope();
-
-	const git_error *e = giterr_last();
-
-	Handle<v8::Value> to;
-	to = NanNew<String>(e->message);
-
-	NanReturnValue(to);
-}
-
-NAN_METHOD(GitMysql::Open) {
+NAN_METHOD(GitMysql::Init){
   NanEscapableScope();
 
-  if (args.Length() == 0 || !args[0]->IsString()) {
-    return NanThrowError("mysql host is required.");
-  }
+  git_mysql_init(&mysql,Mysql::db);
 
-  if (args.Length() == 1 || !args[1]->IsString()) {
-    return NanThrowError("mysql user is required.");
-  }
-
-  if (args.Length() == 2 || !args[2]->IsString()) {
-    return NanThrowError("mysql password is required.");
-  }
-
-  if (args.Length() == 3 || !args[3]->IsString()) {
-    return NanThrowError("mysql db is required.");
-  }
-
-  if (args.Length() == 4 || !args[4]->IsNumber()) {
-    return NanThrowError("mysql port required.");
-  }
-
-// start convert_from_v8 block
-  const char * from_mysql_host;
-  String::Utf8Value mysql_host(args[0]->ToString());
-  from_mysql_host = (const char *) strdup(*mysql_host);
-
-  const char * from_mysql_user;
-  String::Utf8Value mysql_user(args[1]->ToString());
-  from_mysql_user = (const char *) strdup(*mysql_user);
-
-  const char * from_mysql_passwd;
-  String::Utf8Value mysql_passwd(args[2]->ToString());
-  from_mysql_passwd = (const char *) strdup(*mysql_passwd);
-
-  const char * from_mysql_db;
-  String::Utf8Value mysql_db(args[3]->ToString());
-  from_mysql_db = (const char *) strdup(*mysql_db);
-
-  unsigned int from_mysql_port;
-  from_mysql_port = (unsigned int)args[4]->ToNumber()->Value();
-// end convert_from_v8 block
-
-  int error = git_mysql_init(&mysql,
-							  from_mysql_host,
-							  from_mysql_user,
-							  from_mysql_passwd,
-							  from_mysql_db,
-							  from_mysql_port,
-							  NULL,
-							  0);
-
-  if (error < 0){
-	  return NanThrowError("git_mysql_init error");
-  }
-
-  free((char *)from_mysql_host);
-  free((char *)from_mysql_user);
-  free((char *)from_mysql_passwd);
-  free((char *)from_mysql_db);
-
-  error = git_libgit2_init();
-  if (error < 0){
-	  return NanThrowError("git_libgit2_init error");
-  }
+  if (git_libgit2_init() < 0)
+	  printf("git_libgit2_init error");
 
   git_odb_backend   *odb_backend;
-  error = git_mysql_odb_init(&odb_backend, mysql);
-  if (error < 0){
-	  return NanThrowError("git_mysql_odb_init error");
-  }
+  if (git_mysql_odb_init(&odb_backend, mysql) < 0)
+	  printf("git_mysql_odb_init error");
 
-  error = git_odb_new(&odb_backend->odb);
-  if (error < 0){
-	  return NanThrowError("git_odb_new error");
-  }
+  if (git_odb_new(&odb_backend->odb) < 0)
+	  printf("git_odb_new error");
 
-  error = git_odb_add_backend(odb_backend->odb, odb_backend, 1);
-  if (error < 0){
-	  return NanThrowError("git_odb_add_backend error");
-  }
+  if (git_odb_add_backend(odb_backend->odb, odb_backend, 1) < 0)
+	  printf("git_odb_add_backend error");
 
-  error = git_repository_wrap_odb(&repo, odb_backend->odb);
-  if (error < 0){
-	  return NanThrowError("git_repository_wrap_odb error");
-  }
+  if (git_repository_wrap_odb(&repo, odb_backend->odb) < 0)
+	  printf("git_repository_wrap_odb error");
+
 
   git_refdb *refdb;
-  error = git_refdb_new(&refdb,repo);
-  if (error < 0){
-	  return NanThrowError("git_refdb_new error");
-  }
+  if (git_refdb_new(&refdb,repo) < 0)
+	  printf("git_refdb_new error");
+
 
   git_refdb_backend   *refdb_backend;
-  error = git_mysql_refdb_init(&refdb_backend, mysql);
-  if (error < 0){
-	  return NanThrowError("git_mysql_refdb_init error");
-  }
+  if (git_mysql_refdb_init(&refdb_backend, mysql) < 0)
+	  printf("git_mysql_refdb_init error");
 
-  error = git_refdb_set_backend(refdb, refdb_backend);
-  if (error < 0){
-	  return NanThrowError("git_mysql_refdb_init error");
-  }
+  if (git_refdb_set_backend(refdb, refdb_backend) < 0)
+	  printf("git_mysql_refdb_init error");
+
 
   git_repository_set_refdb(repo, refdb);
 
   git_config *cfg;
-  error = git_config_open_default(&cfg);
-  if (error < 0){
-	  return NanThrowError("git_config_open_default error");
-  }
-
-  /*
-  git_config_backend *cfg_backend;
-
-  error = git_mysql_config_init(&cfg_backend, mysql);
-  if (error < 0){
-	  return NanThrowError("git_mysql_config_init error");
-  }
-
-  error = git_config_new(&cfg);
-  if (error < 0){
-	  return NanThrowError("git_config_new error");
-  }
-
-  error = git_config_add_backend(cfg, cfg_backend, GIT_CONFIG_LEVEL_LOCAL, 0);
-  if (error < 0){
-	  return NanThrowError("git_config_add_backend error");
-  }
-  */
+  if (git_config_open_default(&cfg) < 0)
+	  printf("git_config_open_default error");
 
   git_repository_set_config(repo,cfg);
 
+  if (git_repository_set_workdir(repo, "/", 0) < 0)
+	  printf("git_repository_set_workdir error");
 
-  error = git_repository_set_workdir(repo, "/", 0);
-  if (error < 0){
-	  return NanThrowError("git_repository_set_workdir error");
-  }
-
-  error = git_repository_set_path(repo, "/");
-  if (error < 0){
-	  return NanThrowError("git_repository_set_path error");
-  }
-
-  if (!error)
-	  NanReturnValue(NanTrue());
-  else
-	  NanReturnValue(NanFalse());
+  if (git_repository_set_path(repo, "/") < 0)
+	  printf("git_repository_set_path error");
 
 }
 
 
 NAN_METHOD(GitMysql::Close) {
-	NanEscapableScope();
+  NanEscapableScope();
+  git_mysql_free(mysql);
+}
 
-	int error = git_mysql_free(mysql);
+NAN_METHOD(GitMysql::LastError) {
+    NanEscapableScope();
 
-	error = git_libgit2_shutdown();
-	if (error < 0){
-		return NanThrowError("git_libgit2_shutdown error");
-	}
+    const git_error *e = giterr_last();
 
-	if (!error)
-		NanReturnValue(NanTrue());
-	else
-		NanReturnValue(NanFalse());
+    Handle<v8::Value> to;
+    to = NanNew<String>(e->message);
+
+    NanReturnValue(to);
 }
 
 NAN_METHOD(GitMysql::CreateBlob) {
@@ -252,24 +130,24 @@ NAN_METHOD(GitMysql::CreateBlob) {
 	git_oid			  oid;
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_blob_create_frombuffer(&oid, repo, from_buf, strlen(from_buf));
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_blob_create_frombuffer error");
 	}
 
 	error = git_mysql_index_write(mysql, &oid, from_path);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_index_write error");
 	}
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
-  free((char *)from_path);
-  free((char *)from_buf);
+    free((char *)from_path);
+    free((char *)from_buf);
 
 	char sha1[GIT_OID_HEXSZ+1] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ+1, &oid);
@@ -529,29 +407,6 @@ NAN_METHOD(GitMysql::CreateBranch) {
 		NanReturnValue(NanFalse());
 }
 
-NAN_METHOD(GitMysql::AdHoc) {
-	NanEscapableScope();
-
-	if (args.Length() == 0 || !args[0]->IsString()) {
-		return NanThrowError("cmd is required.");
-	}
-
-	// start convert_from_v8 block
-	const char *from_cmd;
-	String::Utf8Value cmd_buf(args[0]->ToString());
-	from_cmd = (const char *)strdup(*cmd_buf);
-	// end convert_from_v8 block
-
-	int error = git_mysql_adhoc(mysql,from_cmd);
-
-  free((char *)from_cmd);
-
-	if (!error)
-		NanReturnValue(NanTrue());
-	else
-		NanReturnValue(NanFalse());
-}
-
 NAN_METHOD(GitMysql::CreateRepo) {
 	NanEscapableScope();
 
@@ -581,7 +436,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	// end convert_from_v8 block
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	my_ulonglong rid = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
 
@@ -600,35 +455,35 @@ NAN_METHOD(GitMysql::CreateRepo) {
 
 		error = git_blob_create_frombuffer(&oid, repo, from_name, strlen(from_name));
 		if (error < 0){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_blob_create_frombuffer error");
 		}
 
 		error = git_mysql_index_write(mysql, &oid, "/README.md");
 		if (error < 0){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_mysql_index_write error");
 		}
 
 		error = git_mysql_tree_init(mysql);
 		if (error < 0){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_mysql_tree_init error");
 		}
 
 		error = git_mysql_tree_build(mysql, repo, "BLOB");
 		if (error < 0){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_mysql_tree_build error");
 		}
 		error = git_mysql_tree_build(mysql, repo, "TREE");
 		if (error < 0){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_mysql_tree_build error");
 		}
 		tree = git_mysql_tree_root(mysql, repo);
 		if (!tree){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_mysql_tree_build error");
 		}
 
@@ -639,11 +494,11 @@ NAN_METHOD(GitMysql::CreateRepo) {
 
 		error = git_commit_create(&commit, repo, "refs/heads/master", me, me, "UTF-8", "Initial Commit", tree, 0, NULL);
 		if (error < 0){
-			git_mysql_rollback(mysql);
+			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_commit_create error");
 		}
 
-		git_mysql_commit(mysql);
+		mysql_trx_commit(mysql->db);
 
         free((char *)from_name);
         free((char *)from_desc);
@@ -655,76 +510,9 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		NanReturnValue(to);
 	}
 	else{
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_repo_create error");
 	}
-}
-
-NAN_METHOD(GitMysql::GetRepo) {
-	NanEscapableScope();
-
-	Handle<v8::Value> to;
-	to = NanNew<Number>(mysql->repo);
-	NanReturnValue(to);
-}
-
-NAN_METHOD(GitMysql::SetRepo) {
-	NanEscapableScope();
-
-	if (args.Length() == 0 || !args[0]->IsNumber()) {
-		return NanThrowError("repo is required.");
-	}
-
-	mysql->repo = (long long int)args[0]->ToNumber()->Value();
-}
-
-NAN_METHOD(GitMysql::TreeWalk) {
-	NanEscapableScope();
-
-	git_mysql_tree_walk(mysql, repo);
-
-}
-
-
-NAN_METHOD(GitMysql::Config) {
-	NanEscapableScope();
-
-	int error;
-	git_config *cfg;
-	git_config_backend *cfg_backend;
-
-	error = git_mysql_config_init(&cfg_backend, mysql);
-	if (error < 0){
-		return NanThrowError("git_mysql_config_init error");
-	}
-
-	error = git_config_new(&cfg);
-	if (error < 0){
-		return NanThrowError("git_config_new error");
-	}
-
-	error = git_config_add_backend(cfg, cfg_backend, GIT_CONFIG_LEVEL_LOCAL, 0);
-	if (error < 0){
-		return NanThrowError("git_config_add_backend error");
-	}
-
-	// Transaction Start
-	git_mysql_transaction(mysql);
-
-	error = git_config_set_string(cfg, "user", "jerry");
-	if (error < 0){
-		git_mysql_rollback(mysql);
-		return NanThrowError("git_config_set_string error");
-	}
-
-	git_mysql_commit(mysql);
-
-	git_config_free(cfg);
-
-	if (!error)
-		NanReturnValue(NanTrue());
-	else
-		NanReturnValue(NanFalse());
 }
 
 NAN_METHOD(GitMysql::RevParse) {

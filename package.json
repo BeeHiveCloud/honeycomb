@@ -1,8 +1,8 @@
 {
   "name": "honeycomb",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A hybrid data platform",
-  "keywords": ["honeycomb","node.js","MySQL","GIT", "R"],
+  "keywords": ["honeycomb","node.js","MySQL","git", "R"],
   "main": "./lib/index.js",
   "dependencies": {
     "nan": "1.8.4",

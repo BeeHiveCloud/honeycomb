@@ -15,6 +15,7 @@ extern "C" {
 #include "../git/mysql/mysql_config.h"
 #include "../patch/libgit2/repo_path.h"
 #include "git2/sys/repository.h"
+#include "../mysql/mysql.h"
 }
 
 using namespace node;
@@ -25,6 +26,8 @@ class GitMysql : public ObjectWrap {
 
     static Persistent<Function> constructor_template;
     static void InitializeComponent (Handle<v8::Object> target);
+    GitMysql();
+    ~GitMysql();
 
 	static git_mysql *mysql;
 	static git_repository *repo;
@@ -33,9 +36,9 @@ class GitMysql : public ObjectWrap {
 
 	  static NAN_METHOD(LastError);
 
-	  static NAN_METHOD(Open);
+    static NAN_METHOD(Init);
 
-	  static NAN_METHOD(Close);
+    static NAN_METHOD(Close);
 
 	  static NAN_METHOD(CreateBlob);
 
@@ -51,19 +54,9 @@ class GitMysql : public ObjectWrap {
 
 	  static NAN_METHOD(RevParse);
 
-	  static NAN_METHOD(AdHoc);
-
 	  static NAN_METHOD(CreateRepo);
 
 	  static NAN_METHOD(DeleteRepo);
-
-	  static NAN_METHOD(GetRepo);
-
-	  static NAN_METHOD(SetRepo);
-
-	  static NAN_METHOD(TreeWalk);
-
-	  static NAN_METHOD(Config);
 
 	  static NAN_METHOD(CreateTag);
 

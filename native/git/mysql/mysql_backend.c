@@ -346,70 +346,25 @@ int git_mysql_free(git_mysql *mysql)
   return GIT_OK;
 }
 
-int git_mysql_init(git_mysql **out,
-				   const char *mysql_host,
-				   const char *mysql_user,
-				   const char *mysql_passwd,
-				   const char *mysql_db,
-				   unsigned int mysql_port,
-				   const char *mysql_unix_socket,
-				   unsigned long mysql_client_flag)
+int git_mysql_init(git_mysql **out,MYSQL *db)
 {
   git_mysql *mysql;
-  int error;
-  my_bool reconnect;
+  int error = GIT_ERROR;
 
   mysql = calloc(1, sizeof(git_mysql));
 
   if (mysql == NULL)
     return GIT_ERROR;
-
-  if (mysql_library_init(0, NULL, NULL)) {
-      free(mysql);
-    return GIT_ERROR;
-  }
-
-  mysql->db = mysql_init(mysql->db);
-
-  reconnect = 1;
-
-  // allow libmysql to reconnect gracefully
-  if (mysql_options(mysql->db, MYSQL_OPT_RECONNECT, &reconnect) != 0){
-    git_mysql_free(mysql);
-    return GIT_ERROR;
-  }
-
-  // make the connection
-  if (mysql_real_connect(mysql->db, mysql_host, mysql_user, mysql_passwd, mysql_db, mysql_port, mysql_unix_socket, mysql_client_flag) != mysql->db){
-    git_mysql_free(mysql);
-    return GIT_ERROR;
-  }
-
+    
+  mysql->db = db;
+    
   // init sql statements
   error = init_statements(mysql);
   if (error < 0)
 	  return GIT_ERROR;
-
-  // turn off auto commit
-  mysql_autocommit(mysql->db, 0);
 
   *out = mysql;
 
   return GIT_OK;
 }
 
-void git_mysql_transaction(git_mysql *mysql){
-	mysql_query(mysql->db, "START TRANSACTION");
-}
-
-void git_mysql_commit(git_mysql *mysql){
-	mysql_query(mysql->db, "COMMIT");
-}
-
-void git_mysql_rollback(git_mysql *mysql){
-	mysql_query(mysql->db, "ROLLBACK");
-}
-
-int git_mysql_adhoc(git_mysql *mysql, const char *cmd){
-	return mysql_query(mysql->db, cmd);
-}

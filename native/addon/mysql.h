@@ -16,6 +16,8 @@ class Mysql : public ObjectWrap {
 
     static Persistent<Function> constructor_template;
     static void InitializeComponent (Handle<v8::Object> target);
+    
+    static MYSQL *db;
 
   private:
 
@@ -23,7 +25,6 @@ class Mysql : public ObjectWrap {
     static NAN_METHOD(Close);
     static NAN_METHOD(Set);
     static NAN_METHOD(Get);
-    static MYSQL *db;
 
 };
 
