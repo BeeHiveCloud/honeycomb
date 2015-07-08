@@ -8,9 +8,9 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "LastError", LastError);
 
-  NODE_SET_METHOD(object, "Init", Init);
+    NODE_SET_METHOD(object, "Init", Init);
 
-  NODE_SET_METHOD(object, "Close", Close);
+    NODE_SET_METHOD(object, "Close", Close);
 
 	NODE_SET_METHOD(object, "Add", CreateBlob);
 
@@ -165,33 +165,33 @@ NAN_METHOD(GitMysql::WriteTree) {
 	git_tree *tree;
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_mysql_tree_init(mysql);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_init error");
 	}
 
 	error = git_mysql_tree_build(mysql, repo, "BLOB");
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_build error");
 	}
 	error = git_mysql_tree_build(mysql, repo, "TREE");
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_build error");
 	}
 	tree = git_mysql_tree_root(mysql, repo);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_build error");
 	}
 
 	git_tree_free(tree);
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -259,15 +259,15 @@ NAN_METHOD(GitMysql::CreateRef) {
 	//git_oid_fromstr(&oid, from_target);
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_reference_symbolic_create(&ref, repo, from_name, from_target, 0, NULL, NULL);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_reference_symbolic_create error");
 	}
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
   free((char *)from_name);
   free((char *)from_target);
@@ -316,38 +316,38 @@ NAN_METHOD(GitMysql::Commit) {
 	}
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_mysql_tree_init(mysql);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_init error");
 	}
 
 	error = git_mysql_tree_build(mysql, repo, "BLOB");
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_build error");
 	}
 	error = git_mysql_tree_build(mysql, repo, "TREE");
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_build error");
 	}
 	tree = git_mysql_tree_root(mysql, repo);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_tree_build error");
 	}
 
 	const git_commit *parents[] = { (git_commit *)parent };
 	error = git_commit_create(&commit, repo, from_ref, me, me, "UTF-8", from_msg, tree, 1, parents);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_commit_create error");
 	}
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
     free((char *)from_ref);
     free((char *)from_msg);
@@ -389,17 +389,17 @@ NAN_METHOD(GitMysql::CreateBranch) {
 	}
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_branch_create(&ref, repo, from_name,commit,0,NULL,NULL);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_branch_create error");
 	}
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
-  free((char *)from_name);
+    free((char *)from_name);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -541,7 +541,7 @@ NAN_METHOD(GitMysql::RevParse) {
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, oid);
 
 	git_object_free(tree);
-  free((char *)from_spec);
+    free((char *)from_spec);
 
 	Handle<v8::Value> to;
 	to = NanNew<String>(sha1);
@@ -556,15 +556,15 @@ NAN_METHOD(GitMysql::DeleteRepo) {
 	int error;
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_mysql_repo_del(mysql);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_mysql_repo_del error");
 	}
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -606,18 +606,18 @@ NAN_METHOD(GitMysql::CreateTag) {
 	error = git_signature_now(&tagger,"Jerry Jin", "jerry.yang.jin@gmail.com");
 
 	// Transaction Start
-	git_mysql_transaction(mysql);
+	mysql_trx_start(mysql->db);
 
 	error = git_tag_create(&oid, repo, from_tag, target, tagger, from_msg, 0);
 	if (error < 0){
-		git_mysql_rollback(mysql);
+		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_tag_create error");
 	}
 
-	git_mysql_commit(mysql);
+	mysql_trx_commit(mysql->db);
 
-  free((char *)from_tag);
-  free((char *)from_msg);
+    free((char *)from_tag);
+    free((char *)from_msg);
 
 	if (!error)
 		NanReturnValue(NanTrue());
