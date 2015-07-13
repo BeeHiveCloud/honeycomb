@@ -1,6 +1,6 @@
 # honeycomb - postgresql module
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 FILE(GLOB SRC_PQ *.c *.h)
 ADD_LIBRARY(postgresql STATIC ${SRC_PQ})

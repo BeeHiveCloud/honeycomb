@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-MYSQL *mysql_hc_connect(const char *mysql_host, const char *mysql_user, const char *mysql_passwd, const char *mysql_db, unsigned int mysql_port, const char *mysql_unix_socket, unsigned long mysql_client_flag){
+MYSQL *mysql_db_connect(const char *mysql_host, const char *mysql_user, const char *mysql_passwd, const char *mysql_db, unsigned int mysql_port, const char *mysql_unix_socket, unsigned long mysql_client_flag){
     
   MYSQL *db = NULL;
   my_bool reconnect = 1;
@@ -13,12 +13,12 @@ MYSQL *mysql_hc_connect(const char *mysql_host, const char *mysql_user, const ch
 	db = mysql_init(db);
 
 	if (mysql_options(db, MYSQL_OPT_RECONNECT, &reconnect) != 0){
-		mysql_hc_disconnect(db);
+		mysql_db_disconnect(db);
 		return NULL;
 	}
 
 	if (mysql_real_connect(db, mysql_host, mysql_user, mysql_passwd, mysql_db, mysql_port, mysql_unix_socket,mysql_client_flag) != db){
-		mysql_hc_disconnect(db);
+		mysql_db_disconnect(db);
 		return NULL;
 	}
 
@@ -27,7 +27,7 @@ MYSQL *mysql_hc_connect(const char *mysql_host, const char *mysql_user, const ch
 	return db;
 }
 
-void mysql_hc_disconnect(MYSQL *db){
+void mysql_db_disconnect(MYSQL *db){
 	mysql_close(db);
 	mysql_library_end();
 }
@@ -44,7 +44,7 @@ void mysql_trx_rollback(MYSQL *db){
 	mysql_query(db, "ROLLBACK");
 }
 
-int mysql_hc_set_variable(MYSQL *db, const char *name, const char *value){
+int mysql_set_variable(MYSQL *db, const char *name, const char *value){
     
     char *sql = malloc(strlen(name)+strlen(value)+8);
     
@@ -58,14 +58,14 @@ int mysql_hc_set_variable(MYSQL *db, const char *name, const char *value){
     return 0;
 }
 
-const char * mysql_hc_get_variable(MYSQL *db, const char *name){
+const char * mysql_get_variable(MYSQL *db, const char *name){
 
     char *sql = malloc(strlen(name)+10);
  
     sprintf(sql,"SELECT @%s;",name);
     
     if(mysql_query(db, sql))
-        return -1;
+        return NULL;
     
     MYSQL_RES *result = mysql_store_result(db);
     
@@ -77,4 +77,3 @@ const char * mysql_hc_get_variable(MYSQL *db, const char *name){
     
     return row[0];
 }
-

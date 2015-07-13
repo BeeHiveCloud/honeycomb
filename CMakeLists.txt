@@ -1,7 +1,7 @@
 # CMake build script for honeycomb
 
 PROJECT(honeycomb)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # set global CMAKE_BUILD_TYPE
 SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)

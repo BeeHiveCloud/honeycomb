@@ -8,9 +8,9 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "LastError", LastError);
 
-    NODE_SET_METHOD(object, "Init", Init);
+  NODE_SET_METHOD(object, "Init", Init);
 
-    NODE_SET_METHOD(object, "Close", Close);
+  NODE_SET_METHOD(object, "Close", Close);
 
 	NODE_SET_METHOD(object, "Add", CreateBlob);
 
@@ -261,7 +261,7 @@ NAN_METHOD(GitMysql::CreateRef) {
 	// Transaction Start
 	mysql_trx_start(mysql->db);
 
-	error = git_reference_symbolic_create(&ref, repo, from_name, from_target, 0, NULL, NULL);
+	error = git_reference_symbolic_create(&ref, repo, from_name, from_target, 0, NULL);
 	if (error < 0){
 		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_reference_symbolic_create error");
@@ -391,7 +391,7 @@ NAN_METHOD(GitMysql::CreateBranch) {
 	// Transaction Start
 	mysql_trx_start(mysql->db);
 
-	error = git_branch_create(&ref, repo, from_name,commit,0,NULL,NULL);
+	error = git_branch_create(&ref, repo, from_name,commit,0);
 	if (error < 0){
 		mysql_trx_rollback(mysql->db);
 		return NanThrowError("git_branch_create error");
@@ -450,7 +450,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		git_tree *tree;
 		git_signature *me;
 		git_oid commit;
-		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL, NULL);
+		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL);
 		git_reference_free(ref);
 
 		error = git_blob_create_frombuffer(&oid, repo, from_name, strlen(from_name));

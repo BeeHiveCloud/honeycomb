@@ -61,7 +61,7 @@ NAN_METHOD(Mysql::Open) {
     from_mysql_port = (unsigned int)args[4]->ToNumber()->Value();
     // end convert_from_v8 block
     
-    db = mysql_hc_connect(from_mysql_host, from_mysql_user, from_mysql_passwd, from_mysql_db, from_mysql_port, NULL, 0);
+    db = mysql_db_connect(from_mysql_host, from_mysql_user, from_mysql_passwd, from_mysql_db, from_mysql_port, NULL, 0);
     
     free((char *)from_mysql_host);
     free((char *)from_mysql_user);
@@ -77,7 +77,7 @@ NAN_METHOD(Mysql::Open) {
 NAN_METHOD(Mysql::Close) {
     NanEscapableScope();
     
-    mysql_hc_disconnect(db);
+    mysql_db_disconnect(db);
 }
 
 NAN_METHOD(Mysql::Set) {
@@ -101,7 +101,7 @@ NAN_METHOD(Mysql::Set) {
     from_value = (const char *) strdup(*value_buf);
     // end convert_from_v8 block
     
-    if(mysql_hc_set_variable(db, from_name, from_value)==0)
+    if(mysql_set_variable(db, from_name, from_value)==0)
         NanReturnValue(NanTrue());
     else
         NanReturnValue(NanFalse());
@@ -121,7 +121,7 @@ NAN_METHOD(Mysql::Get) {
     // end convert_from_v8 block
     
     Handle<v8::Value> to;
-    to = NanNew<String>(mysql_hc_get_variable(db, from_name));
+    to = NanNew<String>(mysql_get_variable(db, from_name));
     
     NanReturnValue(to);
     

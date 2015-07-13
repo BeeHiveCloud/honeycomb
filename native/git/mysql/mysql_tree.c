@@ -387,11 +387,17 @@ int each_line_cb(
 	return 0;
 }
 
+int each_binary_cb(const git_diff_delta *delta, const git_diff_binary *binary, void *payload){
+
+	return 0;
+}
+
 int git_mysql_tree_diff(git_diff *diff){
 	int error;
 
 	error = git_diff_foreach(diff,
 		each_file_cb,
+		each_binary_cb,
 		each_hunk_cb,
 		each_line_cb,
 		NULL);
