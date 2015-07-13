@@ -10,7 +10,7 @@ int mysql_config_snapshot(git_config_backend ** out, struct git_config_backend *
 	return GIT_OK;
 }
 
-int mysql_config_get(git_config_backend *_backend, const char *key, const git_config_entry **entry){
+int mysql_config_get(git_config_backend *_backend, const char *key, git_config_entry **entry){
 	git_mysql_config *backend;
 	int error;
 	MYSQL_BIND bind_buffers[2];
