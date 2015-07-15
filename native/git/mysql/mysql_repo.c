@@ -53,19 +53,6 @@ my_ulonglong git_mysql_repo_create(git_mysql *mysql, const long long int owner, 
 
 int git_mysql_repo_del(git_mysql *mysql){
 
-	MYSQL_BIND bind_buffers[1];
-
-	memset(bind_buffers, 0, sizeof(bind_buffers));
-
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
-	if (mysql_stmt_bind_param(mysql->repo_del, bind_buffers) != 0)
-		return GIT_ERROR;
-
 	// execute the statement
 	if (mysql_stmt_execute(mysql->repo_del) != 0)
 		return GIT_ERROR;

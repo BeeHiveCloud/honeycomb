@@ -8,57 +8,57 @@ int init_statements(git_mysql *mysql)
   static const char *sql_last_seq = "SELECT LAST_INSERT_ID();";
 
   static const char *sql_odb_read =
-    "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
+    "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = @repo AND `oid` = ?;";
 
   static const char *sql_odb_read_header =
-    "SELECT `type`, `size` FROM GIT_ODB WHERE `repo` = ? AND `oid` = ?;";
+    "SELECT `type`, `size` FROM GIT_ODB WHERE `repo` = @repo AND `oid` = ?;";
 
   static const char *sql_odb_write =
-    "INSERT INTO GIT_ODB VALUES (?, ?, ?, ?, COMPRESS(?));";
+    "INSERT INTO GIT_ODB VALUES (@repo, ?, ?, ?, COMPRESS(?));";
 
   static const char *sql_index_read =
-	  "SELECT `oid`, `level`, `dir`, `file` FROM GIT_INDEX_V WHERE `repo` = ? ORDER BY `level` DESC, `dir`;";
+	  "SELECT `oid`, `level`, `dir`, `file` FROM GIT_INDEX_V WHERE `repo` = @repo ORDER BY `level` DESC, `dir`;";
 
   static const char *sql_index_write =
-	"INSERT INTO GIT_INDEX VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
+	"INSERT INTO GIT_INDEX VALUES (@repo, ?, ?) ON DUPLICATE KEY UPDATE `oid` = VALUES(`oid`);";
 
   static const char *sql_index_del =
-	  "DELETE FROM GIT_INDEX WHERE `repo` = ? AND `path` = ?;";
+	  "DELETE FROM GIT_INDEX WHERE `repo` = @repo AND `path` = ?;";
 
   static const char *sql_refdb_read =
-	  "SELECT `type`, `target` FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
+	  "SELECT `type`, `target` FROM GIT_REFDB WHERE `repo` = @repo AND `name` = ?;";
 
   static const char *sql_refdb_read_header =
-	  "SELECT `type` FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
+	  "SELECT `type` FROM GIT_REFDB WHERE `repo` = @repo AND `name` = ?;";
 
   static const char *sql_refdb_write =
-	  "INSERT IGNORE INTO GIT_REFDB VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `target` = VALUES(`target`);";
+	  "INSERT IGNORE INTO GIT_REFDB VALUES (@repo, ?, ?, ?) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `target` = VALUES(`target`);";
 
   static const char *sql_refdb_del =
-	  "DELETE FROM GIT_REFDB WHERE `repo` = ? AND `name` = ?;";
+	  "DELETE FROM GIT_REFDB WHERE `repo` = @repo AND `name` = ?;";
 
   static const char *sql_repo_create =
 	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (?, ?, ?)";
 
-  static const char *sql_repo_del = "CALL GIT_REPO_DEL(?);";
+  static const char *sql_repo_del = "CALL GIT_REPO_DEL(@repo);";
 
-  static const char *sql_tree_init = "CALL GIT_TREE_INIT(?);";
-  static const char *sql_tree_update = "CALL GIT_TREE_UPDATE(?, ?, ?);";
+  static const char *sql_tree_init = "CALL GIT_TREE_INIT(@repo);";
+  static const char *sql_tree_update = "CALL GIT_TREE_UPDATE(@repo, ?, ?);";
 
   static const char *sql_tree_build =
-	  "SELECT `oid`, `dir`, `entry` FROM GIT_TREE WHERE `repo` = ? AND `type` = ? AND `dir` <> '/' ORDER BY `dir`, `entry`;";
+	  "SELECT `oid`, `dir`, `entry` FROM GIT_TREE WHERE `repo` = @repo AND `type` = ? AND `dir` <> '/' ORDER BY `dir`, `entry`;";
 
   static const char *sql_tree_root =
-	  "SELECT `oid`, `dir`, `entry`, `type` FROM GIT_TREE WHERE `repo` = ? AND `dir` = '/' ORDER BY `type` DESC, `entry`;";
+	  "SELECT `oid`, `dir`, `entry`, `type` FROM GIT_TREE WHERE `repo` = @repo AND `dir` = '/' ORDER BY `type` DESC, `entry`;";
 
   static const char *sql_config_get =
-	  "SELECT `value` FROM GIT_CONFIG WHERE `repo` = ? AND `key` = ?;";
+	  "SELECT `value` FROM GIT_CONFIG WHERE `repo` = @repo AND `key` = ?;";
 
   static const char *sql_config_set =
-	  "INSERT INTO GIT_CONFIG VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);";
+	  "INSERT INTO GIT_CONFIG VALUES(@repo, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);";
 
   static const char *sql_config_del =
-	  "DELETE FROM GIT_CONFIG WHERE `repo` = ? AND `key` = ?;";
+	  "DELETE FROM GIT_CONFIG WHERE `repo` = @repo AND `key` = ?;";
 
   mysql->last_seq = mysql_stmt_init(mysql->db);
   if (mysql->last_seq == NULL)

@@ -4,19 +4,6 @@
 
 int git_mysql_tree_init(git_mysql *mysql){
 
-	MYSQL_BIND bind_buffers[1];
-
-	memset(bind_buffers, 0, sizeof(bind_buffers));
-
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
-	if (mysql_stmt_bind_param(mysql->tree_init, bind_buffers) != 0)
-		return GIT_ERROR;
-
 	// execute the statement
 	if (mysql_stmt_execute(mysql->tree_init) != 0)
 		return GIT_ERROR;
@@ -30,27 +17,21 @@ int git_mysql_tree_init(git_mysql *mysql){
 
 int git_mysql_tree_update(git_mysql *mysql, const char *dir, git_oid *oid){
 
-	MYSQL_BIND bind_buffers[3];
+	MYSQL_BIND bind_buffers[2];
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the dir passed to the statement
-	bind_buffers[1].buffer = (void *)dir;
-	bind_buffers[1].buffer_length = strlen(dir) ;
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)dir;
+	bind_buffers[0].buffer_length = strlen(dir) ;
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	// bind the oid passed to the statement
-	bind_buffers[2].buffer = oid;
-	bind_buffers[2].buffer_length = 20;
-	bind_buffers[2].length = &bind_buffers[2].buffer_length;
-	bind_buffers[2].buffer_type = MYSQL_TYPE_BLOB;
+	bind_buffers[1].buffer = oid;
+	bind_buffers[1].buffer_length = 20;
+	bind_buffers[1].length = &bind_buffers[1].buffer_length;
+	bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
 	if (mysql_stmt_bind_param(mysql->tree_update, bind_buffers) != 0)
 		return GIT_ERROR;
@@ -70,23 +51,17 @@ int git_mysql_tree_update(git_mysql *mysql, const char *dir, git_oid *oid){
 int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *type){
 
 	int error;
-	MYSQL_BIND bind_buffers[2];
+	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[3];
 	MYSQL_RES  *prepare_meta_result;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind type
-	bind_buffers[1].buffer = (void *)type;
-	bind_buffers[1].buffer_length = strlen(type);
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_buffers[0].buffer = (void *)type;
+	bind_buffers[0].buffer_length = strlen(type);
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_STRING;
 
 	if (mysql_stmt_bind_param(mysql->tree_build, bind_buffers) != 0)
 		return GIT_ERROR;
@@ -196,22 +171,9 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 	int error;
 	git_oid root;
 	git_tree *tree = NULL;
-	MYSQL_BIND bind_buffers[1];
+
 	MYSQL_BIND result_buffers[4];
 	MYSQL_RES  *prepare_meta_result;
-
-	memset(bind_buffers, 0, sizeof(bind_buffers));
-	memset(result_buffers, 0, sizeof(result_buffers));
-
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
-
-	if (mysql_stmt_bind_param(mysql->tree_root, bind_buffers) != 0)
-		return NULL;
 
 	/* Fetch result set meta information */
 	prepare_meta_result = mysql_stmt_result_metadata(mysql->tree_root);
@@ -233,6 +195,8 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		unsigned long dir_len;
 		unsigned long entry_len;
 		unsigned long type_len;
+        
+        memset(result_buffers, 0, sizeof(result_buffers));
 
 		result_buffers[0].buffer_type = MYSQL_TYPE_BLOB;
 		result_buffers[0].buffer = &oid;

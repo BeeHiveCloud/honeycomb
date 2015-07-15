@@ -13,7 +13,7 @@ int mysql_config_snapshot(git_config_backend ** out, struct git_config_backend *
 int mysql_config_get(git_config_backend *_backend, const char *key, git_config_entry **entry){
 	git_mysql_config *backend;
 	int error;
-	MYSQL_BIND bind_buffers[2];
+	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[2];
 
 	assert(key && entry && _backend );
@@ -23,17 +23,11 @@ int mysql_config_get(git_config_backend *_backend, const char *key, git_config_e
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(backend->mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the key passed to the statement
-	bind_buffers[1].buffer = (void *)key;
-	bind_buffers[1].buffer_length = strlen(key);
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)key;
+	bind_buffers[0].buffer_length = strlen(key);
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->config_get, bind_buffers) != 0)
 		return GIT_ERROR;
@@ -105,7 +99,7 @@ int mysql_config_get(git_config_backend *_backend, const char *key, git_config_e
 int mysql_config_set(git_config_backend *_backend, const char *key, const char *value){
 	git_mysql_config *backend;
 
-	MYSQL_BIND bind_buffers[3];
+	MYSQL_BIND bind_buffers[2];
 	my_ulonglong affected_rows;
 
 	assert(key && value && _backend);
@@ -114,23 +108,17 @@ int mysql_config_set(git_config_backend *_backend, const char *key, const char *
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(backend->mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the key passed to the statement
-	bind_buffers[1].buffer = (void *)key;
-	bind_buffers[1].buffer_length = strlen(key);
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)key;
+	bind_buffers[0].buffer_length = strlen(key);
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	// bind the value passed to the statement
-	bind_buffers[2].buffer = (void *)value;
-	bind_buffers[2].buffer_length = strlen(value);
-	bind_buffers[2].length = &bind_buffers[2].buffer_length;
-	bind_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[1].buffer = (void *)value;
+	bind_buffers[1].buffer_length = strlen(value);
+	bind_buffers[1].length = &bind_buffers[1].buffer_length;
+	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->config_set, bind_buffers) != 0)
 		return GIT_ERROR;
@@ -154,7 +142,7 @@ int mysql_config_set(git_config_backend *_backend, const char *key, const char *
 int mysql_config_del(git_config_backend *_backend, const char *key){
 	git_mysql_config *backend;
 
-	MYSQL_BIND bind_buffers[2];
+	MYSQL_BIND bind_buffers[1];
 	my_ulonglong affected_rows;
 
 	assert(key && _backend);
@@ -163,17 +151,11 @@ int mysql_config_del(git_config_backend *_backend, const char *key){
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(backend->mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the key passed to the statement
-	bind_buffers[1].buffer = (void *)key;
-	bind_buffers[1].buffer_length = strlen(key);
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)key;
+	bind_buffers[0].buffer_length = strlen(key);
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->config_del, bind_buffers) != 0)
 		return GIT_ERROR;

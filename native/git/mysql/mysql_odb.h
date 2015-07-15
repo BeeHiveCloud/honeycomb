@@ -13,6 +13,12 @@
 //#define DEBUGLOG (printf("(%s,%s),%d\n", __FILE__, __func__, __LINE__))
 
 typedef struct {
+    void *data;			/**< Raw, decompressed object data. */
+    size_t len;			/**< Total number of bytes in data. */
+    git_otype type;		/**< Type of this object. */
+} git_rawobj;
+
+typedef struct {
 	git_odb_backend parent;
 	git_mysql *mysql;
 } git_mysql_odb;

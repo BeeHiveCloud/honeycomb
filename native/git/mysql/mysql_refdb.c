@@ -16,7 +16,7 @@ int mysql_ref_iterator_free(git_reference_iterator *iter){
 int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref_name){
 	git_mysql_refdb *backend;
 	int found;
-	MYSQL_BIND bind_buffers[2];
+	MYSQL_BIND bind_buffers[1];
 
 	assert(_backend && ref_name);
 
@@ -25,17 +25,11 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(backend->mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the name passed to the statement
-	bind_buffers[1].buffer = (void *)ref_name;
-	bind_buffers[1].buffer_length = strlen(ref_name);
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)ref_name;
+	bind_buffers[0].buffer_length = strlen(ref_name);
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read_header, bind_buffers) != 0)
 		return GIT_ERROR;
@@ -69,7 +63,7 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const char *ref_name){
 	git_mysql_refdb *backend;
 	int error;
-	MYSQL_BIND bind_buffers[2];
+	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[2];
 
 	git_ref_t type;
@@ -84,18 +78,11 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-
-	// bind the repo passed to the statement
-	bind_buffers[0].buffer = &(backend->mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the name passed to the statement
-	bind_buffers[1].buffer = (void *)ref_name;
-	bind_buffers[1].buffer_length = strlen(ref_name);
-	bind_buffers[1].length = &bind_buffers[1].buffer_length;
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)ref_name;
+	bind_buffers[0].buffer_length = strlen(ref_name);
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read, bind_buffers) != 0)
 		return GIT_ERROR;
@@ -183,7 +170,7 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 {
 	//int error;
 	git_mysql_refdb *backend;
-	MYSQL_BIND bind_buffers[4];
+	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
 
 	const char *ref_name = git_reference_name(ref);
@@ -197,37 +184,31 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
-	// bind the repo 
-	bind_buffers[0].buffer = &(backend->mysql->repo);
-	bind_buffers[0].buffer_length = sizeof(backend->mysql->repo);
-	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_LONGLONG;
-
 	// bind the name
-	bind_buffers[1].buffer = (void *)ref_name;
-	bind_buffers[1].buffer_length = strlen(ref_name);
-	bind_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].buffer = (void *)ref_name;
+	bind_buffers[0].buffer_length = strlen(ref_name);
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 	
 	// bind the type
-	bind_buffers[2].buffer = (void *)&ref_type;
-	bind_buffers[2].buffer_length = sizeof(ref_type);
-	bind_buffers[2].buffer_type = MYSQL_TYPE_TINY;
+	bind_buffers[1].buffer = (void *)&ref_type;
+	bind_buffers[1].buffer_length = sizeof(ref_type);
+	bind_buffers[1].buffer_type = MYSQL_TYPE_TINY;
 
 	// bind the target
-	bind_buffers[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
 
 	if (ref_type == GIT_REF_OID){
 		char sha1[GIT_OID_HEXSZ + 1] = { 0 };
 		git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, target);
 
-		bind_buffers[3].buffer = sha1;
-		bind_buffers[3].buffer_length = GIT_OID_HEXSZ;
-		bind_buffers[3].length = &bind_buffers[3].buffer_length;
+		bind_buffers[2].buffer = sha1;
+		bind_buffers[2].buffer_length = GIT_OID_HEXSZ;
+		bind_buffers[2].length = &bind_buffers[2].buffer_length;
 	}
 	else if (ref_type == GIT_REF_SYMBOLIC) {
-		bind_buffers[3].buffer = (void *)symbolic_target;
-		bind_buffers[3].buffer_length = strlen(symbolic_target);
-		bind_buffers[3].length = &bind_buffers[3].buffer_length;
+		bind_buffers[2].buffer = (void *)symbolic_target;
+		bind_buffers[2].buffer_length = strlen(symbolic_target);
+		bind_buffers[2].length = &bind_buffers[2].buffer_length;
 	}
 	else {
 		giterr_set_str(GITERR_REFERENCE, "unknown ref type returned");

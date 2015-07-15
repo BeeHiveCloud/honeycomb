@@ -442,7 +442,11 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	
 	if (rid > 0){
 
-		mysql->repo = rid;
+		//mysql->repo = rid;
+        char buf[100];
+        memset(buf,0,sizeof(buf));
+        sprintf(buf,"%llu",rid);
+        mysql_set_variable(mysql->db, "repo", buf);
 
 		int error;
 		git_oid oid;
@@ -506,7 +510,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		git_tree_free(tree);
 
 		Handle<v8::Value> to;
-		to = NanNew<Number>(mysql->repo);
+		to = NanNew<Number>(rid);
 		NanReturnValue(to);
 	}
 	else{
@@ -642,8 +646,6 @@ NAN_METHOD(GitMysql::Diff) {
 	git_diff_options opts;
 	error = git_diff_init_options(&opts, GIT_DIFF_OPTIONS_VERSION);
 
-	//opts.context_lines = 1;
-	//opts.interhunk_lines = 1;
 
 	error = git_diff_tree_to_tree(&diff, repo, commit_tree, parent_tree, &opts);
 	if (error < 0){
