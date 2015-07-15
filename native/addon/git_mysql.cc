@@ -439,7 +439,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	mysql_trx_start(mysql->db);
 
 	my_ulonglong rid = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
-
+	
 	if (rid > 0){
 
 		mysql->repo = rid;

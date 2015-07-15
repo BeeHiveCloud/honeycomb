@@ -10,9 +10,9 @@ FILE(GLOB SRC_NODE
   addon.cc
 )
 ADD_LIBRARY(addon SHARED ${SRC_NODE})
-ADD_DEPENDENCIES(addon mysql)
+ADD_DEPENDENCIES(addon mysqladapter)
 ADD_DEPENDENCIES(addon mygit)
-TARGET_LINK_LIBRARIES(addon mysql)
+TARGET_LINK_LIBRARIES(addon mysqladapter)
 TARGET_LINK_LIBRARIES(addon mygit)
 #TARGET_LINK_LIBRARIES(addon hbase)
 #TARGET_LINK_LIBRARIES(addon roger)
