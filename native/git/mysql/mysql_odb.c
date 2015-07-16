@@ -8,7 +8,11 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   MYSQL_BIND result_buffers[2];
   MYSQL_RES  *prepare_meta_result = NULL;
 
+  git_rawobj raw;
+
   assert(len_p && type_p && _backend && oid);
+
+  memset(&raw, 0, sizeof(raw));
 
   backend = (git_mysql_odb *)_backend;
 
@@ -42,18 +46,16 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 	memset(result_buffers, 0, sizeof(result_buffers));
 
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
-    result_buffers[0].buffer = type_p;
+	result_buffers[0].buffer = (void *)&raw.type;
 	result_buffers[0].buffer_length = sizeof(*type_p);
 	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &result_buffers[0].buffer_length;
-	memset(type_p, 0, sizeof(*type_p));
 
     result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
-    result_buffers[1].buffer = len_p;
+	result_buffers[1].buffer = (void *)&raw.len;
 	result_buffers[1].buffer_length = sizeof(*len_p);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
-	memset(len_p, 0, sizeof(*len_p));
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read_header, result_buffers) != 0)
       return GIT_ERROR;
@@ -63,6 +65,10 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
       return GIT_ERROR;
 
 	error = GIT_OK;
+
+	*len_p = raw.len;
+	*type_p = raw.type;
+
   } else
     error = GIT_ENOTFOUND;
 

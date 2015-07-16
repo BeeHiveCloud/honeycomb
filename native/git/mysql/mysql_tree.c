@@ -116,7 +116,7 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		char *curr_dir = "";
 
 		while (mysql_stmt_fetch(mysql->tree_build) == MYSQL_DATA_TRUNCATED){
-	
+
 			dir = calloc(1, dir_len + 1);
 			result_buffers[1].buffer = dir;
 			result_buffers[1].buffer_length = dir_len + 1;
@@ -195,7 +195,7 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		unsigned long dir_len;
 		unsigned long entry_len;
 		unsigned long type_len;
-        
+
         memset(result_buffers, 0, sizeof(result_buffers));
 
 		result_buffers[0].buffer_type = MYSQL_TYPE_BLOB;
@@ -295,7 +295,7 @@ int tree_walk_cb(const char *root, const git_tree_entry *entry, void *payload)
 
 	char sha1[GIT_OID_HEXSZ + 1];
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, git_tree_entry_id(entry));
-	
+
 	printf("entry: %s \n", name);
 	printf("oid: %s \n", sha1);
 
@@ -361,9 +361,9 @@ int git_mysql_tree_diff(git_diff *diff){
 
 	error = git_diff_foreach(diff,
 		each_file_cb,
-		each_binary_cb,
-		each_hunk_cb,
-		each_line_cb,
+		NULL,
+		NULL,
+		NULL,
 		NULL);
 
 	return error;
