@@ -41,17 +41,11 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 	if (mysql_stmt_store_result(backend->mysql->refdb_read_header) != 0)
 		return GIT_ERROR;
 
-	// now lets see if any rows matched our query
 	// this should either be 0 or 1
-	// if it's > 1 MySQL's unique index failed and we should all fear for our lives
 	if (mysql_stmt_num_rows(backend->mysql->refdb_read_header) == 1) {
 		found = 1;
 	}
-
-    // free result
-    if (mysql_stmt_free_result(backend->mysql->refdb_read_header) != 0)
-        return GIT_ERROR;
-    
+   
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read_header) != 0)
 		return 0;
@@ -94,9 +88,7 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	if (mysql_stmt_store_result(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
 
-	// now lets see if any rows matched our query
 	// this should either be 0 or 1
-	// if it's > 1 MySQL's unique index failed and we should all fear for our lives
 	if (mysql_stmt_num_rows(backend->mysql->refdb_read) == 1) {
 
 		memset(result_buffers, 0, sizeof(result_buffers));
@@ -146,10 +138,6 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	}
 	else 
 		error = GIT_ENOTFOUND;
-	
-    // free result
-    if (mysql_stmt_free_result(backend->mysql->refdb_read) != 0)
-        return GIT_ERROR;
     
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read) != 0)

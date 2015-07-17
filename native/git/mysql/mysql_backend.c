@@ -38,7 +38,7 @@ int init_statements(git_mysql *mysql)
 	  "DELETE FROM GIT_REFDB WHERE `repo` = @repo AND `name` = ?;";
 
   static const char *sql_repo_create =
-	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (?, ?, ?)";
+	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (@user, ?, ?)";
 
   static const char *sql_repo_del = "CALL GIT_REPO_DEL(@repo);";
 

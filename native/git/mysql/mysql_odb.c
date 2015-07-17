@@ -72,9 +72,6 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   } else
     error = GIT_ENOTFOUND;
 
-  // free result
-  if (mysql_stmt_free_result(backend->mysql->odb_read_header) != 0)
-      return GIT_ERROR;
   mysql_free_result(prepare_meta_result);
 
   // reset the statement for further use
@@ -201,16 +198,11 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
   if (mysql_stmt_store_result(backend->mysql->odb_read_header) != 0)
 	return 0;
 
-  // now lets see if any rows matched our query
+
   // this should either be 0 or 1
-  // if it's > 1 MySQL's unique index failed and we should all fear for our lives
   if (mysql_stmt_num_rows(backend->mysql->odb_read_header) == 1) {
     found = 1;
   }
-
-  // free result
-  if (mysql_stmt_free_result(backend->mysql->odb_read_header) != 0)
-    return GIT_ERROR;
 
   // reset the statement for further use
   if (mysql_stmt_reset(backend->mysql->odb_read_header) != 0)

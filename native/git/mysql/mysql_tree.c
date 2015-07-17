@@ -154,9 +154,6 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		memset(curr_dir, 0, strlen(curr_dir));
 	}
 
-    // free result
-    if (mysql_stmt_free_result(mysql->tree_build) != 0)
-        return GIT_ERROR;
 	mysql_free_result(prepare_meta_result);
 
 	// reset the statement for further use
@@ -273,9 +270,6 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 	else
 		error = GIT_ENOTFOUND;
 
-    // free result
-    if (mysql_stmt_free_result(mysql->tree_root) != 0)
-        return NULL;
 	mysql_free_result(prepare_meta_result);
 
 	// reset the statement for further use

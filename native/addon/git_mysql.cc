@@ -410,39 +410,30 @@ NAN_METHOD(GitMysql::CreateBranch) {
 NAN_METHOD(GitMysql::CreateRepo) {
 	NanEscapableScope();
 
-	if (args.Length() == 0 || !args[0]->IsNumber()) {
-		return NanThrowError("owner is required.");
-	}
-
-	if (args.Length() == 1 || !args[1]->IsString()) {
+	if (args.Length() == 0 || !args[0]->IsString()) {
 		return NanThrowError("name is required.");
 	}
 
-	if (args.Length() == 2 || !args[2]->IsString()) {
+	if (args.Length() == 1 || !args[1]->IsString()) {
 		return NanThrowError("description is required.");
 	}
 
 	// start convert_from_v8 block
-	long long int from_owner;
-	from_owner = (long long int)args[0]->ToNumber()->Value();
-
 	const char *from_name;
-	String::Utf8Value name_buf(args[1]->ToString());
+	String::Utf8Value name_buf(args[0]->ToString());
 	from_name = (const char *)strdup(*name_buf);
 
 	const char *from_desc;
-	String::Utf8Value desc_buf(args[2]->ToString());
+	String::Utf8Value desc_buf(args[1]->ToString());
 	from_desc = (const char *)strdup(*desc_buf);
 	// end convert_from_v8 block
 
 	// Transaction Start
 	mysql_trx_start(mysql->db);
 
-	my_ulonglong rid = git_mysql_repo_create(mysql, from_owner, from_name, from_desc);
-	
-	if (rid > 0){
+	my_ulonglong rid = git_mysql_repo_create(mysql, from_name, from_desc);
 
-		//mysql->repo = rid;
+	if (rid > 0){
         char buf[100];
         memset(buf,0,sizeof(buf));
         sprintf(buf,"%llu",rid);
@@ -455,7 +446,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		git_signature *me;
 		git_oid commit;
 		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL);
-		git_reference_free(ref);
+    git_reference_free(ref);
 
 		error = git_blob_create_frombuffer(&oid, repo, from_name, strlen(from_name));
 		if (error < 0){
@@ -495,8 +486,8 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		if (error < 0){
 			return NanThrowError("git_signature_now error");
 		}
-
-		error = git_commit_create(&commit, repo, "refs/heads/master", me, me, "UTF-8", "Initial Commit", tree, 0, NULL);
+		//printf("489\n");
+		error = git_commit_create(NULL, repo, "refs/heads/master", me, me, NULL, "Initial Commit", tree, 0, NULL);
 		if (error < 0){
 			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_commit_create error");
