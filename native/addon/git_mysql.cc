@@ -444,7 +444,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		git_reference *ref;
 		git_tree *tree;
 		git_signature *me;
-		git_oid commit;
+		//git_oid commit;
 		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL);
     git_reference_free(ref);
 

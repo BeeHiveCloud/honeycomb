@@ -59,11 +59,11 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	int error;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[2];
+    MYSQL_RES  *meta_result = NULL;
 
 	git_ref_t type;
 	git_oid target;
 	char *target_buf;
-	unsigned long target_len;
 
 	assert(_backend && ref_name);
 
@@ -81,6 +81,10 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read, bind_buffers) != 0)
 		return GIT_ERROR;
 
+    meta_result = mysql_stmt_result_metadata(backend->mysql->refdb_read);
+    if(!meta_result)
+        return GIT_ERROR;
+    
 	// execute the statement
 	if (mysql_stmt_execute(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
@@ -97,14 +101,15 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		result_buffers[0].buffer = &type;
 		result_buffers[0].buffer_length = sizeof(type);
 		result_buffers[0].is_null = 0;
-		result_buffers[0].length = &result_buffers[0].buffer_length; //&type_len
+		result_buffers[0].length = &result_buffers[0].buffer_length;
 		memset(&type, 0, sizeof(type));
-
+        
+        target_buf = calloc(1, meta_result->fields[1].max_length + 1);
 		result_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
-		result_buffers[1].buffer = 0;
-		result_buffers[1].buffer_length = 0;
+		result_buffers[1].buffer = target_buf;
+		result_buffers[1].buffer_length = meta_result->fields[1].max_length + 1;
 		result_buffers[1].is_null = 0;
-		result_buffers[1].length = &target_len;
+		result_buffers[1].length = &result_buffers[1].buffer_length;
 
 		if (mysql_stmt_bind_result(backend->mysql->refdb_read, result_buffers) != 0)
 			return GIT_ERROR;
@@ -112,15 +117,6 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		error = mysql_stmt_fetch(backend->mysql->refdb_read);
 		//if(error != 0 || error != MYSQL_DATA_TRUNCATED)
 		//   return GIT_ERROR;
-
-		if (target_len > 0){
-			target_buf = calloc(1, target_len + 1);
-			result_buffers[1].buffer = target_buf;
-			result_buffers[1].buffer_length = target_len + 1;
-
-			if (mysql_stmt_fetch_column(backend->mysql->refdb_read, &result_buffers[1], 1, 0) != 0)
-				return GIT_ERROR;
-		}
 
 		if (type == GIT_REF_OID){
 			git_oid_fromstr(&target, target_buf);
@@ -139,6 +135,8 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	else 
 		error = GIT_ENOTFOUND;
     
+    mysql_free_result(meta_result);
+    
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
@@ -156,7 +154,6 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 					  const git_signature *who, const char *message,
 					  const git_oid *old, const char *old_target)
 {
-	//int error;
 	git_mysql_refdb *backend;
 	MYSQL_BIND bind_buffers[3];
 	my_ulonglong affected_rows;
