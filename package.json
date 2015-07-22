@@ -20,7 +20,7 @@
       "module_path": "./build/addon.node",
       "host": "https://github.com",
       "package_name": "{platform}-{arch}.tar.gz",
-      "remote_path": "./BeeHiveCloud/dist/raw/master/v{version}/"
+      "remote_path": "./BeeHiveCloud/honeycomb/releases/download/v{version}/"
   },
   "directories": {
     "lib": "lib"
