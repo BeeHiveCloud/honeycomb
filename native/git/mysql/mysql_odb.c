@@ -88,8 +88,6 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
   MYSQL_BIND bind_buffers[1];
   MYSQL_BIND result_buffers[3];
   MYSQL_RES  *meta_result = NULL;
-  unsigned long data_len = 0;
-    
   git_rawobj raw;
 
   assert(len_p && type_p && _backend && oid);
@@ -127,24 +125,22 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
 	result_buffers[0].buffer = (void *)&raw.type;
-	result_buffers[0].buffer_length = sizeof(*type_p);
+	result_buffers[0].buffer_length = sizeof(raw.type);
 	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &result_buffers[0].buffer_length;
 
   	result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
 	result_buffers[1].buffer = (void *)&raw.len;
-	result_buffers[1].buffer_length = sizeof(*len_p);
+	result_buffers[1].buffer_length = sizeof(raw.len);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
 
-	data_len = meta_result->fields[2].max_length;
-	raw.data = malloc(data_len);
-
+	raw.data = malloc(meta_result->fields[2].max_length);
 	result_buffers[2].buffer_type = MYSQL_TYPE_LONG_BLOB;
   	result_buffers[2].buffer = raw.data;
 	result_buffers[2].is_null = 0;
-  	result_buffers[2].buffer_length = data_len;
-  	result_buffers[2].length = &data_len;
+	result_buffers[2].buffer_length = meta_result->fields[2].max_length;
+	result_buffers[2].length = &result_buffers[2].buffer_length;
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read, result_buffers) != 0)
       return GIT_ERROR;
@@ -213,7 +209,6 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 
 int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *data, size_t len, git_otype type)
 {
-  //int error;
   git_mysql_odb *backend;
   MYSQL_BIND bind_buffers[4];
   my_ulonglong affected_rows;
@@ -221,9 +216,6 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
   assert(oid && _backend && data);
 
   backend = (git_mysql_odb *)_backend;
-
-  //if ((error = git_odb_hash(oid, data, len, type)) < 0)
-  //  return error;
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -254,11 +246,6 @@ int mysql_odb_write(git_odb_backend *_backend, const git_oid *oid, const void *d
 
   if (mysql_stmt_bind_param(backend->mysql->odb_write, bind_buffers) != 0)
     return GIT_ERROR;
-
-  // TODO: use the streaming backend API so this actually makes sense to use :P
-  // once we want to use this we should comment out
-  // if (mysql_stmt_send_long_data(backend->mysql->odb_write, 4, data, len) != 0)
-  //   return GIT_ERROR;
 
   // execute the statement
   if (mysql_stmt_execute(backend->mysql->odb_write) != 0)

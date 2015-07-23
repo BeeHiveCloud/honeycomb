@@ -56,7 +56,7 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 
 int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const char *ref_name){
 	git_mysql_refdb *backend;
-	int error;
+	int error = GIT_ERROR;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[2];
     MYSQL_RES  *meta_result = NULL;
@@ -68,7 +68,6 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	assert(_backend && ref_name);
 
 	backend = (git_mysql_refdb *)_backend;
-	error = GIT_ERROR;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -77,21 +76,21 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	bind_buffers[0].buffer_length = strlen(ref_name);
 	bind_buffers[0].length = &bind_buffers[0].buffer_length;
 	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
-
+	
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read, bind_buffers) != 0)
 		return GIT_ERROR;
-
+	
     meta_result = mysql_stmt_result_metadata(backend->mysql->refdb_read);
     if(!meta_result)
         return GIT_ERROR;
-    
+	
 	// execute the statement
 	if (mysql_stmt_execute(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
-
+	
 	if (mysql_stmt_store_result(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
-
+	
 	// this should either be 0 or 1
 	if (mysql_stmt_num_rows(backend->mysql->refdb_read) == 1) {
 
@@ -110,14 +109,14 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 		result_buffers[1].buffer_length = meta_result->fields[1].max_length + 1;
 		result_buffers[1].is_null = 0;
 		result_buffers[1].length = &result_buffers[1].buffer_length;
-
+		
 		if (mysql_stmt_bind_result(backend->mysql->refdb_read, result_buffers) != 0)
 			return GIT_ERROR;
-
+		
 		error = mysql_stmt_fetch(backend->mysql->refdb_read);
 		//if(error != 0 || error != MYSQL_DATA_TRUNCATED)
 		//   return GIT_ERROR;
-
+		
 		if (type == GIT_REF_OID){
 			git_oid_fromstr(&target, target_buf);
 			*out = git_reference__alloc(ref_name, &target, NULL);
@@ -129,19 +128,18 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 			giterr_set_str(GITERR_REFERENCE, "unknown ref type returned");
 			error = GIT_ERROR;
 		}
-
+		
 		error = GIT_OK;
 	}
 	else 
 		error = GIT_ENOTFOUND;
-    
+	
     mysql_free_result(meta_result);
-    
+	
 	// reset the statement for further use
 	if (mysql_stmt_reset(backend->mysql->refdb_read) != 0)
 		return GIT_ERROR;
-
-
+	
 	return error;
 }
 
@@ -173,11 +171,13 @@ int mysql_refdb_write(git_refdb_backend *_backend,
 	bind_buffers[0].buffer = (void *)ref_name;
 	bind_buffers[0].buffer_length = strlen(ref_name);
 	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind_buffers[0].length = &bind_buffers[0].buffer_length;
 	
 	// bind the type
 	bind_buffers[1].buffer = (void *)&ref_type;
 	bind_buffers[1].buffer_length = sizeof(ref_type);
 	bind_buffers[1].buffer_type = MYSQL_TYPE_TINY;
+	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 
 	// bind the target
 	bind_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;

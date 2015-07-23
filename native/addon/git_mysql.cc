@@ -444,7 +444,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		git_reference *ref;
 		git_tree *tree;
 		git_signature *me;
-		//git_oid commit;
+		git_oid commit;
 		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL);
     git_reference_free(ref);
 
@@ -486,8 +486,8 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		if (error < 0){
 			return NanThrowError("git_signature_now error");
 		}
-		//printf("489\n");
-		error = git_commit_create(NULL, repo, "refs/heads/master", me, me, NULL, "Initial Commit", tree, 0, NULL);
+
+		error = git_commit_create(&commit, repo, "refs/heads/master", me, me, NULL, "Initial Commit", tree, 0, NULL);
 		if (error < 0){
 			mysql_trx_rollback(mysql->db);
 			return NanThrowError("git_commit_create error");

@@ -116,7 +116,7 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		char curr_dir[1024];
         memset(curr_dir, 0, sizeof(curr_dir));
 
-		while (mysql_stmt_fetch(mysql->tree_build) == MYSQL_DATA_TRUNCATED){
+		while (!mysql_stmt_fetch(mysql->tree_build)){
 
 			if (strcmp(curr_dir, dir)){ // dir change
 				if (strlen(curr_dir)){
@@ -215,7 +215,7 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		git_treebuilder   *bld = NULL;
 		git_treebuilder_new(&bld, repo, NULL);
 
-		while (mysql_stmt_fetch(mysql->tree_root) == MYSQL_DATA_TRUNCATED){
+		while (!mysql_stmt_fetch(mysql->tree_root)){
 
 			if (!strcmp(type, "BLOB"))
 				error = git_treebuilder_insert(NULL, bld, entry, &oid, GIT_FILEMODE_BLOB);
