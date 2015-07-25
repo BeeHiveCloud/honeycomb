@@ -428,6 +428,10 @@ NAN_METHOD(GitMysql::CreateRepo) {
 	from_desc = (const char *)strdup(*desc_buf);
 	// end convert_from_v8 block
 
+    
+    if(git_mysql_repo_exists(mysql, from_name) ==1 )
+        NanReturnValue(NanNew<String>("repo already exists"));
+    
 	// Transaction Start
 	mysql_trx_start(mysql->db);
 
@@ -446,7 +450,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 		git_signature *me;
 		git_oid commit;
 		error = git_reference_symbolic_create(&ref, repo, "HEAD", "refs/heads/master", 0, NULL);
-    git_reference_free(ref);
+        git_reference_free(ref);
 
 		error = git_blob_create_frombuffer(&oid, repo, from_name, strlen(from_name));
 		if (error < 0){

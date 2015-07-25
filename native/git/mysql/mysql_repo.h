@@ -8,4 +8,6 @@ my_ulonglong git_mysql_repo_create(git_mysql *mysql, const char *name, const cha
 
 int git_mysql_repo_del(git_mysql *mysql);
 
+int git_mysql_repo_exists(git_mysql *mysql, const char *name);
+
 #endif

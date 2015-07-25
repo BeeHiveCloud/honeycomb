@@ -85,7 +85,7 @@ ADD_SUBDIRECTORY(native/git/mysql)
 #ADD_SUBDIRECTORY(native/hbase)
 
 # native test app
-ADD_SUBDIRECTORY(native/test)
+#ADD_SUBDIRECTORY(native/test)
 
 # addon
 ADD_SUBDIRECTORY(native/addon)

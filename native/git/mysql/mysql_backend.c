@@ -5,8 +5,6 @@ int init_statements(git_mysql *mysql)
   my_bool truth = 1;
   //unsigned long type = (unsigned long)CURSOR_TYPE_READ_ONLY;
 
-  static const char *sql_last_seq = "SELECT LAST_INSERT_ID();";
-
   static const char *sql_odb_read =
     "SELECT `type`, `size`, UNCOMPRESS(`data`) FROM GIT_ODB WHERE `repo` = @repo AND `oid` = ?;";
 
@@ -38,10 +36,13 @@ int init_statements(git_mysql *mysql)
 	  "DELETE FROM GIT_REFDB WHERE `repo` = @repo AND `name` = ?;";
 
   static const char *sql_repo_create =
-	  "INSERT INTO GIT_REPO(`OWNER`,`NAME`,`DESCRIPTION`) VALUES (@user, ?, ?)";
+	  "INSERT INTO GIT_REPO(`owner`,`name`,`description`) VALUES (@user, ?, ?);";
 
   static const char *sql_repo_del = "CALL GIT_REPO_DEL(@repo);";
 
+  static const char *sql_repo_exists =
+    "SELECT `id` FROM GIT_REPO WHERE `owner` = @user AND `name` = ?;";
+    
   static const char *sql_tree_init = "CALL GIT_TREE_INIT(@repo);";
   static const char *sql_tree_update = "CALL GIT_TREE_UPDATE(@repo, ?, ?);";
 
@@ -59,13 +60,6 @@ int init_statements(git_mysql *mysql)
 
   static const char *sql_config_del =
 	  "DELETE FROM GIT_CONFIG WHERE `repo` = @repo AND `key` = ?;";
-
-  mysql->last_seq = mysql_stmt_init(mysql->db);
-  if (mysql->last_seq == NULL)
-    return GIT_ERROR;
-
-  if (mysql_stmt_prepare(mysql->last_seq, sql_last_seq, strlen(sql_last_seq)) != 0)
-    return GIT_ERROR;
 
   mysql->odb_read = mysql_stmt_init(mysql->db);
   if (mysql->odb_read == NULL)
@@ -213,7 +207,16 @@ int init_statements(git_mysql *mysql)
   if (mysql_stmt_prepare(mysql->repo_del, sql_repo_del, strlen(sql_repo_del)) != 0)
 	  return GIT_ERROR;
 
-
+  mysql->repo_exists = mysql_stmt_init(mysql->db);
+  if (mysql->repo_exists == NULL)
+      return GIT_ERROR;
+    
+  if (mysql_stmt_attr_set(mysql->repo_exists, STMT_ATTR_UPDATE_MAX_LENGTH, &truth) != 0)
+      return GIT_ERROR;
+    
+  if (mysql_stmt_prepare(mysql->repo_exists, sql_repo_exists, strlen(sql_repo_exists)) != 0)
+      return GIT_ERROR;
+    
   mysql->tree_init = mysql_stmt_init(mysql->db);
   if (mysql->tree_init == NULL)
 	  return GIT_ERROR;
@@ -296,8 +299,6 @@ int git_mysql_free(git_mysql *mysql)
 {
   assert(mysql);
 
-  if (mysql->last_seq)
-    mysql_stmt_close(mysql->last_seq);
   if (mysql->odb_read)
     mysql_stmt_close(mysql->odb_read);
   if (mysql->odb_read_header)
@@ -322,6 +323,10 @@ int git_mysql_free(git_mysql *mysql)
 	  mysql_stmt_close(mysql->refdb_rename);
   if (mysql->repo_create)
 	  mysql_stmt_close(mysql->repo_create);
+  if (mysql->repo_del)
+      mysql_stmt_close(mysql->repo_del);
+  if (mysql->repo_exists)
+      mysql_stmt_close(mysql->repo_exists);
   if (mysql->tree_init)
 	  mysql_stmt_close(mysql->tree_init);
   if (mysql->tree_update)

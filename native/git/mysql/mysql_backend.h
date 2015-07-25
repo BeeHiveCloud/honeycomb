@@ -14,7 +14,6 @@
 
 typedef struct {
   MYSQL *db;
-  MYSQL_STMT *last_seq;
   MYSQL_STMT *odb_read;
   MYSQL_STMT *odb_write;
   MYSQL_STMT *odb_read_header;
@@ -28,6 +27,7 @@ typedef struct {
   MYSQL_STMT *refdb_rename;
   MYSQL_STMT *repo_create;
   MYSQL_STMT *repo_del;
+  MYSQL_STMT *repo_exists;
   MYSQL_STMT *tree_init;
   MYSQL_STMT *tree_update;
   MYSQL_STMT *tree_build;
