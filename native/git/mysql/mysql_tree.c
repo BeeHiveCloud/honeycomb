@@ -5,11 +5,7 @@
 int git_mysql_tree_init(git_mysql *mysql){
 
 	// execute the statement
-	if (mysql_stmt_execute(mysql->tree_init) != 0)
-		return GIT_ERROR;
-
-	// reset the statement for further use
-	if (mysql_stmt_reset(mysql->tree_init) != 0)
+	if (mysql_stmt_execute(mysql->tree_init))
 		return GIT_ERROR;
 
 	return GIT_OK;
@@ -33,15 +29,11 @@ int git_mysql_tree_update(git_mysql *mysql, const char *dir, git_oid *oid){
 	bind_buffers[1].length = &bind_buffers[1].buffer_length;
 	bind_buffers[1].buffer_type = MYSQL_TYPE_BLOB;
 
-	if (mysql_stmt_bind_param(mysql->tree_update, bind_buffers) != 0)
+	if (mysql_stmt_bind_param(mysql->tree_update, bind_buffers))
 		return GIT_ERROR;
 
 	// execute the statement
-	if (mysql_stmt_execute(mysql->tree_update) != 0)
-		return GIT_ERROR;
-
-	// reset the statement for further use
-	if (mysql_stmt_reset(mysql->tree_update) != 0)
+	if (mysql_stmt_execute(mysql->tree_update))
 		return GIT_ERROR;
 
 	return GIT_OK;
@@ -53,7 +45,6 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	int error;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[3];
-	MYSQL_RES  *meta_result;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -63,18 +54,14 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	bind_buffers[0].length = &bind_buffers[0].buffer_length;
 	bind_buffers[0].buffer_type = MYSQL_TYPE_STRING;
 
-	if (mysql_stmt_bind_param(mysql->tree_build, bind_buffers) != 0)
-		return GIT_ERROR;
-
-	meta_result = mysql_stmt_result_metadata(mysql->tree_build);
-	if (!meta_result)
+	if (mysql_stmt_bind_param(mysql->tree_build, bind_buffers))
 		return GIT_ERROR;
 
 	// execute the statement
-	if (mysql_stmt_execute(mysql->tree_build) != 0)
+	if (mysql_stmt_execute(mysql->tree_build))
 		return GIT_ERROR;
 
-	if (mysql_stmt_store_result(mysql->tree_build) != 0)
+	if (mysql_stmt_store_result(mysql->tree_build))
 		return GIT_ERROR;
 
 	if (mysql_stmt_num_rows(mysql->tree_build) > 0){
@@ -92,21 +79,21 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		result_buffers[0].length = &result_buffers[0].buffer_length;
 		memset(&oid, 0, 20);
         
-        dir = calloc(1, meta_result->fields[1].max_length + 1);
+        dir = calloc(1, mysql->meta_tree_build->fields[1].max_length + 1);
 		result_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 		result_buffers[1].buffer = dir;
-		result_buffers[1].buffer_length = meta_result->fields[1].max_length + 1;
+		result_buffers[1].buffer_length = mysql->meta_tree_build->fields[1].max_length + 1;
 		result_buffers[1].is_null = 0;
 		result_buffers[1].length = &result_buffers[1].buffer_length;
         
-        entry = calloc(1, meta_result->fields[2].max_length + 1);
+        entry = calloc(1, mysql->meta_tree_build->fields[2].max_length + 1);
 		result_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
 		result_buffers[2].buffer = 0;
-		result_buffers[2].buffer_length = meta_result->fields[2].max_length + 1;
+		result_buffers[2].buffer_length = mysql->meta_tree_build->fields[2].max_length + 1;
 		result_buffers[2].is_null = 0;
 		result_buffers[2].length = &result_buffers[2].buffer_length;
 
-		if (mysql_stmt_bind_result(mysql->tree_build, result_buffers) != 0)
+		if (mysql_stmt_bind_result(mysql->tree_build, result_buffers))
 			return GIT_ERROR;
 
 		git_oid tree;
@@ -143,12 +130,6 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 		
 	}
 
-	mysql_free_result(meta_result);
-
-	// reset the statement for further use
-	if (mysql_stmt_reset(mysql->tree_build) != 0)
-		return GIT_ERROR;
-
 	return GIT_OK;
 }
 
@@ -159,18 +140,12 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 	git_tree *tree = NULL;
 
 	MYSQL_BIND result_buffers[4];
-	MYSQL_RES  *meta_result;
-
-	/* Fetch result set meta information */
-	meta_result = mysql_stmt_result_metadata(mysql->tree_root);
-	if (!meta_result)
-		return NULL;
 
 	// execute the statement
-	if (mysql_stmt_execute(mysql->tree_root) != 0)
+	if (mysql_stmt_execute(mysql->tree_root))
 		return NULL;
 
-	if (mysql_stmt_store_result(mysql->tree_root) != 0)
+	if (mysql_stmt_store_result(mysql->tree_root))
 		return NULL;
 
 	if (mysql_stmt_num_rows(mysql->tree_root) > 0){
@@ -188,17 +163,17 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		result_buffers[0].length = &result_buffers[0].buffer_length;
 		memset(&oid, 0, 20);
         
-        dir = calloc(1, meta_result->fields[1].max_length + 1);
+        dir = calloc(1, mysql->meta_tree_root->fields[1].max_length + 1);
 		result_buffers[1].buffer_type = MYSQL_TYPE_VAR_STRING;
         result_buffers[1].buffer = dir;
-		result_buffers[1].buffer_length = meta_result->fields[1].max_length + 1;
+		result_buffers[1].buffer_length = mysql->meta_tree_root->fields[1].max_length + 1;
 		result_buffers[1].is_null = 0;
 		result_buffers[1].length = &result_buffers[1].buffer_length;
         
-        entry = calloc(1, meta_result->fields[2].max_length + 1);
+        entry = calloc(1, mysql->meta_tree_root->fields[2].max_length + 1);
 		result_buffers[2].buffer_type = MYSQL_TYPE_VAR_STRING;
 		result_buffers[2].buffer = entry;
-		result_buffers[2].buffer_length = meta_result->fields[2].max_length + 1;
+		result_buffers[2].buffer_length = mysql->meta_tree_root->fields[2].max_length + 1;
 		result_buffers[2].is_null = 0;
 		result_buffers[2].length = &result_buffers[2].buffer_length;
         
@@ -209,7 +184,7 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 		result_buffers[3].is_null = 0;
 		result_buffers[3].length = &result_buffers[3].buffer_length;
 
-		if (mysql_stmt_bind_result(mysql->tree_root, result_buffers) != 0)
+		if (mysql_stmt_bind_result(mysql->tree_root, result_buffers))
 			return NULL;
 
 		git_treebuilder   *bld = NULL;
@@ -239,12 +214,6 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 	}
 	else
 		error = GIT_ENOTFOUND;
-
-	mysql_free_result(meta_result);
-
-	// reset the statement for further use
-	if (mysql_stmt_reset(mysql->tree_root) != 0)
-		return NULL;
 
 	if (!error)
 		return tree;

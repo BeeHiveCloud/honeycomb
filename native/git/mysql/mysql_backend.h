@@ -15,12 +15,14 @@
 typedef struct {
   MYSQL *db;
   MYSQL_STMT *odb_read;
+  MYSQL_RES  *meta_odb;
   MYSQL_STMT *odb_write;
   MYSQL_STMT *odb_read_header;
   MYSQL_STMT *index_read;
   MYSQL_STMT *index_write;
   MYSQL_STMT *index_del;
   MYSQL_STMT *refdb_read;
+  MYSQL_RES  *meta_refdb;
   MYSQL_STMT *refdb_write;
   MYSQL_STMT *refdb_read_header;
   MYSQL_STMT *refdb_del;
@@ -31,17 +33,17 @@ typedef struct {
   MYSQL_STMT *tree_init;
   MYSQL_STMT *tree_update;
   MYSQL_STMT *tree_build;
+  MYSQL_RES  *meta_tree_build;
   MYSQL_STMT *tree_root;
+  MYSQL_RES  *meta_tree_root;
   MYSQL_STMT *config_get;
+  MYSQL_RES  *meta_config;
   MYSQL_STMT *config_set;
   MYSQL_STMT *config_del;
 } git_mysql;
 
 int git_mysql_init(git_mysql **out,MYSQL *db);
 int git_mysql_free(git_mysql *mysql);
-void git_mysql_transaction(git_mysql *mysql);
-void git_mysql_commit(git_mysql *mysql);
-void git_mysql_rollback(git_mysql *mysql);
-int git_mysql_adhoc(git_mysql *mysql, const char *cmd);
+
 
 #endif

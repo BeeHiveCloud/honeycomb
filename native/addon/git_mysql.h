@@ -6,6 +6,7 @@
 
 extern "C" {
 #include "git2.h"
+#include "git2/sys/repository.h"
 #include "../git/mysql/mysql_backend.h"
 #include "../git/mysql/mysql_odb.h"
 #include "../git/mysql/mysql_refdb.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "../git/mysql/mysql_repo.h"
 #include "../git/mysql/mysql_config.h"
 #include "../patch/libgit2/repo_path.h"
-#include "git2/sys/repository.h"
 #include "../mysql/mysql.h"
 }
 
@@ -42,17 +42,9 @@ class GitMysql : public ObjectWrap {
 
 	  static NAN_METHOD(CreateBlob);
 
-	  static NAN_METHOD(WriteTree);
-
-	  static NAN_METHOD(BranchLookup);
-
-	  static NAN_METHOD(CreateRef);
-
 	  static NAN_METHOD(Commit);
 
 	  static NAN_METHOD(CreateBranch);
-
-	  static NAN_METHOD(RevParse);
 
 	  static NAN_METHOD(CreateRepo);
 
