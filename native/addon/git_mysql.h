@@ -53,6 +53,8 @@ class GitMysql : public ObjectWrap {
 	  static NAN_METHOD(CreateTag);
 
 	  static NAN_METHOD(Diff);
+
+	  static NAN_METHOD(Blame);
 };
 
 #endif

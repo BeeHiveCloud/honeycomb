@@ -6,7 +6,6 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
   int error = GIT_ERROR;
   MYSQL_BIND bind_buffers[1];
   MYSQL_BIND result_buffers[2];
-
   git_rawobj raw;
 
   assert(len_p && type_p && _backend && oid);
@@ -38,21 +37,20 @@ int mysql_odb_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *_ba
 
 	result_buffers[0].buffer_type = MYSQL_TYPE_TINY;
 	result_buffers[0].buffer = (void *)&raw.type;
-	result_buffers[0].buffer_length = sizeof(*type_p);
+	result_buffers[0].buffer_length = sizeof(raw.type);
 	result_buffers[0].is_null = 0;
 	result_buffers[0].length = &result_buffers[0].buffer_length;
 
     result_buffers[1].buffer_type = MYSQL_TYPE_LONG;
 	result_buffers[1].buffer = (void *)&raw.len;
-	result_buffers[1].buffer_length = sizeof(*len_p);
+	result_buffers[1].buffer_length = sizeof(raw.len);
 	result_buffers[1].is_null = 0;
 	result_buffers[1].length = &result_buffers[1].buffer_length;
 
 	if (mysql_stmt_bind_result(backend->mysql->odb_read_header, result_buffers))
       return GIT_ERROR;
 
-	if (mysql_stmt_fetch(backend->mysql->odb_read_header) != 0)
-      return GIT_ERROR;
+	mysql_stmt_fetch(backend->mysql->odb_read_header);
 
 	error = GIT_OK;
 
@@ -139,13 +137,12 @@ int mysql_odb_read(void **data_p, size_t *len_p, git_otype *type_p, git_odb_back
 int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
 {
   git_mysql_odb *backend;
-  int found;
+  int found = 0;
   MYSQL_BIND bind_buffers[1];
 
   assert(_backend && oid);
 
   backend = (git_mysql_odb *)_backend;
-  found = 0;
 
   memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -164,9 +161,8 @@ int mysql_odb_exists(git_odb_backend *_backend, const git_oid *oid)
   if (mysql_stmt_store_result(backend->mysql->odb_read_header))
 	return 0;
 
-  if (mysql_stmt_num_rows(backend->mysql->odb_read_header) == 1) {
+  if (mysql_stmt_num_rows(backend->mysql->odb_read_header) == 1)
     found = 1;
-  }
 
   return found;
 }

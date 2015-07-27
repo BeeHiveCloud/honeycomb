@@ -26,7 +26,9 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 
 	NODE_SET_METHOD(object, "Diff", Diff);
 
-	target->Set(NanNew<String>("GIT"), object);
+	NODE_SET_METHOD(object, "Blame", Blame);
+
+	target->Set(NanNew<String>("Git"), object);
 }
 
 NAN_METHOD(GitMysql::Init){
@@ -34,8 +36,7 @@ NAN_METHOD(GitMysql::Init){
 
   git_mysql_init(&mysql,Mysql::db);
 
-  if (git_libgit2_init() < 0)
-	  return NanThrowError("git_libgit2_init error");
+  git_libgit2_init();
 
   git_odb_backend   *odb_backend;
   if (git_mysql_odb_init(&odb_backend, mysql) < 0)
@@ -81,7 +82,12 @@ NAN_METHOD(GitMysql::Init){
 
 NAN_METHOD(GitMysql::Close) {
   NanEscapableScope();
+
+  git_repository_free(repo);
+
   git_mysql_free(mysql);
+
+  git_libgit2_shutdown();
 }
 
 NAN_METHOD(GitMysql::LastError) {
@@ -221,7 +227,7 @@ NAN_METHOD(GitMysql::Commit) {
     free((char *)from_msg);
     git_signature_free(me);
     git_tree_free(tree);
-    git_commit_free((git_commit*)parents);
+    git_object_free(parent);
 
 	char sha1[GIT_OID_HEXSZ + 1] = { 0 };
 	git_oid_tostr(sha1, GIT_OID_HEXSZ + 1, &commit);
@@ -265,9 +271,10 @@ NAN_METHOD(GitMysql::CreateBranch) {
 	}
 
 	mysql_trx_commit(mysql->db);
-    git_commit_free((git_commit *)commit);
 
     free((char *)from_name);
+	git_object_free(commit);
+	git_reference_free(ref);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -380,7 +387,7 @@ NAN_METHOD(GitMysql::CreateRepo) {
 NAN_METHOD(GitMysql::DeleteRepo) {
 	NanEscapableScope();
 
-	int error;
+	int error = GIT_ERROR;
 
 	// Transaction Start
 	mysql_trx_start(mysql->db);
@@ -445,6 +452,8 @@ NAN_METHOD(GitMysql::CreateTag) {
 
     free((char *)from_tag);
     free((char *)from_msg);
+	git_signature_free(tagger);
+	git_object_free(target);
 
 	if (!error)
 		NanReturnValue(NanTrue());
@@ -485,6 +494,19 @@ NAN_METHOD(GitMysql::Diff) {
 	git_tree_free(commit_tree);
 	git_tree_free(parent_tree);
 	git_diff_free(diff);
+
+	if (!error)
+		NanReturnValue(NanTrue());
+	else
+		NanReturnValue(NanFalse());
+}
+
+NAN_METHOD(GitMysql::Blame) {
+	NanEscapableScope();
+
+	int error = GIT_ERROR;
+
+
 
 	if (!error)
 		NanReturnValue(NanTrue());

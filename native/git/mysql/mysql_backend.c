@@ -360,11 +360,7 @@ int git_mysql_free(git_mysql *mysql)
   if (mysql->config_del)
 	  mysql_stmt_close(mysql->config_del);
 
-  mysql_close(mysql->db);
-
   free(mysql);
-
-  mysql_library_end();
 
   return GIT_OK;
 }

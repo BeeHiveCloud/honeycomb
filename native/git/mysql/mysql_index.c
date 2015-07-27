@@ -32,7 +32,6 @@ int git_mysql_index_write(git_mysql *mysql, git_oid *oid, const char *path){
 int git_mysql_index_del(git_mysql *mysql, const char *path){
 
 	MYSQL_BIND bind_buffers[1];
-	my_ulonglong affected_rows;
 
 	assert(mysql && path);
 
@@ -42,17 +41,12 @@ int git_mysql_index_del(git_mysql *mysql, const char *path){
 	bind_buffers[0].buffer = (void*)path;
 	bind_buffers[0].buffer_length = strlen(path);
 	bind_buffers[0].length = &bind_buffers[0].buffer_length;
-	bind_buffers[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_buffers[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 
-	if (mysql_stmt_bind_param(mysql->index_del, bind_buffers) != 0)
+	if (mysql_stmt_bind_param(mysql->index_del, bind_buffers))
 		return GIT_ERROR;
 
-	// execute the statement
-	if (mysql_stmt_execute(mysql->index_del) != 0)
-		return GIT_ERROR;
-
-	affected_rows = mysql_stmt_affected_rows(mysql->index_del);
-	if (affected_rows != 1)
+	if (mysql_stmt_execute(mysql->index_del))
 		return GIT_ERROR;
 
 	return GIT_OK;

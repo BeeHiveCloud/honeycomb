@@ -4,7 +4,6 @@
 
 int git_mysql_tree_init(git_mysql *mysql){
 
-	// execute the statement
 	if (mysql_stmt_execute(mysql->tree_init))
 		return GIT_ERROR;
 
@@ -32,7 +31,6 @@ int git_mysql_tree_update(git_mysql *mysql, const char *dir, git_oid *oid){
 	if (mysql_stmt_bind_param(mysql->tree_update, bind_buffers))
 		return GIT_ERROR;
 
-	// execute the statement
 	if (mysql_stmt_execute(mysql->tree_update))
 		return GIT_ERROR;
 
@@ -42,7 +40,7 @@ int git_mysql_tree_update(git_mysql *mysql, const char *dir, git_oid *oid){
 
 int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *type){
 
-	int error;
+	int error = GIT_ERROR;
 	MYSQL_BIND bind_buffers[1];
 	MYSQL_BIND result_buffers[3];
 
@@ -57,7 +55,6 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 	if (mysql_stmt_bind_param(mysql->tree_build, bind_buffers))
 		return GIT_ERROR;
 
-	// execute the statement
 	if (mysql_stmt_execute(mysql->tree_build))
 		return GIT_ERROR;
 
@@ -135,13 +132,12 @@ int git_mysql_tree_build(git_mysql *mysql, git_repository *repo, const char *typ
 
 git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 
-	int error;
+	int error = GIT_ERROR;
 	git_oid root;
 	git_tree *tree = NULL;
 
 	MYSQL_BIND result_buffers[4];
 
-	// execute the statement
 	if (mysql_stmt_execute(mysql->tree_root))
 		return NULL;
 
@@ -212,8 +208,6 @@ git_tree *git_mysql_tree_root(git_mysql *mysql, git_repository *repo){
 			return NULL;
 		}
 	}
-	else
-		error = GIT_ENOTFOUND;
 
 	if (!error)
 		return tree;

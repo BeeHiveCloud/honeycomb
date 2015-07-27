@@ -15,13 +15,12 @@ int mysql_ref_iterator_free(git_reference_iterator *iter){
 
 int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref_name){
 	git_mysql_refdb *backend;
-	int found;
+	int found = 0;
 	MYSQL_BIND bind_buffers[1];
 
 	assert(_backend && ref_name);
 
 	backend = (git_mysql_refdb *)_backend;
-	found = 0;
 
 	memset(bind_buffers, 0, sizeof(bind_buffers));
 
@@ -42,9 +41,8 @@ int mysql_refdb_exists(int *exists, git_refdb_backend *_backend, const char *ref
 		return GIT_ERROR;
 
 	// this should either be 0 or 1
-	if (mysql_stmt_num_rows(backend->mysql->refdb_read_header) == 1) {
+	if (mysql_stmt_num_rows(backend->mysql->refdb_read_header) == 1)
 		found = 1;
-	}
 
 	*exists = found;
 	return GIT_OK;
@@ -75,14 +73,12 @@ int mysql_refdb_lookup(git_reference **out, git_refdb_backend *_backend, const c
 	if (mysql_stmt_bind_param(backend->mysql->refdb_read, bind_buffers))
 		return GIT_ERROR;
 	
-	// execute the statement
 	if (mysql_stmt_execute(backend->mysql->refdb_read))
 		return GIT_ERROR;
 	
 	if (mysql_stmt_store_result(backend->mysql->refdb_read))
 		return GIT_ERROR;
 	
-	// this should either be 0 or 1
 	if (mysql_stmt_num_rows(backend->mysql->refdb_read) == 1) {
 
 		memset(result_buffers, 0, sizeof(result_buffers));

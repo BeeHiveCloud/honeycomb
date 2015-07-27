@@ -6,8 +6,6 @@
 
 #include <mysql.h>
 
-#include <stdio.h>
-
 my_ulonglong git_mysql_repo_create(git_mysql *mysql, const char *name, const char *description){
 
 	MYSQL_BIND bind_buffers[2];
@@ -28,7 +26,6 @@ my_ulonglong git_mysql_repo_create(git_mysql *mysql, const char *name, const cha
 	if (mysql_stmt_bind_param(mysql->repo_create, bind_buffers))
 		return 0;
 
-	// execute the statement
 	if (mysql_stmt_execute(mysql->repo_create))
 		return 0;
 
@@ -38,7 +35,6 @@ my_ulonglong git_mysql_repo_create(git_mysql *mysql, const char *name, const cha
 
 int git_mysql_repo_del(git_mysql *mysql){
 
-	// execute the statement
 	if (mysql_stmt_execute(mysql->repo_del))
 		return GIT_ERROR;
 
@@ -52,7 +48,7 @@ int git_mysql_repo_exists(git_mysql *mysql, const char* name){
     
     memset(bind_buffers, 0, sizeof(bind_buffers));
     
-    // bind the repo passed to the statement
+    // bind repo name
     bind_buffers[0].buffer = (void *)name;
     bind_buffers[0].buffer_length = strlen(name);
     bind_buffers[0].length = &bind_buffers[0].buffer_length;
@@ -61,14 +57,12 @@ int git_mysql_repo_exists(git_mysql *mysql, const char* name){
     if (mysql_stmt_bind_param(mysql->repo_exists, bind_buffers))
         return GIT_ERROR;
     
-    // execute the statement
     if (mysql_stmt_execute(mysql->repo_exists))
         return GIT_ERROR;
     
     if (mysql_stmt_store_result(mysql->repo_exists))
         return GIT_ERROR;
     
-    // this should either be 0 or 1
     if (mysql_stmt_num_rows(mysql->repo_exists) == 1)
         exists = 1;
     
