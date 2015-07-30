@@ -11,7 +11,7 @@ using namespace v8;
 
 void init(Handle<v8::Object> target) {
     NanScope();
-    Mysql::InitializeComponent(target);
+	MySQL::InitializeComponent(target);
     GitMysql::InitializeComponent(target);
 }
 

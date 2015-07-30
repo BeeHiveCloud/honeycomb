@@ -10,8 +10,6 @@
 
 #include "mysql_backend.h"
 
-//#define DEBUGLOG (printf("(%s,%s),%d\n", __FILE__, __func__, __LINE__))
-
 typedef struct {
     void *data;			/**< Raw, decompressed object data. */
     size_t len;			/**< Total number of bytes in data. */

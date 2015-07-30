@@ -1,40 +1,51 @@
 #include "git_mysql.h"
 #include "mysql.h"
 
+
 void GitMysql::InitializeComponent(Handle<v8::Object> target) {
     NanScope();
 
-	Local<Object> object = NanNew<Object>();
+	Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(JSNewFunction);
 
-	NODE_SET_METHOD(object, "LastError", LastError);
+	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+	tpl->SetClassName(NanNew<String>("Git"));
 
-  NODE_SET_METHOD(object, "Init", Init);
+	// Prototype methods
+	NODE_SET_PROTOTYPE_METHOD(tpl, "lastError", LastError);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "add", CreateBlob);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "commit", Commit);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "createBranch", CreateBranch);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "createRepo", CreateRepo);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "deleteRepo", DeleteRepo);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "createTag", CreateTag);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "diff", Diff);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "blame", Blame);
 
-  NODE_SET_METHOD(object, "Close", Close);
+	// Methods
+	//NODE_SET_METHOD(tpl, "dummy", Dummy);
 
-	NODE_SET_METHOD(object, "Add", CreateBlob);
-
-	NODE_SET_METHOD(object, "Commit", Commit);
-
-	NODE_SET_METHOD(object, "CreateBranch", CreateBranch);
-
-	NODE_SET_METHOD(object, "CreateRepo", CreateRepo);
-
-	NODE_SET_METHOD(object, "DeleteRepo", DeleteRepo);
-
-	NODE_SET_METHOD(object, "CreateTag", CreateTag);
-
-	NODE_SET_METHOD(object, "Diff", Diff);
-
-	NODE_SET_METHOD(object, "Blame", Blame);
-
-	target->Set(NanNew<String>("Git"), object);
+	Local<Function> _constructor_template = tpl->GetFunction();
+	NanAssignPersistent(constructor_template, _constructor_template);
+	target->Set(NanNew<String>("Git"), tpl->GetFunction());
 }
 
-NAN_METHOD(GitMysql::Init){
-  NanEscapableScope();
+GitMysql::GitMysql(){
 
-  git_mysql_init(&mysql,Mysql::db);
+}
+
+GitMysql::~GitMysql(){
+
+	git_repository_free(repo);
+
+	git_mysql_free(mysql);
+
+	git_libgit2_shutdown();
+}
+
+NAN_METHOD(GitMysql::JSNewFunction){
+  NanScope();
+
+  git_mysql_init(&mysql, MySQL::db);
 
   git_libgit2_init();
 
@@ -76,18 +87,10 @@ NAN_METHOD(GitMysql::Init){
   if (git_repository_set_path(repo, "/") < 0)
 	  return NanThrowError("git_repository_set_path error");
 
-  NanReturnValue(NanTrue());
-}
+  GitMysql *obj = new GitMysql();
+  obj->Wrap(args.This());
 
-
-NAN_METHOD(GitMysql::Close) {
-  NanEscapableScope();
-
-  git_repository_free(repo);
-
-  git_mysql_free(mysql);
-
-  git_libgit2_shutdown();
+  NanReturnValue(args.This());
 }
 
 NAN_METHOD(GitMysql::LastError) {

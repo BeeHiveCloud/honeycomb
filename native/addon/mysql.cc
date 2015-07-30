@@ -1,22 +1,55 @@
 #include "mysql.h"
 
-void Mysql::InitializeComponent(Handle<v8::Object> target) {
+void MySQL::InitializeComponent(Handle<v8::Object> target) {
     NanScope();
 
-	Local<Object> object = NanNew<Object>();
+	Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(JSNewFunction);
 
-	NODE_SET_METHOD(object, "Open", Open);
+	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+	tpl->SetClassName(NanNew<String>("MySQL"));
 
-	NODE_SET_METHOD(object, "Close", Close);
-  
-    NODE_SET_METHOD(object, "Set", Set);
-    
-    NODE_SET_METHOD(object, "Get", Get);
+	// Instance Properties
+	tpl->InstanceTemplate()->SetAccessor(NanNew<String>("dummy"), GetError, SetError);
 
-	target->Set(NanNew<String>("MySQL"), object);
+	// Prototype methods
+	NODE_SET_PROTOTYPE_METHOD(tpl, "open", Open);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "set", Set);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "get", Get);
+
+	// Methods
+	//NODE_SET_METHOD(tpl, "dummy", Dummy);
+
+	Local<Function> _constructor_template = tpl->GetFunction();
+	NanAssignPersistent(constructor_template, _constructor_template);
+	target->Set(NanNew<String>("MySQL"), tpl->GetFunction());
 }
 
-NAN_METHOD(Mysql::Open) {
+MySQL::MySQL(void *raw, bool selfFreeing){
+	this->raw = raw;
+	this->selfFreeing = selfFreeing;
+}
+
+MySQL::~MySQL(){
+
+	mysql_db_disconnect(db);
+}
+
+NAN_METHOD(MySQL::JSNewFunction){
+	NanScope();
+
+	MySQL *obj = new MySQL(static_cast<void *>(Handle<External>::Cast(args[0])->Value()), args[1]->BooleanValue());
+	obj->Wrap(args.Holder());
+
+	NanReturnValue(args.Holder());
+}
+
+Handle<v8::Value> MySQL::New(void *raw, bool selfFreeing) {
+	NanEscapableScope();
+	Handle<v8::Value> argv[2] = { NanNew<External>((void *)raw), NanNew<Boolean>(selfFreeing) };
+	return NanEscapeScope(NanNew<Function>(MySQL::constructor_template)->NewInstance(2, argv));
+}
+
+NAN_METHOD(MySQL::Open) {
     
     NanEscapableScope();
 
@@ -74,13 +107,7 @@ NAN_METHOD(Mysql::Open) {
         NanReturnValue(NanFalse());
 }
 
-NAN_METHOD(Mysql::Close) {
-    NanEscapableScope();
-    
-    mysql_db_disconnect(db);
-}
-
-NAN_METHOD(Mysql::Set) {
+NAN_METHOD(MySQL::Set) {
     NanEscapableScope();
     
     if (args.Length() == 0 || !args[0]->IsString()) {
@@ -107,7 +134,7 @@ NAN_METHOD(Mysql::Set) {
         NanReturnValue(NanFalse());
 }
 
-NAN_METHOD(Mysql::Get) {
+NAN_METHOD(MySQL::Get) {
     NanEscapableScope();
     
     if (args.Length() == 0 || !args[0]->IsString()) {
@@ -127,5 +154,19 @@ NAN_METHOD(Mysql::Get) {
     
 }
 
-Persistent<Function> Mysql::constructor_template;
-MYSQL * Mysql::db;
+NAN_GETTER(MySQL::GetError) {
+	NanScope();
+
+	MySQL *obj = Unwrap<MySQL>(args.Holder());
+
+	NanReturnValue(NanNew<String>(obj->error));
+}
+
+NAN_SETTER(MySQL::SetError) {
+	NanScope();
+
+	NanReturnValue(NanTrue());
+}
+
+Persistent<Function> MySQL::constructor_template;
+MYSQL * MySQL::db;

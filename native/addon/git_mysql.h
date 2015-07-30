@@ -23,37 +23,31 @@ using namespace v8;
 
 class GitMysql : public ObjectWrap {
   public:
+	  static Persistent<Function> constructor_template;
+	  static void InitializeComponent (Handle<v8::Object> target);
 
-    static Persistent<Function> constructor_template;
-    static void InitializeComponent (Handle<v8::Object> target);
-    GitMysql();
-    ~GitMysql();
-
-	static git_mysql *mysql;
-	static git_repository *repo;
+	  static git_mysql *mysql;
+	  static git_repository *repo;
 
   private:
 
+	  GitMysql();
+	  ~GitMysql();
+
+	  // Constructor
+	  static NAN_METHOD(JSNewFunction);
+
+	  // Properties
+
+	  // Methods
 	  static NAN_METHOD(LastError);
-
-    static NAN_METHOD(Init);
-
-    static NAN_METHOD(Close);
-
 	  static NAN_METHOD(CreateBlob);
-
 	  static NAN_METHOD(Commit);
-
 	  static NAN_METHOD(CreateBranch);
-
 	  static NAN_METHOD(CreateRepo);
-
 	  static NAN_METHOD(DeleteRepo);
-
 	  static NAN_METHOD(CreateTag);
-
 	  static NAN_METHOD(Diff);
-
 	  static NAN_METHOD(Blame);
 };
 

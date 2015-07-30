@@ -11,20 +11,34 @@ extern "C" {
 using namespace node;
 using namespace v8;
 
-class Mysql : public ObjectWrap {
+class MySQL : public ObjectWrap {
   public:
+	  static Persistent<Function> constructor_template;
+	  static void InitializeComponent (Handle<v8::Object> target);
 
-    static Persistent<Function> constructor_template;
-    static void InitializeComponent (Handle<v8::Object> target);
-    
-    static MYSQL *db;
+	  static Handle<v8::Value> New(void *raw, bool selfFreeing);
+
+	  bool selfFreeing;
+
+	  static MYSQL *db;
 
   private:
+	  void *raw;
+	  const char *error;
 
-    static NAN_METHOD(Open);
-    static NAN_METHOD(Close);
-    static NAN_METHOD(Set);
-    static NAN_METHOD(Get);
+	  // Con(De)structor
+	  static NAN_METHOD(JSNewFunction);
+	  MySQL(void *raw, bool selfFreeing);
+	  ~MySQL();
+
+	  // Properties
+	  static NAN_GETTER(GetError);
+	  static NAN_SETTER(SetError);
+
+	  // Methods
+	  static NAN_METHOD(Open);
+	  static NAN_METHOD(Set);
+	  static NAN_METHOD(Get);
 
 };
 

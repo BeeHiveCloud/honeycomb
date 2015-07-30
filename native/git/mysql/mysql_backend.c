@@ -1,5 +1,7 @@
 #include "mysql_backend.h"
 
+#include <stdio.h>
+
 int init_statements(git_mysql *mysql)
 {
   my_bool truth = 1;
@@ -387,3 +389,24 @@ int git_mysql_init(git_mysql **out,MYSQL *db)
   return GIT_OK;
 }
 
+void print_bind(MYSQL_BIND *bind){
+	printf("unsigned long	    *length:%p\n",bind->length);
+	printf("my_bool            *is_null:%p\n", bind->is_null);
+	printf("void		        *buffer:%p\n", bind->buffer);
+	printf("my_bool              *error:%p\n", bind->error);
+	printf("unsigned char      *row_ptr:%p\n", bind->row_ptr);
+	printf("void    (*store_param_func):%p\n", bind->store_param_func);
+	printf("void        (*fetch_result):%p\n", bind->fetch_result);
+	printf("void         (*skip_result):%p\n", bind->skip_result);
+	printf("unsigned long buffer_length:%lu\n", bind->buffer_length);
+	printf("unsigned long        offset:%lu\n", bind->offset);
+	printf("unsigned long  length_value:%lu\n", bind->length_value);
+	printf("unsigned int   param_number:%u\n", bind->param_number);
+	printf("unsigned int    pack_length:%u\n", bind->pack_length);
+	printf("enum            buffer_type:%d\n", bind->buffer_type);
+	printf("my_bool         error_value:%d\n", bind->error_value);
+	printf("my_bool         is_unsigned:%d\n", bind->is_unsigned);
+	printf("my_bool	     long_data_used:%d\n", bind->long_data_used);
+	printf("my_bool	      is_null_value:%d\n", bind->is_null_value);
+	printf("void             *extension:%p\n\n", bind->extension);
+}

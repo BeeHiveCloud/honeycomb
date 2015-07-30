@@ -45,5 +45,7 @@ typedef struct {
 int git_mysql_init(git_mysql **out,MYSQL *db);
 int git_mysql_free(git_mysql *mysql);
 
+/* Diagnostic function */
+void print_bind(MYSQL_BIND *bind);
 
 #endif
