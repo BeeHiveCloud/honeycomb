@@ -30,62 +30,37 @@ void GitMysql::InitializeComponent(Handle<v8::Object> target) {
 }
 
 GitMysql::GitMysql(){
-
+    git_mysql_init(&mysql, MySQL::db);
+    git_libgit2_init();
+    git_mysql_odb_init(&odb_backend, mysql);
+    git_odb_new(&odb_backend->odb);
+    git_odb_add_backend(odb_backend->odb, odb_backend, 1);
+    git_repository_wrap_odb(&repo, odb_backend->odb);
+    git_refdb_new(&refdb,repo);
+    git_mysql_refdb_init(&refdb_backend, mysql);
+    git_refdb_set_backend(refdb, refdb_backend);
+    git_repository_set_refdb(repo, refdb);
+    git_config_open_default(&cfg);
+    git_repository_set_config(repo,cfg);
+    git_repository_set_workdir(repo, "/", 0);
+    git_repository_set_path(repo, "/");
 }
 
 GitMysql::~GitMysql(){
-
+    git_refdb_free(refdb);
+    git_odb_free(odb_backend->odb);
+    git_config_free(cfg);
+    mysql_odb_free(odb_backend);
+    mysql_refdb_free(refdb_backend);
 	git_repository_free(repo);
-
 	git_mysql_free(mysql);
-
 	git_libgit2_shutdown();
 }
 
 NAN_METHOD(GitMysql::JSNewFunction){
   NanScope();
 
-  git_mysql_init(&mysql, MySQL::db);
 
-  git_libgit2_init();
-
-  git_odb_backend   *odb_backend;
-  if (git_mysql_odb_init(&odb_backend, mysql) < 0)
-	  return NanThrowError("git_mysql_odb_init error");
-
-  if (git_odb_new(&odb_backend->odb) < 0)
-	  return NanThrowError("git_odb_new error");
-
-  if (git_odb_add_backend(odb_backend->odb, odb_backend, 1) < 0)
-	  return NanThrowError("git_odb_add_backend error");
-
-  if (git_repository_wrap_odb(&repo, odb_backend->odb) < 0)
-	  return NanThrowError("git_repository_wrap_odb error");
-
-  git_refdb *refdb;
-  if (git_refdb_new(&refdb,repo) < 0)
-	  return NanThrowError("git_refdb_new error");
-
-  git_refdb_backend   *refdb_backend;
-  if (git_mysql_refdb_init(&refdb_backend, mysql) < 0)
-	  return NanThrowError("git_mysql_refdb_init error");
-
-  if (git_refdb_set_backend(refdb, refdb_backend) < 0)
-	  return NanThrowError("git_mysql_refdb_init error");
-
-  git_repository_set_refdb(repo, refdb);
-
-  git_config *cfg;
-  if (git_config_open_default(&cfg) < 0)
-	  return NanThrowError("git_config_open_default error");
-
-  git_repository_set_config(repo,cfg);
-
-  if (git_repository_set_workdir(repo, "/", 0) < 0)
-	  return NanThrowError("git_repository_set_workdir error");
-
-  if (git_repository_set_path(repo, "/") < 0)
-	  return NanThrowError("git_repository_set_path error");
 
   GitMysql *obj = new GitMysql();
   obj->Wrap(args.This());
