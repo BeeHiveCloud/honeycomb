@@ -6,8 +6,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 # Set Global Variables
 
 SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
-# override STATIC_CRT
-# TODO - this needs to be fixed
+# override STATIC_CRT TODO - this needs to be fixed
 IF (MSVC_IDE)
   SET(STATIC_CRT OFF CACHE BOOL "Link the dynamic CRT libraries" FORCE)
 ENDIF ()

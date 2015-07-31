@@ -22,15 +22,19 @@ using namespace node;
 using namespace v8;
 
 class GitMysql : public ObjectWrap {
+    
   public:
 	  static Persistent<Function> constructor_template;
 	  static void InitializeComponent (Handle<v8::Object> target);
 
-	  static git_mysql *mysql;
-	  static git_repository *repo;
-
   private:
-
+    static git_mysql        *mysql;
+    static git_repository   *repo;
+    git_odb_backend         *odb_backend;
+    git_refdb_backend       *refdb_backend;
+    git_refdb               *refdb;
+    git_config              *cfg;
+    
 	  GitMysql();
 	  ~GitMysql();
 
