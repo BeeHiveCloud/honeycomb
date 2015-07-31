@@ -1,23 +1,36 @@
 # http://www.appveyor.com/docs/appveyor-yml
 
 environment:
+  # set variables
+  NODE_GYP_VER: 0.12.7
+  NODE_GYP_DIR: %HOMEDRIVE%%HOMEPATH%\.node-gyp
+  LIBMYSQL_INCLUDE_DIR: C:\Program Files\MySql\MySQL Server 5.6\include
+  LIBMYSQL_LIBRARY: C:\Program Files\MySql\MySQL Server 5.6\lib
+
   matrix:
-  # node.js
     - nodejs_version: "0.12"
 
-# Install scripts. (runs after repo cloning)
-install:
-  # Typical npm stuff.
-  - npm install
+platform:
+  - x86
 
-# Post-install test scripts.
+configuration:
+  - Release
+
+install:
+  - npm install nan@1.8.4
+
 test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
 
-# Don't actually build.
-build: off
+build:
+  project: c:\projects\honeycomb\build\honeycomb.sln
 
-# Set build version format here instead of in the admin panel.
-version: "{build}"
+before_build:
+  - echo Running cmake...
+  - cd c:\projects\honeycomb\build
+  - cmake ..
+
+artifacts:
+  - path: c:\projects\honeycomb\build\Release\addon.node

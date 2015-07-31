@@ -1,6 +1,6 @@
 {
   "name": "honeycomb",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A hybrid data platform",
   "main": [
     "lib/index.js"

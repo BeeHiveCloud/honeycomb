@@ -1,9 +1,9 @@
 {
   "name": "honeycomb",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A hybrid data platform",
   "keywords": ["honeycomb","node.js","MySQL","git", "R"],
-  "main": "./lib/index.js",
+  "main": "./lib/honeycomb.js",
   "dependencies": {
     "nan": "1.8.4",
     "bluebird": "2.9.27",
