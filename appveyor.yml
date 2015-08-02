@@ -28,7 +28,10 @@ build:
   project: c:\projects\honeycomb\build\honeycomb.sln
 
 before_build:
-  - echo Running cmake...
+  - git submodule init
+  - git submodule update
+  - cd vendor/libgit2
+  - git checkout v0.23.0
   - cd c:\projects\honeycomb\build
   - cmake ..
 
