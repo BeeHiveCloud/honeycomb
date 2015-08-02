@@ -32,6 +32,7 @@ before_build:
   - git submodule update
   - cd vendor/libgit2
   - git checkout v0.23.0
+  - md build
   - cd c:\projects\honeycomb\build
   - cmake ..
 
