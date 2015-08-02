@@ -32,7 +32,7 @@ nbproject
 # C/C++ stuff
 #
 ################################################
-build
+build/*
 !build/.gitkeep
 *.o
 *.a
