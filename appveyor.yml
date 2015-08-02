@@ -3,7 +3,7 @@
 environment:
   # set variables
   NODE_GYP_VER: 0.12.7
-  NODE_GYP_DIR: %HOMEDRIVE%%HOMEPATH%\.node-gyp
+  NODE_GYP_DIR: %USERPROFILE%\.node-gyp
   LIBMYSQL_INCLUDE_DIR: C:\Program Files\MySql\MySQL Server 5.6\include
   LIBMYSQL_LIBRARY: C:\Program Files\MySql\MySQL Server 5.6\lib
 
