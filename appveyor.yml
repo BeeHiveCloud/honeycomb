@@ -32,8 +32,9 @@ before_build:
   - git submodule update
   - cd vendor/libgit2
   - git checkout v0.23.0
+  - cd c:\projects\honeycomb
   - md build
-  - cd c:\projects\honeycomb\build
+  - cd build
   - git clone https://github.com/JerryYangJin/hello.git
   - cd hello
   - npm install
