@@ -19,6 +19,7 @@ configuration:
 install:
   - set NODE_GYP_DIR=%USERPROFILE%\.node-gyp
   - npm install nan@1.8.4
+  - npm install -g node-gyp
 
 test_script:
   # Output useful info for debugging.
@@ -36,8 +37,13 @@ before_build:
   - cd c:\projects\honeycomb
   - md build
   - cd build
+  - git clone https://github.com/JerryYangJin/hello.git
+  - cd hello
+  - npm install
+  - cd ..
+  - rmdir hello /s /q
   - cmd: if "%platform%"=="Win32" cmake -G"Visual Studio 12"  ..
-  - cmd: if "%platform%"=="x64" cmake -G"Visual Studio 12 Win64" ..
+  - cmd: if "%platform%"=="Win64" cmake -G"Visual Studio 12 Win64" ..
 
 artifacts:
   - path: c:\projects\honeycomb\build\Release\addon.node
