@@ -1,7 +1,7 @@
 # CMake build script for honeycomb
 
 PROJECT(honeycomb)
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 # Set Global Variables
 
