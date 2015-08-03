@@ -10,8 +10,8 @@ environment:
     - nodejs_version: "0.12"
 
 platform:
+  - Win32
   - x64
-  - Any CPU
 
 configuration:
   - Release
