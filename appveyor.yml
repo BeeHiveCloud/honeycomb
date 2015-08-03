@@ -35,11 +35,6 @@ before_build:
   - cd c:\projects\honeycomb
   - md build
   - cd build
-  - git clone https://github.com/JerryYangJin/hello.git
-  - cd hello
-  - npm install
-  - cd ..
-  - rmdir hello /s /q
   - cmake ..
 
 artifacts:
