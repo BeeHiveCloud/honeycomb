@@ -11,6 +11,7 @@ environment:
 
 platform:
   - x64
+  - Any CPU
 
 configuration:
   - Release
