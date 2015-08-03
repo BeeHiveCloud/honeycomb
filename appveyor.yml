@@ -3,7 +3,6 @@
 environment:
   # set variables
   NODE_GYP_VER: 0.12.7
-  NODE_GYP_DIR: %USERPROFILE%\.node-gyp
   LIBMYSQL_INCLUDE_DIR: C:\Program Files\MySql\MySQL Server 5.6\include
   LIBMYSQL_LIBRARY: C:\Program Files\MySql\MySQL Server 5.6\lib
 
@@ -11,12 +10,13 @@ environment:
     - nodejs_version: "0.12"
 
 platform:
-  - x86
+  - x64
 
 configuration:
   - Release
 
 install:
+  - set NODE_GYP_DIR=%USERPROFILE%\.node-gyp
   - npm install nan@1.8.4
 
 test_script:
