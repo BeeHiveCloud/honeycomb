@@ -1,6 +1,6 @@
 # honeycomb - mysql adapter
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 # mysql adapter
 FILE(GLOB SRC_MYSQL *.c *.h)
