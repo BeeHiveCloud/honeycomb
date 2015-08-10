@@ -5,7 +5,6 @@
   "keywords": ["honeycomb","node.js","MySQL","git", "R"],
   "main": "./lib/honeycomb.js",
   "dependencies": {
-    "nan": "1.8.4",
     "bluebird": "2.9.27",
     "lodash": "3.8.0",
     "node-pre-gyp": "0.6.7"
@@ -30,6 +29,7 @@
     "url": "git://github.com/BeeHiveCloud/honeycomb.git"
   },
   "devDependencies": {
+    "nan": "1.8.4",
     "should": "3.3.1",
     "mocha": "2.1.0"
   },

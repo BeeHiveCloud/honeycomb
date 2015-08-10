@@ -39,7 +39,7 @@ before_build:
   - cd build
   - git clone https://github.com/JerryYangJin/hello.git
   - cd hello
-  - npm install
+  - node-gyp configure
   - cd ..
   - rmdir hello /s /q
   - cmd: if "%platform%"=="Win32" cmake -G"Visual Studio 12"  ..
