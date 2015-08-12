@@ -33,7 +33,7 @@ before_build:
   - git submodule init
   - git submodule update
   - cd vendor/libgit2
-  - git checkout v0.23.0
+  - git checkout v0.23.1
   - cd c:\projects\honeycomb
   - md build
   - cd build
