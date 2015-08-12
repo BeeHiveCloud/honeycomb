@@ -1,22 +1,24 @@
+env:
+  matrix:
+    - export NODE_GYP_VER="0.12.7"
+    - export NODE_GYP_DIR="~/.node-gyp"
+    - export LIBMYSQL_INCLUDE_DIR="/usr/local/include/mysql"
+    - export LIBMYSQL_LIBRARY="/usr/local/lib64/mysql"
+    - export LD_LIBRARY_PATH="$LIBMYSQL_LIBRARY:$LD_LIBRARY_PATH"
 os:
   - linux
-  - osx
 matrix:
   fast_finish: true
-os:
-  - linux
-  - osx
 notifications:
   email:
     - beehivecloud@gmail.com
 branches:
   only:
     - master
-    - stable
-    - beta
-before_script:
+before_install:
   - npm install nan@1.8.4
   - npm install -g node-gyp
+before_script:
   - git submodule init
   - git submodule update
   - cd vendor/libgit2
@@ -24,6 +26,11 @@ before_script:
   - cd ../..
   - mkdir build
   - cd build
+  - git clone https://github.com/JerryYangJin/hello.git
+  - cd hello
+  - node-gyp configure
+  - cd ..
+  - rm -rf hello
 script:
   - cmake ..
   - cmake --build .
