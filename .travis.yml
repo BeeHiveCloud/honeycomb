@@ -1,12 +1,22 @@
+language: c
 env:
-  matrix:
-    - export NODE_GYP_VER="0.12.7"
-    - export NODE_GYP_DIR="~/.node-gyp"
-    - export LIBMYSQL_INCLUDE_DIR="/usr/local/include/mysql"
-    - export LIBMYSQL_LIBRARY="/usr/local/lib64/mysql"
-    - export LD_LIBRARY_PATH="$LIBMYSQL_LIBRARY:$LD_LIBRARY_PATH"
+  - export NODE_GYP_VER="0.12.5"
+  - export NODE_GYP_DIR="~/.node-gyp"
+  - export LIBMYSQL_INCLUDE_DIR="/usr/local/include/mysql"
+  - export LIBMYSQL_LIBRARY="/usr/local/lib64/mysql"
+  - export LD_LIBRARY_PATH="$LIBMYSQL_LIBRARY:$LD_LIBRARY_PATH"
 os:
   - linux
+compiler:
+  - gcc
+  addons:
+    apt:
+      packages:
+      - cmake
+      - libssh2-1-dev
+      - openssh-client
+      - openssh-server
+      - mysql
 matrix:
   fast_finish: true
 notifications:
