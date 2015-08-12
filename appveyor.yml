@@ -12,7 +12,7 @@ environment:
 
 platform:
   - Win32
-  - Win64
+  - x64
 
 configuration:
   - Release
@@ -47,3 +47,15 @@ before_build:
 
 artifacts:
   - path: c:\projects\honeycomb\build\Release\addon.node
+
+services:
+  - mysql
+
+test_script:
+  - '"C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" --version'
+  - >
+    "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" -u root -p"Password12!" -e "
+    CREATE DATABASE IF NOT EXISTS git;
+    CREATE USER 'git'@'localhost' IDENTIFIED BY 'git';
+    GRANT ALL PRIVILEGES ON git.* TO 'git'@'localhost';
+    "
