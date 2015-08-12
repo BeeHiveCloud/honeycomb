@@ -21,11 +21,6 @@ install:
   - npm install nan@1.8.4
   - npm install -g node-gyp
 
-test_script:
-  # Output useful info for debugging.
-  - node --version
-  - npm --version
-
 build:
   project: c:\projects\honeycomb\build\honeycomb.sln
 
@@ -52,6 +47,8 @@ services:
   - mysql
 
 test_script:
+  - node -v
+  - npm -v
   - '"C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" --version'
   - >
     "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" -u root -p"Password12!" -e "
