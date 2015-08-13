@@ -1,4 +1,4 @@
-honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb)
+honeycomb [![npm version](https://badge.fury.io/js/honeycomb.svg)](http://badge.fury.io/js/honeycomb) [![Build status](https://ci.appveyor.com/api/projects/status/7qaxyuns4xfal2ts?svg=true)](https://ci.appveyor.com/project/JerryYangJin/honeycomb) [![Build Status](https://travis-ci.org/BeeHiveCloud/honeycomb.svg)](https://travis-ci.org/BeeHiveCloud/honeycomb)
 =========
 
 A hybrid data platform
@@ -6,12 +6,6 @@ A hybrid data platform
 Status
 ------
 This project is still at early stage, **DO NOT** use for production.
-
-[![NPM](https://nodei.co/npm/honeycomb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/honeycomb/)
-
-| Windows build | UNIX Build |
-| ------------- | ---------- |
-| [![Build status](https://ci.appveyor.com/api/projects/status/7qaxyuns4xfal2ts?svg=true)](https://ci.appveyor.com/project/JerryYangJin/honeycomb) | [![Build Status](https://travis-ci.org/BeeHiveCloud/honeycomb.svg)](https://travis-ci.org/BeeHiveCloud/honeycomb) |
 
 License
 -------
